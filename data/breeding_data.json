@@ -1,0 +1,2666 @@
+{
+  "WorldTreeDragon": {
+    "key": "WorldTreeDragon",
+    "name": "Astralym",
+    "rank": 10,
+    "order": 0,
+    "zukan": 204,
+    "child_eligible": false
+  },
+  "KingWhale": {
+    "key": "KingWhale",
+    "name": "Panthalus",
+    "rank": 20,
+    "order": 1,
+    "zukan": 203,
+    "child_eligible": false
+  },
+  "DomeArmorDragon": {
+    "key": "DomeArmorDragon",
+    "name": "Aegidron",
+    "rank": 30,
+    "order": 2,
+    "zukan": 184,
+    "child_eligible": true
+  },
+  "BlueSkyDragon": {
+    "key": "BlueSkyDragon",
+    "name": "Shaolong",
+    "rank": 40,
+    "order": 3,
+    "zukan": 192,
+    "child_eligible": false
+  },
+  "SnowTigerBeastman": {
+    "key": "SnowTigerBeastman",
+    "name": "Bastigor",
+    "rank": 50,
+    "order": 4,
+    "zukan": 191,
+    "child_eligible": false
+  },
+  "FlowerPrince": {
+    "key": "FlowerPrince",
+    "name": "Dandilord",
+    "rank": 60,
+    "order": 5,
+    "zukan": 194,
+    "child_eligible": false
+  },
+  "JetDragon": {
+    "key": "JetDragon",
+    "name": "Jetragon",
+    "rank": 70,
+    "order": 6,
+    "zukan": 202,
+    "child_eligible": false
+  },
+  "Mothman": {
+    "key": "Mothman",
+    "name": "Silvance",
+    "rank": 80,
+    "order": 7,
+    "zukan": 193,
+    "child_eligible": false
+  },
+  "LegendDeer": {
+    "key": "LegendDeer",
+    "name": "Hartalis",
+    "rank": 90,
+    "order": 8,
+    "zukan": 197,
+    "child_eligible": false
+  },
+  "KingBahamut_Dragon": {
+    "key": "KingBahamut_Dragon",
+    "name": "Blazamut Ryu",
+    "rank": 100,
+    "order": 9,
+    "zukan": 137,
+    "child_eligible": false
+  },
+  "IceHorse_Dark": {
+    "key": "IceHorse_Dark",
+    "name": "Frostallion Noct",
+    "rank": 110,
+    "order": 10,
+    "zukan": 200,
+    "child_eligible": false
+  },
+  "ThunderDragonMan": {
+    "key": "ThunderDragonMan",
+    "name": "Orserk",
+    "rank": 120,
+    "order": 11,
+    "zukan": 187,
+    "child_eligible": false
+  },
+  "NightLady_Dark": {
+    "key": "NightLady_Dark",
+    "name": "Bellanoir Libero",
+    "rank": 130,
+    "order": 12,
+    "zukan": 195,
+    "child_eligible": false
+  },
+  "GhostDragon_Fire": {
+    "key": "GhostDragon_Fire",
+    "name": "Eidrolon Ignis",
+    "rank": 140,
+    "order": 13,
+    "zukan": 171,
+    "child_eligible": true
+  },
+  "IceHorse": {
+    "key": "IceHorse",
+    "name": "Frostallion",
+    "rank": 150,
+    "order": 14,
+    "zukan": 200,
+    "child_eligible": false
+  },
+  "PoseidonOrca": {
+    "key": "PoseidonOrca",
+    "name": "Neptilius",
+    "rank": 160,
+    "order": 15,
+    "zukan": 201,
+    "child_eligible": false
+  },
+  "Umihebi_Fire": {
+    "key": "Umihebi_Fire",
+    "name": "Jormuntide Ignis",
+    "rank": 170,
+    "order": 16,
+    "zukan": 121,
+    "child_eligible": true
+  },
+  "SaintCentaur": {
+    "key": "SaintCentaur",
+    "name": "Paladius",
+    "rank": 180,
+    "order": 17,
+    "zukan": 198,
+    "child_eligible": false
+  },
+  "BlackCentaur": {
+    "key": "BlackCentaur",
+    "name": "Necromus",
+    "rank": 190,
+    "order": 18,
+    "zukan": 199,
+    "child_eligible": false
+  },
+  "CubeTurtle_Neutral": {
+    "key": "CubeTurtle_Neutral",
+    "name": "Tetroise Primo",
+    "rank": 200,
+    "order": 19,
+    "zukan": 142,
+    "child_eligible": true
+  },
+  "WingGolem_Fire": {
+    "key": "WingGolem_Fire",
+    "name": "Knocklem Ignis",
+    "rank": 210,
+    "order": 20,
+    "zukan": 159,
+    "child_eligible": true
+  },
+  "LilyQueen_Dark": {
+    "key": "LilyQueen_Dark",
+    "name": "Lyleen Noct",
+    "rank": 220,
+    "order": 21,
+    "zukan": 186,
+    "child_eligible": false
+  },
+  "LotusDragon": {
+    "key": "LotusDragon",
+    "name": "Ophydia",
+    "rank": 230,
+    "order": 22,
+    "zukan": 175,
+    "child_eligible": true
+  },
+  "LilyQueen": {
+    "key": "LilyQueen",
+    "name": "Lyleen",
+    "rank": 240,
+    "order": 23,
+    "zukan": 186,
+    "child_eligible": false
+  },
+  "GrassGolem_Dark": {
+    "key": "GrassGolem_Dark",
+    "name": "Dualith Noct",
+    "rank": 250,
+    "order": 24,
+    "zukan": 138,
+    "child_eligible": true
+  },
+  "WhiteDeer_Dark": {
+    "key": "WhiteDeer_Dark",
+    "name": "Celesdir Noct",
+    "rank": 270,
+    "order": 25,
+    "zukan": 157,
+    "child_eligible": true
+  },
+  "MonochromeQueen": {
+    "key": "MonochromeQueen",
+    "name": "Solenne",
+    "rank": 280,
+    "order": 26,
+    "zukan": 182,
+    "child_eligible": true
+  },
+  "KabukiMan": {
+    "key": "KabukiMan",
+    "name": "Renjishi",
+    "rank": 290,
+    "order": 27,
+    "zukan": 183,
+    "child_eligible": true
+  },
+  "GhostDragon": {
+    "key": "GhostDragon",
+    "name": "Eidrolon",
+    "rank": 300,
+    "order": 28,
+    "zukan": 171,
+    "child_eligible": true
+  },
+  "MoonQueen": {
+    "key": "MoonQueen",
+    "name": "Selyne",
+    "rank": 360,
+    "order": 29,
+    "zukan": 190,
+    "child_eligible": false
+  },
+  "IceNarwhal_Fire": {
+    "key": "IceNarwhal_Fire",
+    "name": "Whalaska Ignis",
+    "rank": 370,
+    "order": 30,
+    "zukan": 151,
+    "child_eligible": true
+  },
+  "VolcanoDragon_Ice": {
+    "key": "VolcanoDragon_Ice",
+    "name": "Moldron Cryst",
+    "rank": 380,
+    "order": 31,
+    "zukan": 105,
+    "child_eligible": true
+  },
+  "FoxExorcist": {
+    "key": "FoxExorcist",
+    "name": "Flaracle",
+    "rank": 390,
+    "order": 32,
+    "zukan": 174,
+    "child_eligible": true
+  },
+  "DarkMechaDragon": {
+    "key": "DarkMechaDragon",
+    "name": "Xenolord",
+    "rank": 400,
+    "order": 33,
+    "zukan": 196,
+    "child_eligible": false
+  },
+  "KingBahamut": {
+    "key": "KingBahamut",
+    "name": "Blazamut",
+    "rank": 410,
+    "order": 34,
+    "zukan": 137,
+    "child_eligible": true
+  },
+  "BlueThunderHorse": {
+    "key": "BlueThunderHorse",
+    "name": "Azurmane",
+    "rank": 420,
+    "order": 35,
+    "zukan": 161,
+    "child_eligible": true
+  },
+  "NightBlueHorse_Neutral": {
+    "key": "NightBlueHorse_Neutral",
+    "name": "Starryon Primo",
+    "rank": 430,
+    "order": 36,
+    "zukan": 130,
+    "child_eligible": true
+  },
+  "GrassMinotaur_Ice": {
+    "key": "GrassMinotaur_Ice",
+    "name": "Elgrove Cryst",
+    "rank": 440,
+    "order": 37,
+    "zukan": 81,
+    "child_eligible": true
+  },
+  "Horus_Water": {
+    "key": "Horus_Water",
+    "name": "Faleris Aqua",
+    "rank": 450,
+    "order": 38,
+    "zukan": 188,
+    "child_eligible": false
+  },
+  "RockBeast_Ice": {
+    "key": "RockBeast_Ice",
+    "name": "Pierdon Cryst",
+    "rank": 460,
+    "order": 39,
+    "zukan": 131,
+    "child_eligible": true
+  },
+  "WhiteTiger_Ground": {
+    "key": "WhiteTiger_Ground",
+    "name": "Cryolinx Terra",
+    "rank": 470,
+    "order": 40,
+    "zukan": 132,
+    "child_eligible": true
+  },
+  "Anubis": {
+    "key": "Anubis",
+    "name": "Anubis",
+    "rank": 480,
+    "order": 41,
+    "zukan": 139,
+    "child_eligible": true
+  },
+  "BlackMetalDragon": {
+    "key": "BlackMetalDragon",
+    "name": "Astegon",
+    "rank": 490,
+    "order": 42,
+    "zukan": 158,
+    "child_eligible": true
+  },
+  "GrassGolem": {
+    "key": "GrassGolem",
+    "name": "Dualith",
+    "rank": 510,
+    "order": 43,
+    "zukan": 138,
+    "child_eligible": true
+  },
+  "ClownRabbit": {
+    "key": "ClownRabbit",
+    "name": "Dupin",
+    "rank": 520,
+    "order": 44,
+    "zukan": 176,
+    "child_eligible": true
+  },
+  "ThiefBird": {
+    "key": "ThiefBird",
+    "name": "Roujay",
+    "rank": 530,
+    "order": 45,
+    "zukan": 177,
+    "child_eligible": true
+  },
+  "Kirin_Ice": {
+    "key": "Kirin_Ice",
+    "name": "Univolt Cryst",
+    "rank": 540,
+    "order": 46,
+    "zukan": 54,
+    "child_eligible": true
+  },
+  "BlackGriffon": {
+    "key": "BlackGriffon",
+    "name": "Shadowbeak",
+    "rank": 550,
+    "order": 47,
+    "zukan": 189,
+    "child_eligible": false
+  },
+  "WhiteShieldDragon": {
+    "key": "WhiteShieldDragon",
+    "name": "Silvegis",
+    "rank": 560,
+    "order": 48,
+    "zukan": 160,
+    "child_eligible": true
+  },
+  "WhiteDeer": {
+    "key": "WhiteDeer",
+    "name": "Celesdir",
+    "rank": 570,
+    "order": 49,
+    "zukan": 157,
+    "child_eligible": true
+  },
+  "ThunderBird_Ice": {
+    "key": "ThunderBird_Ice",
+    "name": "Beakon Cryst",
+    "rank": 580,
+    "order": 50,
+    "zukan": 96,
+    "child_eligible": true
+  },
+  "Umihebi": {
+    "key": "Umihebi",
+    "name": "Jormuntide",
+    "rank": 590,
+    "order": 51,
+    "zukan": 121,
+    "child_eligible": true
+  },
+  "VolcanicMonster_Ice": {
+    "key": "VolcanicMonster_Ice",
+    "name": "Reptyro Cryst",
+    "rank": 600,
+    "order": 52,
+    "zukan": 129,
+    "child_eligible": true
+  },
+  "Yeti_Grass": {
+    "key": "Yeti_Grass",
+    "name": "Wumpo Botan",
+    "rank": 610,
+    "order": 53,
+    "zukan": 134,
+    "child_eligible": true
+  },
+  "NightLady": {
+    "key": "NightLady",
+    "name": "Bellanoir",
+    "rank": 620,
+    "order": 54,
+    "zukan": 195,
+    "child_eligible": false
+  },
+  "HerculesBeetle_Ground": {
+    "key": "HerculesBeetle_Ground",
+    "name": "Warsect Terra",
+    "rank": 630,
+    "order": 55,
+    "zukan": 113,
+    "child_eligible": true
+  },
+  "DarkScorpion_Ground": {
+    "key": "DarkScorpion_Ground",
+    "name": "Menasting Terra",
+    "rank": 640,
+    "order": 56,
+    "zukan": 99,
+    "child_eligible": true
+  },
+  "WhiteMoth_Neutral": {
+    "key": "WhiteMoth_Neutral",
+    "name": "Sibelyx Primo",
+    "rank": 650,
+    "order": 57,
+    "zukan": 116,
+    "child_eligible": true
+  },
+  "IceNarwhal": {
+    "key": "IceNarwhal",
+    "name": "Whalaska",
+    "rank": 710,
+    "order": 58,
+    "zukan": 151,
+    "child_eligible": true
+  },
+  "GhostAnglerfish_Fire": {
+    "key": "GhostAnglerfish_Fire",
+    "name": "Ghangler Ignis",
+    "rank": 720,
+    "order": 59,
+    "zukan": 97,
+    "child_eligible": true
+  },
+  "GoldenHorse": {
+    "key": "GoldenHorse",
+    "name": "Gildane",
+    "rank": 730,
+    "order": 60,
+    "zukan": 154,
+    "child_eligible": true
+  },
+  "Suzaku_Water": {
+    "key": "Suzaku_Water",
+    "name": "Suzaku Aqua",
+    "rank": 740,
+    "order": 61,
+    "zukan": 122,
+    "child_eligible": true
+  },
+  "VolcanoDragon": {
+    "key": "VolcanoDragon",
+    "name": "Moldron",
+    "rank": 750,
+    "order": 62,
+    "zukan": 105,
+    "child_eligible": true
+  },
+  "MushroomLady": {
+    "key": "MushroomLady",
+    "name": "Mycora",
+    "rank": 760,
+    "order": 63,
+    "zukan": 179,
+    "child_eligible": true
+  },
+  "LazyDragon_Electric": {
+    "key": "LazyDragon_Electric",
+    "name": "Relaxaurus Lux",
+    "rank": 770,
+    "order": 64,
+    "zukan": 94,
+    "child_eligible": true
+  },
+  "GrimGirl": {
+    "key": "GrimGirl",
+    "name": "Splatterina",
+    "rank": 780,
+    "order": 65,
+    "zukan": 153,
+    "child_eligible": true
+  },
+  "CubeTurtle": {
+    "key": "CubeTurtle",
+    "name": "Tetroise ",
+    "rank": 790,
+    "order": 66,
+    "zukan": 142,
+    "child_eligible": true
+  },
+  "AmaterasuWolf_Dark": {
+    "key": "AmaterasuWolf_Dark",
+    "name": "Kitsun Noct",
+    "rank": 800,
+    "order": 67,
+    "zukan": 111,
+    "child_eligible": true
+  },
+  "SleeveRabbit": {
+    "key": "SleeveRabbit",
+    "name": "Lapure",
+    "rank": 810,
+    "order": 68,
+    "zukan": 170,
+    "child_eligible": true
+  },
+  "FlowerDoll_Fire": {
+    "key": "FlowerDoll_Fire",
+    "name": "Petallia Ignis",
+    "rank": 820,
+    "order": 69,
+    "zukan": 89,
+    "child_eligible": true
+  },
+  "Yeti": {
+    "key": "Yeti",
+    "name": "Wumpo",
+    "rank": 830,
+    "order": 70,
+    "zukan": 134,
+    "child_eligible": true
+  },
+  "Ronin_Dark": {
+    "key": "Ronin_Dark",
+    "name": "Bushi Noct",
+    "rank": 840,
+    "order": 71,
+    "zukan": 85,
+    "child_eligible": true
+  },
+  "ScorpionMan_Electric": {
+    "key": "ScorpionMan_Electric",
+    "name": "Prixter Lux",
+    "rank": 850,
+    "order": 72,
+    "zukan": 141,
+    "child_eligible": true
+  },
+  "SnowPeafowl": {
+    "key": "SnowPeafowl",
+    "name": "Frostplume",
+    "rank": 860,
+    "order": 73,
+    "zukan": 114,
+    "child_eligible": true
+  },
+  "Sekhmet": {
+    "key": "Sekhmet",
+    "name": "Sekhmet",
+    "rank": 870,
+    "order": 74,
+    "zukan": 140,
+    "child_eligible": true
+  },
+  "GhostAnglerfish": {
+    "key": "GhostAnglerfish",
+    "name": "Ghangler",
+    "rank": 880,
+    "order": 75,
+    "zukan": 97,
+    "child_eligible": true
+  },
+  "LanternButler": {
+    "key": "LanternButler",
+    "name": "Loomen",
+    "rank": 890,
+    "order": 76,
+    "zukan": 180,
+    "child_eligible": true
+  },
+  "FengyunDeeper_Electric": {
+    "key": "FengyunDeeper_Electric",
+    "name": "Fenglope Lux",
+    "rank": 900,
+    "order": 77,
+    "zukan": 83,
+    "child_eligible": true
+  },
+  "HadesBird_Electric": {
+    "key": "HadesBird_Electric",
+    "name": "Helzephyr Lux",
+    "rank": 960,
+    "order": 78,
+    "zukan": 80,
+    "child_eligible": true
+  },
+  "SnakeGirl": {
+    "key": "SnakeGirl",
+    "name": "Venusa",
+    "rank": 970,
+    "order": 79,
+    "zukan": 178,
+    "child_eligible": true
+  },
+  "CandleGhost": {
+    "key": "CandleGhost",
+    "name": "Sootseer",
+    "rank": 980,
+    "order": 80,
+    "zukan": 135,
+    "child_eligible": true
+  },
+  "WhiteAlienDragon": {
+    "key": "WhiteAlienDragon",
+    "name": "Xenogard",
+    "rank": 990,
+    "order": 81,
+    "zukan": 146,
+    "child_eligible": false
+  },
+  "KingSunfish_Thunder": {
+    "key": "KingSunfish_Thunder",
+    "name": "Solmora Lux",
+    "rank": 1000,
+    "order": 82,
+    "zukan": 169,
+    "child_eligible": true
+  },
+  "DarkFlameFox": {
+    "key": "DarkFlameFox",
+    "name": "Majex",
+    "rank": 1010,
+    "order": 83,
+    "zukan": 115,
+    "child_eligible": true
+  },
+  "ElecPanda": {
+    "key": "ElecPanda",
+    "name": "Grizzbolt",
+    "rank": 1020,
+    "order": 84,
+    "zukan": 185,
+    "child_eligible": false
+  },
+  "Plesiosaur": {
+    "key": "Plesiosaur",
+    "name": "Braloha",
+    "rank": 1030,
+    "order": 85,
+    "zukan": 110,
+    "child_eligible": true
+  },
+  "WhiteTiger": {
+    "key": "WhiteTiger",
+    "name": "Cryolinx",
+    "rank": 1040,
+    "order": 86,
+    "zukan": 132,
+    "child_eligible": true
+  },
+  "RedArmorBird": {
+    "key": "RedArmorBird",
+    "name": "Ragnahawk",
+    "rank": 1050,
+    "order": 87,
+    "zukan": 104,
+    "child_eligible": true
+  },
+  "VolcanicMonster": {
+    "key": "VolcanicMonster",
+    "name": "Reptyro",
+    "rank": 1060,
+    "order": 88,
+    "zukan": 129,
+    "child_eligible": true
+  },
+  "GrassMammoth_Ice": {
+    "key": "GrassMammoth_Ice",
+    "name": "Mammorest Cryst",
+    "rank": 1070,
+    "order": 89,
+    "zukan": 87,
+    "child_eligible": true
+  },
+  "SakuraSaurus_Water": {
+    "key": "SakuraSaurus_Water",
+    "name": "Broncherry Aqua",
+    "rank": 1080,
+    "order": 90,
+    "zukan": 108,
+    "child_eligible": true
+  },
+  "LazyDragon": {
+    "key": "LazyDragon",
+    "name": "Relaxaurus",
+    "rank": 1090,
+    "order": 91,
+    "zukan": 94,
+    "child_eligible": true
+  },
+  "IceSeal_Ground": {
+    "key": "IceSeal_Ground",
+    "name": "Polapup Terra",
+    "rank": 1100,
+    "order": 92,
+    "zukan": 72,
+    "child_eligible": true
+  },
+  "RockBeast": {
+    "key": "RockBeast",
+    "name": "Pierdon",
+    "rank": 1110,
+    "order": 93,
+    "zukan": 131,
+    "child_eligible": true
+  },
+  "DarkScorpion": {
+    "key": "DarkScorpion",
+    "name": "Menasting",
+    "rank": 1120,
+    "order": 94,
+    "zukan": 99,
+    "child_eligible": true
+  },
+  "MysteryMask": {
+    "key": "MysteryMask",
+    "name": "Omascul",
+    "rank": 1140,
+    "order": 95,
+    "zukan": 150,
+    "child_eligible": true
+  },
+  "NightBlueHorse": {
+    "key": "NightBlueHorse",
+    "name": "Starryon",
+    "rank": 1150,
+    "order": 96,
+    "zukan": 130,
+    "child_eligible": true
+  },
+  "GrassRabbitMan": {
+    "key": "GrassRabbitMan",
+    "name": "Verdash",
+    "rank": 1160,
+    "order": 97,
+    "zukan": 152,
+    "child_eligible": true
+  },
+  "MummyPal": {
+    "key": "MummyPal",
+    "name": "Gildra",
+    "rank": 1170,
+    "order": 98,
+    "zukan": 120,
+    "child_eligible": true
+  },
+  "MoonChild": {
+    "key": "MoonChild",
+    "name": "Wistella",
+    "rank": 1180,
+    "order": 99,
+    "zukan": 181,
+    "child_eligible": true
+  },
+  "SumoDog": {
+    "key": "SumoDog",
+    "name": "Bulldosu",
+    "rank": 1190,
+    "order": 100,
+    "zukan": 156,
+    "child_eligible": true
+  },
+  "Suzaku": {
+    "key": "Suzaku",
+    "name": "Suzaku",
+    "rank": 1200,
+    "order": 101,
+    "zukan": 122,
+    "child_eligible": true
+  },
+  "SkyDragon": {
+    "key": "SkyDragon",
+    "name": "Quivern",
+    "rank": 1210,
+    "order": 102,
+    "zukan": 124,
+    "child_eligible": true
+  },
+  "BlueDragon_Ice": {
+    "key": "BlueDragon_Ice",
+    "name": "Azurobe Cryst",
+    "rank": 1220,
+    "order": 103,
+    "zukan": 41,
+    "child_eligible": true
+  },
+  "GhostRabbit": {
+    "key": "GhostRabbit",
+    "name": "Nitemary",
+    "rank": 1230,
+    "order": 104,
+    "zukan": 148,
+    "child_eligible": true
+  },
+  "TropicalOstrich": {
+    "key": "TropicalOstrich",
+    "name": "Palumba",
+    "rank": 1240,
+    "order": 105,
+    "zukan": 106,
+    "child_eligible": true
+  },
+  "BadCatgirl": {
+    "key": "BadCatgirl",
+    "name": "Nyafia",
+    "rank": 1250,
+    "order": 106,
+    "zukan": 143,
+    "child_eligible": true
+  },
+  "IceWitch": {
+    "key": "IceWitch",
+    "name": "Icelyn",
+    "rank": 1260,
+    "order": 107,
+    "zukan": 119,
+    "child_eligible": true
+  },
+  "Manticore_Dark": {
+    "key": "Manticore_Dark",
+    "name": "Blazehowl Noct",
+    "rank": 1270,
+    "order": 108,
+    "zukan": 112,
+    "child_eligible": true
+  },
+  "HerculesBeetle": {
+    "key": "HerculesBeetle",
+    "name": "Warsect",
+    "rank": 1280,
+    "order": 109,
+    "zukan": 113,
+    "child_eligible": true
+  },
+  "Werewolf_Ice": {
+    "key": "Werewolf_Ice",
+    "name": "Loupmoon Cryst",
+    "rank": 1290,
+    "order": 110,
+    "zukan": 56,
+    "child_eligible": true
+  },
+  "SkyDragon_Grass": {
+    "key": "SkyDragon_Grass",
+    "name": "Quivern Botan",
+    "rank": 1300,
+    "order": 111,
+    "zukan": 124,
+    "child_eligible": true
+  },
+  "GhostRabbit_Grass": {
+    "key": "GhostRabbit_Grass",
+    "name": "Nitemary Botan",
+    "rank": 1320,
+    "order": 112,
+    "zukan": 148,
+    "child_eligible": true
+  },
+  "TentacleTurtle_Ground": {
+    "key": "TentacleTurtle_Ground",
+    "name": "Turtacle Terra",
+    "rank": 1330,
+    "order": 113,
+    "zukan": 37,
+    "child_eligible": true
+  },
+  "GrassMammoth": {
+    "key": "GrassMammoth",
+    "name": "Mammorest",
+    "rank": 1340,
+    "order": 114,
+    "zukan": 87,
+    "child_eligible": true
+  },
+  "RedFlowerBird": {
+    "key": "RedFlowerBird",
+    "name": "Tropicaw",
+    "rank": 1350,
+    "order": 115,
+    "zukan": 173,
+    "child_eligible": true
+  },
+  "Manticore": {
+    "key": "Manticore",
+    "name": "Blazehowl",
+    "rank": 1360,
+    "order": 116,
+    "zukan": 112,
+    "child_eligible": true
+  },
+  "KingSunfish": {
+    "key": "KingSunfish",
+    "name": "Solmora",
+    "rank": 1370,
+    "order": 117,
+    "zukan": 169,
+    "child_eligible": true
+  },
+  "SakuraSaurus": {
+    "key": "SakuraSaurus",
+    "name": "Broncherry",
+    "rank": 1380,
+    "order": 118,
+    "zukan": 108,
+    "child_eligible": true
+  },
+  "BlueberryFairy": {
+    "key": "BlueberryFairy",
+    "name": "Prunelia",
+    "rank": 1390,
+    "order": 119,
+    "zukan": 147,
+    "child_eligible": true
+  },
+  "ThunderFluffyBird": {
+    "key": "ThunderFluffyBird",
+    "name": "Dynamoff",
+    "rank": 1400,
+    "order": 120,
+    "zukan": 172,
+    "child_eligible": true
+  },
+  "PandaGirl": {
+    "key": "PandaGirl",
+    "name": "Leafan",
+    "rank": 1410,
+    "order": 121,
+    "zukan": 90,
+    "child_eligible": true
+  },
+  "SwordCutlassfish": {
+    "key": "SwordCutlassfish",
+    "name": "Skutlass",
+    "rank": 1420,
+    "order": 122,
+    "zukan": 128,
+    "child_eligible": true
+  },
+  "BirdDragon_Ice": {
+    "key": "BirdDragon_Ice",
+    "name": "Vanwyrm Cryst",
+    "rank": 1430,
+    "order": 123,
+    "zukan": 64,
+    "child_eligible": true
+  },
+  "GrassPanda_Electric": {
+    "key": "GrassPanda_Electric",
+    "name": "Mossanda Lux",
+    "rank": 1440,
+    "order": 124,
+    "zukan": 102,
+    "child_eligible": true
+  },
+  "MushroomDragon_Dark": {
+    "key": "MushroomDragon_Dark",
+    "name": "Shroomer Noct",
+    "rank": 1450,
+    "order": 125,
+    "zukan": 118,
+    "child_eligible": true
+  },
+  "SifuDog": {
+    "key": "SifuDog",
+    "name": "Dogen",
+    "rank": 1460,
+    "order": 126,
+    "zukan": 155,
+    "child_eligible": true
+  },
+  "Baphomet": {
+    "key": "Baphomet",
+    "name": "Incineram",
+    "rank": 1470,
+    "order": 127,
+    "zukan": 91,
+    "child_eligible": true
+  },
+  "VioletFairy": {
+    "key": "VioletFairy",
+    "name": "Vaelet",
+    "rank": 1480,
+    "order": 128,
+    "zukan": 66,
+    "child_eligible": true
+  },
+  "FoxMage_Dark": {
+    "key": "FoxMage_Dark",
+    "name": "Wixen Noct",
+    "rank": 1490,
+    "order": 129,
+    "zukan": 78,
+    "child_eligible": true
+  },
+  "ElecSnail_Ground": {
+    "key": "ElecSnail_Ground",
+    "name": "Snock Lux",
+    "rank": 1500,
+    "order": 130,
+    "zukan": 163,
+    "child_eligible": true
+  },
+  "ScorpionMan": {
+    "key": "ScorpionMan",
+    "name": "Prixter",
+    "rank": 1510,
+    "order": 131,
+    "zukan": 141,
+    "child_eligible": true
+  },
+  "MushroomDragon": {
+    "key": "MushroomDragon",
+    "name": "Shroomer",
+    "rank": 1520,
+    "order": 132,
+    "zukan": 118,
+    "child_eligible": true
+  },
+  "KingAlpaca_Ice": {
+    "key": "KingAlpaca_Ice",
+    "name": "Kingpaca Cryst",
+    "rank": 1530,
+    "order": 133,
+    "zukan": 21,
+    "child_eligible": true
+  },
+  "OniGhostGirl": {
+    "key": "OniGhostGirl",
+    "name": "Bakemi",
+    "rank": 1540,
+    "order": 134,
+    "zukan": 168,
+    "child_eligible": true
+  },
+  "DrillGame": {
+    "key": "DrillGame",
+    "name": "Digtoise",
+    "rank": 1550,
+    "order": 135,
+    "zukan": 107,
+    "child_eligible": true
+  },
+  "Ronin": {
+    "key": "Ronin",
+    "name": "Bushi",
+    "rank": 1560,
+    "order": 136,
+    "zukan": 85,
+    "child_eligible": true
+  },
+  "CatVampire": {
+    "key": "CatVampire",
+    "name": "Felbat",
+    "rank": 1570,
+    "order": 137,
+    "zukan": 65,
+    "child_eligible": true
+  },
+  "CactusDoll_Dark": {
+    "key": "CactusDoll_Dark",
+    "name": "Needoll Noct",
+    "rank": 1580,
+    "order": 138,
+    "zukan": 100,
+    "child_eligible": true
+  },
+  "SwordCutlassfish_Fire": {
+    "key": "SwordCutlassfish_Fire",
+    "name": "Skutlass Ignis",
+    "rank": 1590,
+    "order": 139,
+    "zukan": 128,
+    "child_eligible": true
+  },
+  "ThunderDog_Ice": {
+    "key": "ThunderDog_Ice",
+    "name": "Rayhound Cryst",
+    "rank": 1600,
+    "order": 140,
+    "zukan": 98,
+    "child_eligible": true
+  },
+  "BlackPuppy_Ice": {
+    "key": "BlackPuppy_Ice",
+    "name": "Smokie Cryst",
+    "rank": 1610,
+    "order": 141,
+    "zukan": 149,
+    "child_eligible": true
+  },
+  "LazyCatfish_Gold": {
+    "key": "LazyCatfish_Gold",
+    "name": "Dumud Gild",
+    "rank": 1620,
+    "order": 142,
+    "zukan": 109,
+    "child_eligible": true
+  },
+  "OctopusGirl_Neutral": {
+    "key": "OctopusGirl_Neutral",
+    "name": "Gloopie Primo",
+    "rank": 1630,
+    "order": 143,
+    "zukan": 48,
+    "child_eligible": true
+  },
+  "FairyDragon_Water": {
+    "key": "FairyDragon_Water",
+    "name": "Elphidran Aqua",
+    "rank": 1640,
+    "order": 144,
+    "zukan": 63,
+    "child_eligible": true
+  },
+  "BirdDragon": {
+    "key": "BirdDragon",
+    "name": "Vanwyrm",
+    "rank": 1650,
+    "order": 145,
+    "zukan": 64,
+    "child_eligible": true
+  },
+  "IceSeal": {
+    "key": "IceSeal",
+    "name": "Polapup",
+    "rank": 1660,
+    "order": 146,
+    "zukan": 72,
+    "child_eligible": true
+  },
+  "AmaterasuWolf": {
+    "key": "AmaterasuWolf",
+    "name": "Kitsun",
+    "rank": 1670,
+    "order": 147,
+    "zukan": 111,
+    "child_eligible": true
+  },
+  "BrownRabbit": {
+    "key": "BrownRabbit",
+    "name": "Lapiron",
+    "rank": 1680,
+    "order": 148,
+    "zukan": 165,
+    "child_eligible": true
+  },
+  "ThunderBird": {
+    "key": "ThunderBird",
+    "name": "Beakon",
+    "rank": 1690,
+    "order": 149,
+    "zukan": 96,
+    "child_eligible": true
+  },
+  "VenusFlytrap": {
+    "key": "VenusFlytrap",
+    "name": "Carnibora",
+    "rank": 1700,
+    "order": 150,
+    "zukan": 136,
+    "child_eligible": true
+  },
+  "GhostBeast": {
+    "key": "GhostBeast",
+    "name": "Maraith",
+    "rank": 1710,
+    "order": 151,
+    "zukan": 117,
+    "child_eligible": true
+  },
+  "FlowerDoll": {
+    "key": "FlowerDoll",
+    "name": "Petallia",
+    "rank": 1720,
+    "order": 152,
+    "zukan": 89,
+    "child_eligible": true
+  },
+  "PurpleSpider": {
+    "key": "PurpleSpider",
+    "name": "Tarantriss",
+    "rank": 1730,
+    "order": 153,
+    "zukan": 71,
+    "child_eligible": true
+  },
+  "MimicDog": {
+    "key": "MimicDog",
+    "name": "Mimog",
+    "rank": 1740,
+    "order": 154,
+    "zukan": 144,
+    "child_eligible": false
+  },
+  "ElecLizard": {
+    "key": "ElecLizard",
+    "name": "Slowatt",
+    "rank": 1750,
+    "order": 155,
+    "zukan": 167,
+    "child_eligible": true
+  },
+  "BlackPuppy": {
+    "key": "BlackPuppy",
+    "name": "Smokie",
+    "rank": 1760,
+    "order": 156,
+    "zukan": 149,
+    "child_eligible": true
+  },
+  "HoodGhost": {
+    "key": "HoodGhost",
+    "name": "Hoodle",
+    "rank": 1770,
+    "order": 157,
+    "zukan": 166,
+    "child_eligible": true
+  },
+  "ElecSnail": {
+    "key": "ElecSnail",
+    "name": "Snock",
+    "rank": 1780,
+    "order": 158,
+    "zukan": 163,
+    "child_eligible": true
+  },
+  "QueenBee": {
+    "key": "QueenBee",
+    "name": "Elizabee",
+    "rank": 1790,
+    "order": 159,
+    "zukan": 68,
+    "child_eligible": true
+  },
+  "CatMage_Fire": {
+    "key": "CatMage_Fire",
+    "name": "Katress Ignis",
+    "rank": 1800,
+    "order": 160,
+    "zukan": 79,
+    "child_eligible": true
+  },
+  "WhiteMoth": {
+    "key": "WhiteMoth",
+    "name": "Sibelyx",
+    "rank": 1810,
+    "order": 161,
+    "zukan": 116,
+    "child_eligible": true
+  },
+  "BlueDragon": {
+    "key": "BlueDragon",
+    "name": "Azurobe",
+    "rank": 1830,
+    "order": 162,
+    "zukan": 41,
+    "child_eligible": true
+  },
+  "Serpent_Ground": {
+    "key": "Serpent_Ground",
+    "name": "Surfent Terra",
+    "rank": 1840,
+    "order": 163,
+    "zukan": 75,
+    "child_eligible": true
+  },
+  "CaptainPenguin_Black": {
+    "key": "CaptainPenguin_Black",
+    "name": "Penking Lux",
+    "rank": 1850,
+    "order": 164,
+    "zukan": 18,
+    "child_eligible": true
+  },
+  "KendoFrog_Dark": {
+    "key": "KendoFrog_Dark",
+    "name": "Croajiro Noct",
+    "rank": 1860,
+    "order": 165,
+    "zukan": 9,
+    "child_eligible": true
+  },
+  "FireKirin_Dark": {
+    "key": "FireKirin_Dark",
+    "name": "Pyrin Noct",
+    "rank": 1870,
+    "order": 166,
+    "zukan": 93,
+    "child_eligible": true
+  },
+  "Gorilla_Ground": {
+    "key": "Gorilla_Ground",
+    "name": "Gorirat Terra",
+    "rank": 1880,
+    "order": 167,
+    "zukan": 74,
+    "child_eligible": true
+  },
+  "FlowerDinosaur_Electric": {
+    "key": "FlowerDinosaur_Electric",
+    "name": "Dinossom Lux",
+    "rank": 1890,
+    "order": 168,
+    "zukan": 84,
+    "child_eligible": true
+  },
+  "LongCat": {
+    "key": "LongCat",
+    "name": "Valentail",
+    "rank": 1900,
+    "order": 169,
+    "zukan": 162,
+    "child_eligible": true
+  },
+  "RaijinDaughter_Water": {
+    "key": "RaijinDaughter_Water",
+    "name": "Dazzi Noct",
+    "rank": 1910,
+    "order": 170,
+    "zukan": 92,
+    "child_eligible": true
+  },
+  "ThunderDog": {
+    "key": "ThunderDog",
+    "name": "Rayhound",
+    "rank": 1920,
+    "order": 171,
+    "zukan": 98,
+    "child_eligible": true
+  },
+  "IceDeer": {
+    "key": "IceDeer",
+    "name": "Reindrix",
+    "rank": 1930,
+    "order": 172,
+    "zukan": 101,
+    "child_eligible": true
+  },
+  "BerryGoat_Dark": {
+    "key": "BerryGoat_Dark",
+    "name": "Caprity Noct",
+    "rank": 1940,
+    "order": 173,
+    "zukan": 34,
+    "child_eligible": true
+  },
+  "WeaselDragon_Fire": {
+    "key": "WeaselDragon_Fire",
+    "name": "Chillet Ignis",
+    "rank": 1950,
+    "order": 174,
+    "zukan": 103,
+    "child_eligible": true
+  },
+  "FengyunDeeper": {
+    "key": "FengyunDeeper",
+    "name": "Fenglope",
+    "rank": 1960,
+    "order": 175,
+    "zukan": 83,
+    "child_eligible": true
+  },
+  "IceFox": {
+    "key": "IceFox",
+    "name": "Foxcicle",
+    "rank": 1970,
+    "order": 176,
+    "zukan": 95,
+    "child_eligible": true
+  },
+  "FireKirin": {
+    "key": "FireKirin",
+    "name": "Pyrin",
+    "rank": 1980,
+    "order": 177,
+    "zukan": 93,
+    "child_eligible": true
+  },
+  "LeafPrincess": {
+    "key": "LeafPrincess",
+    "name": "Lullu",
+    "rank": 1990,
+    "order": 178,
+    "zukan": 125,
+    "child_eligible": true
+  },
+  "DandelionGirl": {
+    "key": "DandelionGirl",
+    "name": "Souffline",
+    "rank": 2000,
+    "order": 179,
+    "zukan": 164,
+    "child_eligible": true
+  },
+  "Mutant": {
+    "key": "Mutant",
+    "name": "Lunaris",
+    "rank": 2010,
+    "order": 180,
+    "zukan": 82,
+    "child_eligible": true
+  },
+  "GrassMinotaur": {
+    "key": "GrassMinotaur",
+    "name": "Elgrove",
+    "rank": 2020,
+    "order": 181,
+    "zukan": 81,
+    "child_eligible": true
+  },
+  "SweetsSheep_Ground": {
+    "key": "SweetsSheep_Ground",
+    "name": "Woolipop Terra",
+    "rank": 2030,
+    "order": 182,
+    "zukan": 39,
+    "child_eligible": true
+  },
+  "CatMage": {
+    "key": "CatMage",
+    "name": "Katress",
+    "rank": 2040,
+    "order": 183,
+    "zukan": 79,
+    "child_eligible": true
+  },
+  "RobinHood_Ground": {
+    "key": "RobinHood_Ground",
+    "name": "Robinquill Terra",
+    "rank": 2050,
+    "order": 184,
+    "zukan": 76,
+    "child_eligible": true
+  },
+  "GrassPanda": {
+    "key": "GrassPanda",
+    "name": "Mossanda",
+    "rank": 2060,
+    "order": 185,
+    "zukan": 102,
+    "child_eligible": true
+  },
+  "CaptainPenguin": {
+    "key": "CaptainPenguin",
+    "name": "Penking",
+    "rank": 2070,
+    "order": 186,
+    "zukan": 18,
+    "child_eligible": true
+  },
+  "FoxMage": {
+    "key": "FoxMage",
+    "name": "Wixen",
+    "rank": 2080,
+    "order": 187,
+    "zukan": 78,
+    "child_eligible": true
+  },
+  "PinkLizard": {
+    "key": "PinkLizard",
+    "name": "Lovander",
+    "rank": 2090,
+    "order": 188,
+    "zukan": 69,
+    "child_eligible": true
+  },
+  "FlowerDinosaur": {
+    "key": "FlowerDinosaur",
+    "name": "Dinossom",
+    "rank": 2100,
+    "order": 189,
+    "zukan": 84,
+    "child_eligible": true
+  },
+  "Werewolf": {
+    "key": "Werewolf",
+    "name": "Loupmoon",
+    "rank": 2110,
+    "order": 190,
+    "zukan": 56,
+    "child_eligible": true
+  },
+  "NaughtyCat": {
+    "key": "NaughtyCat",
+    "name": "Grintale",
+    "rank": 2120,
+    "order": 191,
+    "zukan": 70,
+    "child_eligible": true
+  },
+  "IceCrocodile": {
+    "key": "IceCrocodile",
+    "name": "Munchill",
+    "rank": 2130,
+    "order": 192,
+    "zukan": 86,
+    "child_eligible": true
+  },
+  "Gorilla": {
+    "key": "Gorilla",
+    "name": "Gorirat",
+    "rank": 2140,
+    "order": 193,
+    "zukan": 74,
+    "child_eligible": true
+  },
+  "MopKing": {
+    "key": "MopKing",
+    "name": "Sweepa",
+    "rank": 2150,
+    "order": 194,
+    "zukan": 36,
+    "child_eligible": true
+  },
+  "FeatherOstrich": {
+    "key": "FeatherOstrich",
+    "name": "Dazemu",
+    "rank": 2210,
+    "order": 195,
+    "zukan": 123,
+    "child_eligible": true
+  },
+  "KingAlpaca": {
+    "key": "KingAlpaca",
+    "name": "Kingpaca",
+    "rank": 2220,
+    "order": 196,
+    "zukan": 21,
+    "child_eligible": true
+  },
+  "GuardianDog": {
+    "key": "GuardianDog",
+    "name": "Yakumo",
+    "rank": 2230,
+    "order": 197,
+    "zukan": 127,
+    "child_eligible": true
+  },
+  "StuffedShark_Fire": {
+    "key": "StuffedShark_Fire",
+    "name": "Finsider Ignis",
+    "rank": 2240,
+    "order": 198,
+    "zukan": 88,
+    "child_eligible": true
+  },
+  "GhostBlackCat": {
+    "key": "GhostBlackCat",
+    "name": "Wispaw",
+    "rank": 2250,
+    "order": 199,
+    "zukan": 50,
+    "child_eligible": true
+  },
+  "RobinHood": {
+    "key": "RobinHood",
+    "name": "Robinquill",
+    "rank": 2260,
+    "order": 200,
+    "zukan": 76,
+    "child_eligible": true
+  },
+  "Kirin": {
+    "key": "Kirin",
+    "name": "Univolt",
+    "rank": 2270,
+    "order": 201,
+    "zukan": 54,
+    "child_eligible": true
+  },
+  "FairyDragon": {
+    "key": "FairyDragon",
+    "name": "Elphidran",
+    "rank": 2280,
+    "order": 202,
+    "zukan": 63,
+    "child_eligible": true
+  },
+  "LazyCatfish": {
+    "key": "LazyCatfish",
+    "name": "Dumud",
+    "rank": 2290,
+    "order": 203,
+    "zukan": 109,
+    "child_eligible": true
+  },
+  "BluePlatypus_Fire": {
+    "key": "BluePlatypus_Fire",
+    "name": "Fuack Ignis",
+    "rank": 2300,
+    "order": 204,
+    "zukan": 5,
+    "child_eligible": true
+  },
+  "SmallArmadillo": {
+    "key": "SmallArmadillo",
+    "name": "Kikit",
+    "rank": 2310,
+    "order": 205,
+    "zukan": 126,
+    "child_eligible": true
+  },
+  "FlameBuffalo": {
+    "key": "FlameBuffalo",
+    "name": "Arsox",
+    "rank": 2320,
+    "order": 206,
+    "zukan": 58,
+    "child_eligible": true
+  },
+  "WeaselDragon": {
+    "key": "WeaselDragon",
+    "name": "Chillet",
+    "rank": 2330,
+    "order": 207,
+    "zukan": 103,
+    "child_eligible": true
+  },
+  "CatBat": {
+    "key": "CatBat",
+    "name": "Tombat",
+    "rank": 2340,
+    "order": 208,
+    "zukan": 52,
+    "child_eligible": true
+  },
+  "SoldierBee": {
+    "key": "SoldierBee",
+    "name": "Beegarde",
+    "rank": 2350,
+    "order": 209,
+    "zukan": 67,
+    "child_eligible": true
+  },
+  "ElecPomeranian": {
+    "key": "ElecPomeranian",
+    "name": "Puffolt",
+    "rank": 2360,
+    "order": 210,
+    "zukan": 62,
+    "child_eligible": true
+  },
+  "DarkCrow": {
+    "key": "DarkCrow",
+    "name": "Cawgnito",
+    "rank": 2370,
+    "order": 211,
+    "zukan": 57,
+    "child_eligible": true
+  },
+  "FlyingManta_Thunder": {
+    "key": "FlyingManta_Thunder",
+    "name": "Celaray Lux",
+    "rank": 2380,
+    "order": 212,
+    "zukan": 7,
+    "child_eligible": true
+  },
+  "SmallYeti": {
+    "key": "SmallYeti",
+    "name": "Snugloo",
+    "rank": 2390,
+    "order": 213,
+    "zukan": 133,
+    "child_eligible": true
+  },
+  "RaijinDaughter": {
+    "key": "RaijinDaughter",
+    "name": "Dazzi",
+    "rank": 2400,
+    "order": 214,
+    "zukan": 92,
+    "child_eligible": true
+  },
+  "TentacleTurtle": {
+    "key": "TentacleTurtle",
+    "name": "Turtacle",
+    "rank": 2410,
+    "order": 215,
+    "zukan": 37,
+    "child_eligible": true
+  },
+  "CactusDoll": {
+    "key": "CactusDoll",
+    "name": "Needoll",
+    "rank": 2420,
+    "order": 216,
+    "zukan": 100,
+    "child_eligible": true
+  },
+  "SharkKid_Fire": {
+    "key": "SharkKid_Fire",
+    "name": "Gobfin Ignis",
+    "rank": 2430,
+    "order": 217,
+    "zukan": 55,
+    "child_eligible": true
+  },
+  "Serpent": {
+    "key": "Serpent",
+    "name": "Surfent",
+    "rank": 2440,
+    "order": 218,
+    "zukan": 75,
+    "child_eligible": true
+  },
+  "StuffedShark": {
+    "key": "StuffedShark",
+    "name": "Finsider",
+    "rank": 2450,
+    "order": 219,
+    "zukan": 88,
+    "child_eligible": true
+  },
+  "PinkRabbit_Grass": {
+    "key": "PinkRabbit_Grass",
+    "name": "Ribbuny Botan",
+    "rank": 2460,
+    "order": 220,
+    "zukan": 44,
+    "child_eligible": true
+  },
+  "Kelpie_Fire": {
+    "key": "Kelpie_Fire",
+    "name": "Kelpsea Ignis",
+    "rank": 2470,
+    "order": 221,
+    "zukan": 43,
+    "child_eligible": true
+  },
+  "FluffyBird": {
+    "key": "FluffyBird",
+    "name": "Muffly",
+    "rank": 2480,
+    "order": 222,
+    "zukan": 59,
+    "child_eligible": true
+  },
+  "Penguin_Electric": {
+    "key": "Penguin_Electric",
+    "name": "Pengullet Lux",
+    "rank": 2490,
+    "order": 223,
+    "zukan": 17,
+    "child_eligible": true
+  },
+  "Kitsunebi_Ice": {
+    "key": "Kitsunebi_Ice",
+    "name": "Foxparks Cryst",
+    "rank": 2500,
+    "order": 224,
+    "zukan": 29,
+    "child_eligible": true
+  },
+  "WindChimes_Ice": {
+    "key": "WindChimes_Ice",
+    "name": "WindChimes_Ice",
+    "rank": 2510,
+    "order": 225,
+    "zukan": 38,
+    "child_eligible": true
+  },
+  "ClioneTwins": {
+    "key": "ClioneTwins",
+    "name": "Amione",
+    "rank": 2520,
+    "order": 226,
+    "zukan": 47,
+    "child_eligible": true
+  },
+  "OctopusGirl": {
+    "key": "OctopusGirl",
+    "name": "Gloopie",
+    "rank": 2530,
+    "order": 227,
+    "zukan": 48,
+    "child_eligible": true
+  },
+  "NegativeOctopus_Neutral": {
+    "key": "NegativeOctopus_Neutral",
+    "name": "Killamari Primo",
+    "rank": 2540,
+    "order": 228,
+    "zukan": 30,
+    "child_eligible": true
+  },
+  "SharkKid": {
+    "key": "SharkKid",
+    "name": "Gobfin",
+    "rank": 2550,
+    "order": 229,
+    "zukan": 55,
+    "child_eligible": true
+  },
+  "HawkBird": {
+    "key": "HawkBird",
+    "name": "Nitewing",
+    "rank": 2560,
+    "order": 230,
+    "zukan": 51,
+    "child_eligible": true
+  },
+  "Eagle": {
+    "key": "Eagle",
+    "name": "Galeclaw",
+    "rank": 2570,
+    "order": 231,
+    "zukan": 49,
+    "child_eligible": true
+  },
+  "Deer_Ground": {
+    "key": "Deer_Ground",
+    "name": "Eikthyrdeer Terra",
+    "rank": 2580,
+    "order": 232,
+    "zukan": 32,
+    "child_eligible": true
+  },
+  "JellyfishGhost": {
+    "key": "JellyfishGhost",
+    "name": "Jellroy",
+    "rank": 2590,
+    "order": 233,
+    "zukan": 46,
+    "child_eligible": true
+  },
+  "KendoFrog": {
+    "key": "KendoFrog",
+    "name": "Croajiro",
+    "rank": 2600,
+    "order": 234,
+    "zukan": 9,
+    "child_eligible": true
+  },
+  "BerryGoat": {
+    "key": "BerryGoat",
+    "name": "Caprity",
+    "rank": 2610,
+    "order": 235,
+    "zukan": 34,
+    "child_eligible": true
+  },
+  "CuteButterfly": {
+    "key": "CuteButterfly",
+    "name": "Cinnamoth",
+    "rank": 2620,
+    "order": 236,
+    "zukan": 61,
+    "child_eligible": true
+  },
+  "LeafMomonga": {
+    "key": "LeafMomonga",
+    "name": "Herbil",
+    "rank": 2630,
+    "order": 237,
+    "zukan": 10,
+    "child_eligible": true
+  },
+  "LizardMan_Fire": {
+    "key": "LizardMan_Fire",
+    "name": "Leezpunk Ignis",
+    "rank": 2640,
+    "order": 238,
+    "zukan": 73,
+    "child_eligible": true
+  },
+  "JellyfishFairy": {
+    "key": "JellyfishFairy",
+    "name": "Jelliette",
+    "rank": 2650,
+    "order": 239,
+    "zukan": 45,
+    "child_eligible": true
+  },
+  "FlowerRabbit": {
+    "key": "FlowerRabbit",
+    "name": "Flopie",
+    "rank": 2660,
+    "order": 240,
+    "zukan": 77,
+    "child_eligible": true
+  },
+  "Garm": {
+    "key": "Garm",
+    "name": "Direhowl",
+    "rank": 2680,
+    "order": 241,
+    "zukan": 33,
+    "child_eligible": true
+  },
+  "LittleBriarRose": {
+    "key": "LittleBriarRose",
+    "name": "Bristla",
+    "rank": 2690,
+    "order": 242,
+    "zukan": 60,
+    "child_eligible": true
+  },
+  "LavaGirl": {
+    "key": "LavaGirl",
+    "name": "Flambelle",
+    "rank": 2700,
+    "order": 243,
+    "zukan": 25,
+    "child_eligible": true
+  },
+  "Deer": {
+    "key": "Deer",
+    "name": "Eikthyrdeer",
+    "rank": 2710,
+    "order": 244,
+    "zukan": 32,
+    "child_eligible": true
+  },
+  "Alpaca": {
+    "key": "Alpaca",
+    "name": "Melpaca",
+    "rank": 2720,
+    "order": 245,
+    "zukan": 20,
+    "child_eligible": true
+  },
+  "ColorfulBird": {
+    "key": "ColorfulBird",
+    "name": "Tocotoco",
+    "rank": 2730,
+    "order": 246,
+    "zukan": 53,
+    "child_eligible": true
+  },
+  "FlyingManta": {
+    "key": "FlyingManta",
+    "name": "Celaray",
+    "rank": 2740,
+    "order": 247,
+    "zukan": 7,
+    "child_eligible": true
+  },
+  "Bastet_Ice": {
+    "key": "Bastet_Ice",
+    "name": "Mau Cryst",
+    "rank": 2750,
+    "order": 248,
+    "zukan": 27,
+    "child_eligible": true
+  },
+  "PinkCat": {
+    "key": "PinkCat",
+    "name": "Cattiva",
+    "rank": 2760,
+    "order": 249,
+    "zukan": 2,
+    "child_eligible": true
+  },
+  "NegativeOctopus": {
+    "key": "NegativeOctopus",
+    "name": "Killamari",
+    "rank": 2770,
+    "order": 250,
+    "zukan": 30,
+    "child_eligible": true
+  },
+  "WindChimes": {
+    "key": "WindChimes",
+    "name": "WindChimes",
+    "rank": 2780,
+    "order": 251,
+    "zukan": 38,
+    "child_eligible": true
+  },
+  "CuteMole": {
+    "key": "CuteMole",
+    "name": "Fuddler",
+    "rank": 2790,
+    "order": 252,
+    "zukan": 31,
+    "child_eligible": true
+  },
+  "CowPal": {
+    "key": "CowPal",
+    "name": "Mozzarina",
+    "rank": 2800,
+    "order": 253,
+    "zukan": 40,
+    "child_eligible": true
+  },
+  "Kelpie": {
+    "key": "Kelpie",
+    "name": "Kelpsea",
+    "rank": 2810,
+    "order": 254,
+    "zukan": 43,
+    "child_eligible": true
+  },
+  "SweetsSheep": {
+    "key": "SweetsSheep",
+    "name": "Woolipop",
+    "rank": 2820,
+    "order": 255,
+    "zukan": 39,
+    "child_eligible": true
+  },
+  "Monkey_Fire": {
+    "key": "Monkey_Fire",
+    "name": "Tanzee Ignis",
+    "rank": 2830,
+    "order": 256,
+    "zukan": 23,
+    "child_eligible": true
+  },
+  "MopBaby": {
+    "key": "MopBaby",
+    "name": "Swee",
+    "rank": 2840,
+    "order": 257,
+    "zukan": 35,
+    "child_eligible": true
+  },
+  "Hedgehog_Ice": {
+    "key": "Hedgehog_Ice",
+    "name": "Jolthog Cryst",
+    "rank": 2850,
+    "order": 258,
+    "zukan": 15,
+    "child_eligible": true
+  },
+  "PinkRabbit": {
+    "key": "PinkRabbit",
+    "name": "Ribbuny",
+    "rank": 2860,
+    "order": 259,
+    "zukan": 44,
+    "child_eligible": true
+  },
+  "FlameBambi": {
+    "key": "FlameBambi",
+    "name": "Rooby",
+    "rank": 2870,
+    "order": 260,
+    "zukan": 26,
+    "child_eligible": true
+  },
+  "Boar": {
+    "key": "Boar",
+    "name": "Rushoar",
+    "rank": 2880,
+    "order": 261,
+    "zukan": 28,
+    "child_eligible": true
+  },
+  "WoolFox": {
+    "key": "WoolFox",
+    "name": "Cremis",
+    "rank": 2890,
+    "order": 262,
+    "zukan": 8,
+    "child_eligible": true
+  },
+  "Monkey": {
+    "key": "Monkey",
+    "name": "Tanzee",
+    "rank": 2900,
+    "order": 263,
+    "zukan": 23,
+    "child_eligible": true
+  },
+  "DreamDemon": {
+    "key": "DreamDemon",
+    "name": "Daedream",
+    "rank": 2910,
+    "order": 264,
+    "zukan": 22,
+    "child_eligible": true
+  },
+  "NightFox": {
+    "key": "NightFox",
+    "name": "Nox",
+    "rank": 2920,
+    "order": 265,
+    "zukan": 24,
+    "child_eligible": true
+  },
+  "SamuraiDog": {
+    "key": "SamuraiDog",
+    "name": "Pupperai",
+    "rank": 2930,
+    "order": 266,
+    "zukan": 13,
+    "child_eligible": true
+  },
+  "WizardOwl": {
+    "key": "WizardOwl",
+    "name": "Hoocrates",
+    "rank": 2940,
+    "order": 267,
+    "zukan": 19,
+    "child_eligible": true
+  },
+  "PlantSlime": {
+    "key": "PlantSlime",
+    "name": "Gumoss",
+    "rank": 2950,
+    "order": 268,
+    "zukan": 12,
+    "child_eligible": true
+  },
+  "Penguin": {
+    "key": "Penguin",
+    "name": "Pengullet",
+    "rank": 2960,
+    "order": 269,
+    "zukan": 17,
+    "child_eligible": true
+  },
+  "CloverFairy": {
+    "key": "CloverFairy",
+    "name": "Clovee",
+    "rank": 2970,
+    "order": 270,
+    "zukan": 14,
+    "child_eligible": true
+  },
+  "Blueplatypus": {
+    "key": "Blueplatypus",
+    "name": "Blueplatypus",
+    "rank": 2980,
+    "order": 271,
+    "zukan": 5,
+    "child_eligible": true
+  },
+  "Kitsunebi": {
+    "key": "Kitsunebi",
+    "name": "Foxparks",
+    "rank": 2990,
+    "order": 272,
+    "zukan": 29,
+    "child_eligible": true
+  },
+  "NegativeKoala": {
+    "key": "NegativeKoala",
+    "name": "Depresso",
+    "rank": 3000,
+    "order": 273,
+    "zukan": 16,
+    "child_eligible": true
+  },
+  "ElecCat": {
+    "key": "ElecCat",
+    "name": "Sparkit",
+    "rank": 3010,
+    "order": 274,
+    "zukan": 42,
+    "child_eligible": true
+  },
+  "Carbunclo": {
+    "key": "Carbunclo",
+    "name": "Lifmunk",
+    "rank": 3020,
+    "order": 275,
+    "zukan": 4,
+    "child_eligible": true
+  },
+  "Hedgehog": {
+    "key": "Hedgehog",
+    "name": "Jolthog",
+    "rank": 3030,
+    "order": 276,
+    "zukan": 15,
+    "child_eligible": true
+  },
+  "Bastet": {
+    "key": "Bastet",
+    "name": "Mau",
+    "rank": 3040,
+    "order": 277,
+    "zukan": 27,
+    "child_eligible": true
+  },
+  "SheepBall": {
+    "key": "SheepBall",
+    "name": "Lamball",
+    "rank": 3050,
+    "order": 278,
+    "zukan": 1,
+    "child_eligible": true
+  },
+  "CuteFox": {
+    "key": "CuteFox",
+    "name": "Vixy",
+    "rank": 3060,
+    "order": 279,
+    "zukan": 6,
+    "child_eligible": true
+  },
+  "Ganesha": {
+    "key": "Ganesha",
+    "name": "Teafant",
+    "rank": 3070,
+    "order": 280,
+    "zukan": 11,
+    "child_eligible": true
+  },
+  "ChickenPal": {
+    "key": "ChickenPal",
+    "name": "Chikipi",
+    "rank": 3080,
+    "order": 281,
+    "zukan": 3,
+    "child_eligible": true
+  },
+  "YakushimaBoss001": {
+    "key": "YakushimaBoss001",
+    "name": "Eye of Cthulhu",
+    "rank": 3100,
+    "order": 282,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss001_Green": {
+    "key": "YakushimaBoss001_Green",
+    "name": "YakushimaBoss001_Green",
+    "rank": 3100,
+    "order": 283,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss001_Green_2": {
+    "key": "YakushimaBoss001_Green_2",
+    "name": "YakushimaBoss001_Green_2",
+    "rank": 3100,
+    "order": 284,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss001_Small": {
+    "key": "YakushimaBoss001_Small",
+    "name": "Demon Eye",
+    "rank": 3100,
+    "order": 285,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002": {
+    "key": "YakushimaBoss002",
+    "name": "YakushimaBoss002",
+    "rank": 3100,
+    "order": 286,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002_2": {
+    "key": "YakushimaBoss002_2",
+    "name": "YakushimaBoss002_2",
+    "rank": 3100,
+    "order": 287,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002_Hand_Left": {
+    "key": "YakushimaBoss002_Hand_Left",
+    "name": "YakushimaBoss002_Hand_Left",
+    "rank": 3100,
+    "order": 288,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002_Hand_Left_2": {
+    "key": "YakushimaBoss002_Hand_Left_2",
+    "name": "YakushimaBoss002_Hand_Left_2",
+    "rank": 3100,
+    "order": 289,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002_Hand_Right": {
+    "key": "YakushimaBoss002_Hand_Right",
+    "name": "YakushimaBoss002_Hand_Right",
+    "rank": 3100,
+    "order": 290,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002_Hand_Right_2": {
+    "key": "YakushimaBoss002_Hand_Right_2",
+    "name": "YakushimaBoss002_Hand_Right_2",
+    "rank": 3100,
+    "order": 291,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002_Head": {
+    "key": "YakushimaBoss002_Head",
+    "name": "YakushimaBoss002_Head",
+    "rank": 3100,
+    "order": 292,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaBoss002_Head_2": {
+    "key": "YakushimaBoss002_Head_2",
+    "name": "YakushimaBoss002_Head_2",
+    "rank": 3100,
+    "order": 293,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster001": {
+    "key": "YakushimaMonster001",
+    "name": "Green Slime",
+    "rank": 3100,
+    "order": 294,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster001_Blue": {
+    "key": "YakushimaMonster001_Blue",
+    "name": "Blue Slime",
+    "rank": 3100,
+    "order": 295,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster001_Pink": {
+    "key": "YakushimaMonster001_Pink",
+    "name": "Illuminant Slime",
+    "rank": 3100,
+    "order": 296,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster001_Purple": {
+    "key": "YakushimaMonster001_Purple",
+    "name": "Purple Slime",
+    "rank": 3100,
+    "order": 297,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster001_Rainbow": {
+    "key": "YakushimaMonster001_Rainbow",
+    "name": "Rainbow Slime",
+    "rank": 3100,
+    "order": 298,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster001_Red": {
+    "key": "YakushimaMonster001_Red",
+    "name": "Red Slime",
+    "rank": 3100,
+    "order": 299,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster002": {
+    "key": "YakushimaMonster002",
+    "name": "Enchanted Sword",
+    "rank": 3100,
+    "order": 300,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster003": {
+    "key": "YakushimaMonster003",
+    "name": "Cave Bat",
+    "rank": 3100,
+    "order": 301,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "YakushimaMonster003_Purple": {
+    "key": "YakushimaMonster003_Purple",
+    "name": "Illuminant Bat",
+    "rank": 3100,
+    "order": 302,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "LizardMan": {
+    "key": "LizardMan",
+    "name": "Leezpunk",
+    "rank": 9999,
+    "order": 303,
+    "zukan": 73,
+    "child_eligible": false
+  },
+  "HadesBird": {
+    "key": "HadesBird",
+    "name": "Helzephyr",
+    "rank": 9999,
+    "order": 304,
+    "zukan": 80,
+    "child_eligible": false
+  },
+  "Baphomet_Dark": {
+    "key": "Baphomet_Dark",
+    "name": "Incineram Noct",
+    "rank": 9999,
+    "order": 305,
+    "zukan": 91,
+    "child_eligible": false
+  },
+  "DarkAlien": {
+    "key": "DarkAlien",
+    "name": "Xenovader",
+    "rank": 9999,
+    "order": 306,
+    "zukan": 145,
+    "child_eligible": false
+  },
+  "WingGolem": {
+    "key": "WingGolem",
+    "name": "Knocklem",
+    "rank": 9999,
+    "order": 307,
+    "zukan": 159,
+    "child_eligible": false
+  },
+  "Horus": {
+    "key": "Horus",
+    "name": "Faleris",
+    "rank": 9999,
+    "order": 308,
+    "zukan": 188,
+    "child_eligible": false
+  },
+  "ArmorWoodlouse": {
+    "key": "ArmorWoodlouse",
+    "name": "ArmorWoodlouse",
+    "rank": 9999,
+    "order": 309,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "BeardedDragon": {
+    "key": "BeardedDragon",
+    "name": "en_text",
+    "rank": 9999,
+    "order": 310,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "BlackFurDragon": {
+    "key": "BlackFurDragon",
+    "name": "Dragostrophe",
+    "rank": 9999,
+    "order": 311,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "BlueWoolRabbit": {
+    "key": "BlueWoolRabbit",
+    "name": "BlueWoolRabbit",
+    "rank": 9999,
+    "order": 312,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "CandleWitch": {
+    "key": "CandleWitch",
+    "name": "Unidentified Pal",
+    "rank": 9999,
+    "order": 313,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "CuteOrca": {
+    "key": "CuteOrca",
+    "name": "CuteOrca",
+    "rank": 9999,
+    "order": 314,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "DarkMutant": {
+    "key": "DarkMutant",
+    "name": "en_text",
+    "rank": 9999,
+    "order": 315,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "ElecLion": {
+    "key": "ElecLion",
+    "name": "Boltmane",
+    "rank": 9999,
+    "order": 316,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "ElecSnail_Fire": {
+    "key": "ElecSnail_Fire",
+    "name": "ElecSnail_Fire",
+    "rank": 9999,
+    "order": 317,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "FrozenBear": {
+    "key": "FrozenBear",
+    "name": "FrozenBear",
+    "rank": 9999,
+    "order": 318,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "GrassDragon": {
+    "key": "GrassDragon",
+    "name": "en_text",
+    "rank": 9999,
+    "order": 319,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "IceVeilDragon": {
+    "key": "IceVeilDragon",
+    "name": "IceVeilDragon",
+    "rank": 9999,
+    "order": 320,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "KingCrab": {
+    "key": "KingCrab",
+    "name": "KingCrab",
+    "rank": 9999,
+    "order": 321,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "LeafBird": {
+    "key": "LeafBird",
+    "name": "LeafBird",
+    "rank": 9999,
+    "order": 322,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "MedjedBird": {
+    "key": "MedjedBird",
+    "name": "MedjedBird",
+    "rank": 9999,
+    "order": 323,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "MexicanSalamander": {
+    "key": "MexicanSalamander",
+    "name": "MexicanSalamander",
+    "rank": 9999,
+    "order": 324,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "Monkey_Ice": {
+    "key": "Monkey_Ice",
+    "name": "Monkey_Ice",
+    "rank": 9999,
+    "order": 325,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "MonochromeMushroom": {
+    "key": "MonochromeMushroom",
+    "name": "MonochromeMushroom",
+    "rank": 9999,
+    "order": 326,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "PinkKangaroo": {
+    "key": "PinkKangaroo",
+    "name": "en_text",
+    "rank": 9999,
+    "order": 327,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "RockCheetah": {
+    "key": "RockCheetah",
+    "name": "RockCheetah",
+    "rank": 9999,
+    "order": 328,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "SnakeQueen": {
+    "key": "SnakeQueen",
+    "name": "SnakeQueen",
+    "rank": 9999,
+    "order": 329,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "Strawhatcat": {
+    "key": "Strawhatcat",
+    "name": "Strawhatcat",
+    "rank": 9999,
+    "order": 330,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "VolcanicTurtle": {
+    "key": "VolcanicTurtle",
+    "name": "Unidentified Pal",
+    "rank": 9999,
+    "order": 331,
+    "zukan": -1,
+    "child_eligible": false
+  },
+  "WaterLizard": {
+    "key": "WaterLizard",
+    "name": "en_text",
+    "rank": 9999,
+    "order": 332,
+    "zukan": -1,
+    "child_eligible": false
+  }
+}

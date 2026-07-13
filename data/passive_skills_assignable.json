@@ -1,0 +1,2254 @@
+{
+  "WorldTree_CraftSpeed": {
+    "name": "Demon’s Hand",
+    "description": "Work Speed <NumBlue_13>+</>{EffectValue1}<NumBlue_13>%</>\r\nSAN dreceases <NumRed_13>+15.0% faster</>\r\nWorld Tree harvestables won't vanish when approached.",
+    "rank": 5,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": 90.0
+      },
+      {
+        "type": "Sanity_Decrease",
+        "value": 15.0
+      },
+      {
+        "type": "WorldTreeDecayImmunity",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": true,
+      "add_mutation_pal": false
+    }
+  },
+  "WorldTree_MoveSpeed": {
+    "name": "Dimensional Leap",
+    "description": "Movement Speed <NumBlue_13>+</>{EffectValue1}<NumBlue_13>%</>\r\nIncreases Hunger depletion rate by <NumRed_13>+15.0%</>\r\nWorld Tree resources will not vanish when approached.",
+    "rank": 5,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "MoveSpeed",
+        "value": 50.0
+      },
+      {
+        "type": "FullStomatch_Decrease",
+        "value": 15.0
+      },
+      {
+        "type": "WorldTreeDecayImmunity",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": true,
+      "add_mutation_pal": false
+    }
+  },
+  "WorldTree_ATK_DEF": {
+    "name": "God of Destruction",
+    "description": "Attack <NumBlue_13>+</>{EffectValue1}%\r\nDefense <NumBlue_13>+</>{EffectValue2}%\r\nMax Health {EffectValue3}%\r\nWorld Tree resources will not vanish when approached.",
+    "rank": 5,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 40.0
+      },
+      {
+        "type": "Defense",
+        "value": 20.0
+      },
+      {
+        "type": "MaxHP",
+        "value": -50.0
+      },
+      {
+        "type": "WorldTreeDecayImmunity",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": true,
+      "add_mutation_pal": false
+    }
+  },
+  "WorldTree_Sanity": {
+    "name": "Hermit Sage",
+    "description": "SAN depletion rate -<NumBlue_13>50.0%</>\r\nWork Speed {EffectValue2}<NumRed_13>%</>\r\nWorld Tree resources will not vanish when approached.",
+    "rank": 5,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "Sanity_Decrease",
+        "value": -50.0
+      },
+      {
+        "type": "CraftSpeed",
+        "value": -20.0
+      },
+      {
+        "type": "WorldTreeDecayImmunity",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": true,
+      "add_mutation_pal": false
+    }
+  },
+  "WorldTree_DEF": {
+    "name": "Sanctified Meat Shield",
+    "description": "Defense <NumBlue_13>+</>{EffectValue1}%\r\nAttack {EffectValue2}%\r\nWorld Tree resources will not vanish when approached.",
+    "rank": 5,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": 50.0
+      },
+      {
+        "type": "ShotAttack",
+        "value": -30.0
+      },
+      {
+        "type": "WorldTreeDecayImmunity",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": true,
+      "add_mutation_pal": false
+    }
+  },
+  "WorldTree_ATK": {
+    "name": "Twin-Edged Holy Blade",
+    "description": "Attack <NumBlue_13>+</>{EffectValue1}%\r\nDefense {EffectValue2}%\r\nWorld Tree resources will not vanish when approached.",
+    "rank": 5,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 50.0
+      },
+      {
+        "type": "Defense",
+        "value": -30.0
+      },
+      {
+        "type": "WorldTreeDecayImmunity",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": true,
+      "add_mutation_pal": false
+    }
+  },
+  "WorldTree_FullStomach": {
+    "name": "World Tree Seedbed",
+    "description": "Decrease Hunger depletion rate by <NumBlue_13>+50.0%</>\r\nHP {EffectValue2}<NumRed_13>%</>\r\nWorld Tree resources will not vanish when approached.",
+    "rank": 5,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "FullStomatch_Decrease",
+        "value": -50.0
+      },
+      {
+        "type": "MaxHP",
+        "value": -20.0
+      },
+      {
+        "type": "WorldTreeDecayImmunity",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": true,
+      "add_mutation_pal": false
+    }
+  },
+  "MutationPal_Babysitter": {
+    "name": "Babysitter",
+    "description": "While at a base, increases egg production speed by +{EffectValue2}% and incubation speed by +{EffectValue1}% for Pals assigned to a Breeding Farm.",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "PalEggHatchingSpeed",
+        "value": 30.0
+      },
+      {
+        "type": "BreedSpeed_InBaseCamp",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": true
+    }
+  },
+  "MutationPal_ExplosionResist": {
+    "name": "Heavily Armored",
+    "description": "<Status_Up>Immune</> to Explosion Damage",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ExplosionResist",
+        "value": 100.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": true
+    }
+  },
+  "MutationPal_Mutant": {
+    "name": "Idiosyncratic",
+    "description": "Pal and Player Auto Health Regeneration Rate +{EffectValue1}%\r\nDefense +{EffectValue4}%\r\n<Status_Up>Immune</> to Poison Damage\r\n<Status_Up>Immune</> to Burn Damage",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "AutoHPRegeneRate",
+        "value": 50.0
+      },
+      {
+        "type": "ResistAdditionalEffect_Burn",
+        "value": 100.0
+      },
+      {
+        "type": "ResistAdditionalEffect_Poison",
+        "value": 100.0
+      },
+      {
+        "type": "Defense",
+        "value": 25.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": true
+    }
+  },
+  "MutationPal_Immortal": {
+    "name": "Immortality",
+    "description": "Life Steal +{EffectValue1}%\r\nPal Auto Health Regeneration Rate +{EffectValue2}%\r\nAttack +{EffectValue3}%",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "LifeSteal",
+        "value": 5.0
+      },
+      {
+        "type": "AutoHPRegeneRate",
+        "value": 100.0
+      },
+      {
+        "type": "ShotAttack",
+        "value": 15.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": true
+    }
+  },
+  "Rare": {
+    "name": "Lucky",
+    "description": "",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 15.0
+      },
+      {
+        "type": "Defense",
+        "value": 15.0
+      },
+      {
+        "type": "CraftSpeed",
+        "value": 20.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": true,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "RideJumpCount_Increase2": {
+    "name": "Skymarcher",
+    "description": "Mounted Jump Count <NumBlue_13>+2</>",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "RideJumpCount_Increase",
+        "value": 2.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": true
+    }
+  },
+  "PAL_ALLAttack_up3": {
+    "name": "Demon God",
+    "description": "",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 30.0
+      },
+      {
+        "type": "Defense",
+        "value": 5.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Deffence_up3": {
+    "name": "Diamond Body",
+    "description": "Defense +{EffectValue1}%\r\nImmune to Flinch\r\nImmune to Knockback",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": 30.0
+      },
+      {
+        "type": "LeanBackInvalid_ForPassiveSkill",
+        "value": 0.0
+      },
+      {
+        "type": "KnockbackInvalid_ForPassiveSkill",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Stamina_Up_3": {
+    "name": "Eternal Engine",
+    "description": "Max stamina +{EffectValue1}%\r\n*This effect is only valid for rideable pals.",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "PalSP_Increase",
+        "value": 75.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_Sanity_Down_3": {
+    "name": "Heart of the Immovable King",
+    "description": "SAN drops <NumBlue_13>+20.0%</> slower.",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "Sanity_Decrease",
+        "value": -20.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SwimSpeed_up_3": {
+    "name": "King of the Waves",
+    "description": "{EffectValue1}% increase movement speed on water.",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "SwimSpeed",
+        "value": 50.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SelfDeathAddItemDrop_up_3": {
+    "name": "Lavish Hospitality",
+    "description": "Your Dropped Items + {EffectValue1}%",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "SelfDeathAddItemDrop",
+        "value": 100.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "RideJumpCount_Increase1": {
+    "name": "Lightfooted",
+    "description": "Mounted Jump Count <NumBlue_13>+1</>",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "RideJumpCount_Increase",
+        "value": 1.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_FullStomach_Down_3": {
+    "name": "Mastery of Fasting",
+    "description": "Hunger decreases <NumBlue_13>+20.0%</> slower.",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "FullStomatch_Decrease",
+        "value": -20.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "WorkSuitabilityAddRank_MonsterFarm_2": {
+    "name": "Ranch Master",
+    "description": "<uiCommon id=|COMMON_WORK_SUITABILITY_MonsterFarm|/>'s <uiCommon id=|COMMON_WORK_SUITABILITY_PALDEX|/><NumBlue_13> +2</>",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "WorkSuitabilityAddRank_MonsterFarm",
+        "value": 2.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CraftSpeed_up3": {
+    "name": "Remarkable Craftsmanship",
+    "description": "",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": 75.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "MoveSpeed_up_3": {
+    "name": "Swift",
+    "description": "{EffectValue1}% increase to movement speed.",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "MoveSpeed",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Vampire": {
+    "name": "Vampiric",
+    "description": "Absorbs a portion of the damage dealt to restore <uiCommon id=|COMMON_STATUS_HP|/>. \r\nDoes not sleep at night and continues to work.",
+    "rank": 4,
+    "weight": 5,
+    "effects": [
+      {
+        "type": "Nocturnal",
+        "value": 0.0
+      },
+      {
+        "type": "LifeSteal",
+        "value": 5.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SwimSpeed_up_2": {
+    "name": "Ace Swimmer",
+    "description": "{EffectValue1}% increase movement speed on water.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "SwimSpeed",
+        "value": 40.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CraftSpeed_up2": {
+    "name": "Artisan",
+    "description": "",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": 50.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Deffence_up2": {
+    "name": "Burly Body",
+    "description": "Defense +{EffectValue1}%\r\nImmune to Flinch",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": 20.0
+      },
+      {
+        "type": "LeanBackInvalid_ForPassiveSkill",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_FullStomach_Down_2": {
+    "name": "Diet Lover",
+    "description": "Hunger decreases <NumBlue_13>+15.0%</> slower.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "FullStomatch_Decrease",
+        "value": -15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "WorkSuitabilityAddRank_MonsterFarm_1": {
+    "name": "Farmhand",
+    "description": "<uiCommon id=|COMMON_WORK_SUITABILITY_MonsterFarm|/>'s <uiCommon id=|COMMON_WORK_SUITABILITY_PALDEX|/><NumBlue_13> +1</>",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "WorkSuitabilityAddRank_MonsterFarm",
+        "value": 1.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_ALLAttack_up2": {
+    "name": "Ferocious",
+    "description": "",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 20.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "AutoHPRegeneRate_Passive": {
+    "name": "Healing Coach",
+    "description": "Player Auto Health Regeneration Rate +{EffectValue1}%",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "AutoHPRegeneRate",
+        "value": 5.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Stamina_Up_1": {
+    "name": "Infinite Stamina",
+    "description": "Max stamina +{EffectValue1}%\r\n*This effect is only valid for rideable pals.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "PalSP_Increase",
+        "value": 50.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "TrainerLogging_up1": {
+    "name": "Logging Foreman",
+    "description": "{EffectValue1}% increase in Player Logging Efficiency.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Logging",
+        "value": 25.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "TrainerMining_up1": {
+    "name": "Mine Foreman",
+    "description": "{EffectValue1}% increase in Player Mining Efficiency.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Mining",
+        "value": 25.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "TrainerWorkSpeed_UP_1": {
+    "name": "Motivational Leader",
+    "description": "{EffectValue1}% increase in Player Work Speed.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": 25.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SalePrice_Up_1": {
+    "name": "Noble",
+    "description": "Increases the value of items when sold by +{EffectValue1}%",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShopSellPrice_Money_Increase",
+        "value": 5.0
+      },
+      {
+        "type": "ShopBuyPrice_Money_Increase",
+        "value": -5.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Test_PalEgg_HatchingSpeed_Up": {
+    "name": "Philanthropist",
+    "description": "When assigned to a Breeding Farm, breeding speed is increased by {EffectValue1}%.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "BreedSpeed",
+        "value": 100.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ReloadSpeedUp_Passive": {
+    "name": "Reload Master",
+    "description": "Player Reload Speed +{EffectValue1}%",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ReloadSpeedUp",
+        "value": 4.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "MoveSpeed_up_2": {
+    "name": "Runner",
+    "description": "{EffectValue1}% increase to movement speed.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "MoveSpeed",
+        "value": 20.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CoolTimeReduction_Up_1": {
+    "name": "Serenity",
+    "description": "Active skill cooldown reduction {EffectValue1}%\r\nAttack +{EffectValue2}%",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ActiveSkillCoolTime_Decrease",
+        "value": 30.0
+      },
+      {
+        "type": "ShotAttack",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SelfDeathAddItemDrop_up_2": {
+    "name": "Service-Minded",
+    "description": "Your Dropped Items + {EffectValue1}%",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "SelfDeathAddItemDrop",
+        "value": 50.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "TrainerDEF_UP_1": {
+    "name": "Stronghold Strategist",
+    "description": "{EffectValue1}% increase in Player Defense.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "TrainerATK_UP_1": {
+    "name": "Vanguard",
+    "description": "{EffectValue1}% increase in Player Attack.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PlayerSP_DecreaseRate_Passive": {
+    "name": "Wellness Watcher",
+    "description": "Player Stamina Consumption -<NumBlue_13>5.0</>%",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "PlayerSP_DecreaseRate",
+        "value": -5.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_Sanity_Down_2": {
+    "name": "Workaholic",
+    "description": "SAN drops <NumBlue_13>+15.0%</> slower.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Sanity_Decrease",
+        "value": -15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Deffence_up2_2": {
+    "name": "Heavyweight",
+    "description": "Defense +{EffectValue1}%\r\nImmune to Knockback",
+    "rank": 2,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": 20.0
+      },
+      {
+        "type": "KnockbackInvalid_ForPassiveSkill",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Noukin": {
+    "name": "Musclehead",
+    "description": "",
+    "rank": 2,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 30.0
+      },
+      {
+        "type": "CraftSpeed",
+        "value": -50.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Normal_1_PAL": {
+    "name": "Abnormal",
+    "description": "{EffectValue1}% decrease in incoming Neutral damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Normal",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_oraora": {
+    "name": "Aggressive",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 10.0
+      },
+      {
+        "type": "Defense",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Dragon_1_PAL": {
+    "name": "Blood of the Dragon",
+    "description": "{EffectValue1}% increase in Dragon attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Dragon",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Leaf_1_PAL": {
+    "name": "Botanical Barrier",
+    "description": "{EffectValue1}% decrease in incoming Grass damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Leaf",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_ALLAttack_up1": {
+    "name": "Brave",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Thunder_1_PAL": {
+    "name": "Capacitor",
+    "description": "{EffectValue1}% increase in Lightning attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Electricity",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Dark_1_PAL": {
+    "name": "Cheery",
+    "description": "{EffectValue1}% decrease in incoming Dark damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Dark",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Ice_1_PAL": {
+    "name": "Coldblooded",
+    "description": "{EffectValue1}% increase in Ice attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Ice",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_conceited": {
+    "name": "Conceited",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": 10.0
+      },
+      {
+        "type": "Defense",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_FullStomach_Down_1": {
+    "name": "Dainty Eater",
+    "description": "Hunger decreases <NumBlue_13>+10.0%</> slower.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "FullStomatch_Decrease",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Dragon_1_PAL": {
+    "name": "Dragonkiller",
+    "description": "{EffectValue1}% decrease in incoming Dragon damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Dragon",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Earth_1_PAL": {
+    "name": "Earthquake Resistant",
+    "description": "{EffectValue1}% decrease in incoming Earth damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Earth",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SalePrice_Up_2": {
+    "name": "Fine Furs",
+    "description": "Increases the value of items when sold by +{EffectValue1}%",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShopSellPrice_Money_Increase",
+        "value": 3.0
+      },
+      {
+        "type": "ShopBuyPrice_Money_Increase",
+        "value": -3.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Stamina_Up_2": {
+    "name": "Fit as a Fiddle",
+    "description": "Max stamina +{EffectValue1}%\r\n*This effect is only valid for rideable pals.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "PalSP_Increase",
+        "value": 25.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Leaf_1_PAL": {
+    "name": "Fragrant Foliage",
+    "description": "{EffectValue1}% increase in Grass attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Leaf",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Deffence_up1": {
+    "name": "Hard Skin",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Ice_1_PAL": {
+    "name": "Heated Body",
+    "description": "{EffectValue1}% decrease in incoming Ice damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Ice",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_rude": {
+    "name": "Hooligan",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 15.0
+      },
+      {
+        "type": "CraftSpeed",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Aqua_1_PAL": {
+    "name": "Hydromaniac",
+    "description": "{EffectValue1}% increase in Water attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Water",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CoolTimeReduction_Up_2": {
+    "name": "Impatient",
+    "description": "Active skill cooldown reduction {EffectValue1}%",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ActiveSkillCoolTime_Decrease",
+        "value": 15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Nocturnal": {
+    "name": "Insomnia",
+    "description": "Does not sleep and continues to work even at night.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Nocturnal",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Thunder_1_PAL": {
+    "name": "Insulated Body",
+    "description": "{EffectValue1}% decrease in incoming Lightning damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Electricity",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_masochist": {
+    "name": "Masochist",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": 15.0
+      },
+      {
+        "type": "ShotAttack",
+        "value": -15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "MoveSpeed_up_1": {
+    "name": "Nimble",
+    "description": "{EffectValue1}% increase to movement speed.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "MoveSpeed",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_Sanity_Down_1": {
+    "name": "Positive Thinker",
+    "description": "SAN drops <NumBlue_13>+10.0%</> slower.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Sanity_Decrease",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Earth_1_PAL": {
+    "name": "Power of Gaia",
+    "description": "{EffectValue1}% increase in Earth attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Earth",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Fire_1_PAL": {
+    "name": "Pyromaniac",
+    "description": "{EffectValue1}% increase in Fire attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Fire",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_sadist": {
+    "name": "Sadist",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 15.0
+      },
+      {
+        "type": "Defense",
+        "value": -15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CraftSpeed_up1": {
+    "name": "Serious",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": 20.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SwimSpeed_up_1": {
+    "name": "Sleek Stroke",
+    "description": "{EffectValue1}% increase movement speed on water.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "SwimSpeed",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Normal_1_PAL": {
+    "name": "Spirit of Zen",
+    "description": "{EffectValue1}% increase in Neutral attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Normal",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Fire_1_PAL": {
+    "name": "Suntan Lover",
+    "description": "{EffectValue1}% decrease in incoming Fire damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Fire",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Dark_1_PAL": {
+    "name": "Veil of Darkness",
+    "description": "{EffectValue1}% increase in Dark attack damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Dark",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementResist_Aqua_1_PAL": {
+    "name": "Waterproof",
+    "description": "{EffectValue1}% decrease in incoming Water damage.",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementResist_Water",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_CorporateSlave": {
+    "name": "Work Slave",
+    "description": "",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": 30.0
+      },
+      {
+        "type": "ShotAttack",
+        "value": -30.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CraftSpeed_down1": {
+    "name": "Clumsy",
+    "description": "",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_ALLAttack_down1": {
+    "name": "Coward",
+    "description": "",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Deffence_down1": {
+    "name": "Downtrodden",
+    "description": "",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": -10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CoolTimeReduction_Down_1": {
+    "name": "Easygoing",
+    "description": "Active skill cooldown extension {EffectValue1}%",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ActiveSkillCoolTime_Decrease",
+        "value": -15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_FullStomach_Up_1": {
+    "name": "Glutton",
+    "description": "Hunger decreases <NumRed_13>+10.0%</> faster.",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "FullStomatch_Decrease",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "NonKilling": {
+    "name": "Mercy Hit",
+    "description": "Pacifist.\r\nWill not reduce the target's Health below 1.",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "NonKilling",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "NightOwl": {
+    "name": "Night Owl",
+    "description": "Tends to nap through the day, due to being nocturnal.",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "NightOwl",
+        "value": 0.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "SalePrice_Down_1": {
+    "name": "Shabby",
+    "description": "Decrease the value of items when sold by {EffectValue1}%",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShopSellPrice_Money_Increase",
+        "value": -10.0
+      },
+      {
+        "type": "ShopBuyPrice_Money_Increase",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Stamina_Down_1": {
+    "name": "Sickly",
+    "description": "Max Stamina {EffectValue1}%\r\n*This effect is only valid for rideable pals.",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "PalSP_Increase",
+        "value": -25.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_Sanity_Up_1": {
+    "name": "Unstable",
+    "description": "SAN drops <NumRed_13>+10.0%</> faster.",
+    "rank": -1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Sanity_Decrease",
+        "value": 10.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_FullStomach_Up_2": {
+    "name": "Bottomless Stomach",
+    "description": "Hunger decreases <NumRed_13>+15.0%</> faster.",
+    "rank": -2,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "FullStomatch_Decrease",
+        "value": 15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_Sanity_Up_2": {
+    "name": "Destructive",
+    "description": "SAN drops <NumRed_13>+15.0%</> faster.",
+    "rank": -2,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Sanity_Decrease",
+        "value": 15.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Deffence_down2": {
+    "name": "Brittle",
+    "description": "",
+    "rank": -3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "Defense",
+        "value": -20.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "PAL_ALLAttack_down2": {
+    "name": "Pacifist",
+    "description": "",
+    "rank": -3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": -20.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "CraftSpeed_down2": {
+    "name": "Slacker",
+    "description": "",
+    "rank": -3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "CraftSpeed",
+        "value": -30.0
+      }
+    ],
+    "flags": {
+      "add_pal": true,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Alien": {
+    "name": "Otherworldly Cells",
+    "description": "Attack +{EffectValue1}%\r\nFire damage reduction {EffectValue2}%\r\nLightning damage reduction {EffectValue3}%",
+    "rank": 1,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 10.0
+      },
+      {
+        "type": "ElementResist_Fire",
+        "value": 15.0
+      },
+      {
+        "type": "ElementBoost_Electricity",
+        "value": 15.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Aqua_2_PAL": {
+    "name": "Lord of the Sea",
+    "description": "{EffectValue1}% increase in Water attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Water",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Dark_2_PAL": {
+    "name": "Lord of the Underworld",
+    "description": "{EffectValue1}% increase in Dark attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Dark",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Dragon_2_PAL": {
+    "name": "Divine Dragon",
+    "description": "{EffectValue1}% increase in Dragon attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Dragon",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Earth_2_PAL": {
+    "name": "Earth Emperor",
+    "description": "{EffectValue1}% increase in Earth attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Earth",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Fire_2_PAL": {
+    "name": "Flame Emperor",
+    "description": "{EffectValue1}% increase in Fire attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Fire",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Ice_2_PAL": {
+    "name": "Ice Emperor",
+    "description": "{EffectValue1}% increase in Ice attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Ice",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Leaf_2_PAL": {
+    "name": "Spirit Emperor",
+    "description": "{EffectValue1}% increase in Grass attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Leaf",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Normal_2_PAL": {
+    "name": "Celestial Emperor",
+    "description": "{EffectValue1}% increase in Neutral attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Normal",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "ElementBoost_Thunder_2_PAL": {
+    "name": "Lord of Lightning",
+    "description": "{EffectValue1}% increase in Lightning attack damage.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Electricity",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "EternalFlame": {
+    "name": "Eternal Flame",
+    "description": "{EffectValue1}% increase to Fire attack damage.\r\n{EffectValue1}% increase to Lightning attack damage.",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Fire",
+        "value": 30.0
+      },
+      {
+        "type": "ElementBoost_Electricity",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Invader": {
+    "name": "Invader",
+    "description": "{EffectValue1}% increase in Dark attack damage.\r\n{EffectValue1}% increase in Dragon attack damage.",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Dark",
+        "value": 30.0
+      },
+      {
+        "type": "ElementBoost_Dragon",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Legend": {
+    "name": "Legend",
+    "description": "Attack +{EffectValue1}%\r\nDefense +{EffectValue2}%\r\nMovement Speed increases {EffectValue3}%",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ShotAttack",
+        "value": 20.0
+      },
+      {
+        "type": "Defense",
+        "value": 20.0
+      },
+      {
+        "type": "MoveSpeed",
+        "value": 20.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Nushi": {
+    "name": "Lunker",
+    "description": "{EffectValue1}% increase to Water attack damage \r\n{EffectValue1}% increase to Ice attack damage \r\n{EffectValue1}% increase to defense.",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Water",
+        "value": 20.0
+      },
+      {
+        "type": "ElementBoost_Ice",
+        "value": 20.0
+      },
+      {
+        "type": "Defense",
+        "value": 20.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Salvation": {
+    "name": "Savior",
+    "description": "{EffectValue1}% increase in Neutral attack damage.\r\n{EffectValue1}% increase in Grass attack damage.",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Normal",
+        "value": 30.0
+      },
+      {
+        "type": "ElementBoost_Leaf",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  },
+  "Witch": {
+    "name": "Siren of the Void",
+    "description": "{EffectValue1}% increase in Dark attack damage.\r\n{EffectValue1}% increase in Ice attack damage.",
+    "rank": 4,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Dark",
+        "value": 30.0
+      },
+      {
+        "type": "ElementBoost_Ice",
+        "value": 30.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
+  }
+}

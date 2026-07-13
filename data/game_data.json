@@ -1,0 +1,4073 @@
+{
+  "pals": [
+    {
+      "key": "WorldTreeDragon",
+      "tribe": "WorldTreeDragon",
+      "combi_rank": 10,
+      "zukan_index": 204,
+      "order": 0
+    },
+    {
+      "key": "KingWhale",
+      "tribe": "KingWhale",
+      "combi_rank": 20,
+      "zukan_index": 203,
+      "order": 1
+    },
+    {
+      "key": "DomeArmorDragon",
+      "tribe": "DomeArmorDragon",
+      "combi_rank": 30,
+      "zukan_index": 184,
+      "order": 2
+    },
+    {
+      "key": "BlueSkyDragon",
+      "tribe": "BlueSkyDragon",
+      "combi_rank": 40,
+      "zukan_index": 192,
+      "order": 3
+    },
+    {
+      "key": "SnowTigerBeastman",
+      "tribe": "SnowTigerBeastman",
+      "combi_rank": 50,
+      "zukan_index": 191,
+      "order": 4
+    },
+    {
+      "key": "FlowerPrince",
+      "tribe": "FlowerPrince",
+      "combi_rank": 60,
+      "zukan_index": 194,
+      "order": 5
+    },
+    {
+      "key": "JetDragon",
+      "tribe": "JetDragon",
+      "combi_rank": 70,
+      "zukan_index": 202,
+      "order": 6
+    },
+    {
+      "key": "Mothman",
+      "tribe": "Mothman",
+      "combi_rank": 80,
+      "zukan_index": 193,
+      "order": 7
+    },
+    {
+      "key": "LegendDeer",
+      "tribe": "LegendDeer",
+      "combi_rank": 90,
+      "zukan_index": 197,
+      "order": 8
+    },
+    {
+      "key": "KingBahamut_Dragon",
+      "tribe": "KingBahamut_Dragon",
+      "combi_rank": 100,
+      "zukan_index": 137,
+      "order": 9
+    },
+    {
+      "key": "IceHorse_Dark",
+      "tribe": "IceHorse_Dark",
+      "combi_rank": 110,
+      "zukan_index": 200,
+      "order": 10
+    },
+    {
+      "key": "ThunderDragonMan",
+      "tribe": "ThunderDragonMan",
+      "combi_rank": 120,
+      "zukan_index": 187,
+      "order": 11
+    },
+    {
+      "key": "NightLady_Dark",
+      "tribe": "NightLady_Dark",
+      "combi_rank": 130,
+      "zukan_index": 195,
+      "order": 12
+    },
+    {
+      "key": "GhostDragon_Fire",
+      "tribe": "GhostDragon_Fire",
+      "combi_rank": 140,
+      "zukan_index": 171,
+      "order": 13
+    },
+    {
+      "key": "IceHorse",
+      "tribe": "IceHorse",
+      "combi_rank": 150,
+      "zukan_index": 200,
+      "order": 14
+    },
+    {
+      "key": "PoseidonOrca",
+      "tribe": "PoseidonOrca",
+      "combi_rank": 160,
+      "zukan_index": 201,
+      "order": 15
+    },
+    {
+      "key": "Umihebi_Fire",
+      "tribe": "Umihebi_Fire",
+      "combi_rank": 170,
+      "zukan_index": 121,
+      "order": 16
+    },
+    {
+      "key": "SaintCentaur",
+      "tribe": "SaintCentaur",
+      "combi_rank": 180,
+      "zukan_index": 198,
+      "order": 17
+    },
+    {
+      "key": "BlackCentaur",
+      "tribe": "BlackCentaur",
+      "combi_rank": 190,
+      "zukan_index": 199,
+      "order": 18
+    },
+    {
+      "key": "CubeTurtle_Neutral",
+      "tribe": "CubeTurtle_Neutral",
+      "combi_rank": 200,
+      "zukan_index": 142,
+      "order": 19
+    },
+    {
+      "key": "WingGolem_Fire",
+      "tribe": "WingGolem_Fire",
+      "combi_rank": 210,
+      "zukan_index": 159,
+      "order": 20
+    },
+    {
+      "key": "LilyQueen_Dark",
+      "tribe": "LilyQueen_Dark",
+      "combi_rank": 220,
+      "zukan_index": 186,
+      "order": 21
+    },
+    {
+      "key": "LotusDragon",
+      "tribe": "LotusDragon",
+      "combi_rank": 230,
+      "zukan_index": 175,
+      "order": 22
+    },
+    {
+      "key": "LilyQueen",
+      "tribe": "LilyQueen",
+      "combi_rank": 240,
+      "zukan_index": 186,
+      "order": 23
+    },
+    {
+      "key": "GrassGolem_Dark",
+      "tribe": "GrassGolem_Dark",
+      "combi_rank": 250,
+      "zukan_index": 138,
+      "order": 24
+    },
+    {
+      "key": "WhiteDeer_Dark",
+      "tribe": "WhiteDeer_Dark",
+      "combi_rank": 270,
+      "zukan_index": 157,
+      "order": 25
+    },
+    {
+      "key": "MonochromeQueen",
+      "tribe": "MonochromeQueen",
+      "combi_rank": 280,
+      "zukan_index": 182,
+      "order": 26
+    },
+    {
+      "key": "KabukiMan",
+      "tribe": "KabukiMan",
+      "combi_rank": 290,
+      "zukan_index": 183,
+      "order": 27
+    },
+    {
+      "key": "GhostDragon",
+      "tribe": "GhostDragon",
+      "combi_rank": 300,
+      "zukan_index": 171,
+      "order": 28
+    },
+    {
+      "key": "MoonQueen",
+      "tribe": "MoonQueen",
+      "combi_rank": 360,
+      "zukan_index": 190,
+      "order": 29
+    },
+    {
+      "key": "IceNarwhal_Fire",
+      "tribe": "IceNarwhal_Fire",
+      "combi_rank": 370,
+      "zukan_index": 151,
+      "order": 30
+    },
+    {
+      "key": "VolcanoDragon_Ice",
+      "tribe": "VolcanoDragon_Ice",
+      "combi_rank": 380,
+      "zukan_index": 105,
+      "order": 31
+    },
+    {
+      "key": "FoxExorcist",
+      "tribe": "FoxExorcist",
+      "combi_rank": 390,
+      "zukan_index": 174,
+      "order": 32
+    },
+    {
+      "key": "DarkMechaDragon",
+      "tribe": "DarkMechaDragon",
+      "combi_rank": 400,
+      "zukan_index": 196,
+      "order": 33
+    },
+    {
+      "key": "KingBahamut",
+      "tribe": "KingBahamut",
+      "combi_rank": 410,
+      "zukan_index": 137,
+      "order": 34
+    },
+    {
+      "key": "BlueThunderHorse",
+      "tribe": "BlueThunderHorse",
+      "combi_rank": 420,
+      "zukan_index": 161,
+      "order": 35
+    },
+    {
+      "key": "NightBlueHorse_Neutral",
+      "tribe": "NightBlueHorse_Neutral",
+      "combi_rank": 430,
+      "zukan_index": 130,
+      "order": 36
+    },
+    {
+      "key": "GrassMinotaur_Ice",
+      "tribe": "GrassMinotaur_Ice",
+      "combi_rank": 440,
+      "zukan_index": 81,
+      "order": 37
+    },
+    {
+      "key": "Horus_Water",
+      "tribe": "Horus_Water",
+      "combi_rank": 450,
+      "zukan_index": 188,
+      "order": 38
+    },
+    {
+      "key": "RockBeast_Ice",
+      "tribe": "RockBeast_Ice",
+      "combi_rank": 460,
+      "zukan_index": 131,
+      "order": 39
+    },
+    {
+      "key": "WhiteTiger_Ground",
+      "tribe": "WhiteTiger_Ground",
+      "combi_rank": 470,
+      "zukan_index": 132,
+      "order": 40
+    },
+    {
+      "key": "Anubis",
+      "tribe": "Anubis",
+      "combi_rank": 480,
+      "zukan_index": 139,
+      "order": 41
+    },
+    {
+      "key": "BlackMetalDragon",
+      "tribe": "BlackMetalDragon",
+      "combi_rank": 490,
+      "zukan_index": 158,
+      "order": 42
+    },
+    {
+      "key": "GrassGolem",
+      "tribe": "GrassGolem",
+      "combi_rank": 510,
+      "zukan_index": 138,
+      "order": 43
+    },
+    {
+      "key": "ClownRabbit",
+      "tribe": "ClownRabbit",
+      "combi_rank": 520,
+      "zukan_index": 176,
+      "order": 44
+    },
+    {
+      "key": "ThiefBird",
+      "tribe": "ThiefBird",
+      "combi_rank": 530,
+      "zukan_index": 177,
+      "order": 45
+    },
+    {
+      "key": "Kirin_Ice",
+      "tribe": "Kirin_Ice",
+      "combi_rank": 540,
+      "zukan_index": 54,
+      "order": 46
+    },
+    {
+      "key": "BlackGriffon",
+      "tribe": "BlackGriffon",
+      "combi_rank": 550,
+      "zukan_index": 189,
+      "order": 47
+    },
+    {
+      "key": "WhiteShieldDragon",
+      "tribe": "WhiteShieldDragon",
+      "combi_rank": 560,
+      "zukan_index": 160,
+      "order": 48
+    },
+    {
+      "key": "WhiteDeer",
+      "tribe": "WhiteDeer",
+      "combi_rank": 570,
+      "zukan_index": 157,
+      "order": 49
+    },
+    {
+      "key": "ThunderBird_Ice",
+      "tribe": "ThunderBird_Ice",
+      "combi_rank": 580,
+      "zukan_index": 96,
+      "order": 50
+    },
+    {
+      "key": "Umihebi",
+      "tribe": "Umihebi",
+      "combi_rank": 590,
+      "zukan_index": 121,
+      "order": 51
+    },
+    {
+      "key": "VolcanicMonster_Ice",
+      "tribe": "VolcanicMonster_Ice",
+      "combi_rank": 600,
+      "zukan_index": 129,
+      "order": 52
+    },
+    {
+      "key": "Yeti_Grass",
+      "tribe": "Yeti_Grass",
+      "combi_rank": 610,
+      "zukan_index": 134,
+      "order": 53
+    },
+    {
+      "key": "NightLady",
+      "tribe": "NightLady",
+      "combi_rank": 620,
+      "zukan_index": 195,
+      "order": 54
+    },
+    {
+      "key": "HerculesBeetle_Ground",
+      "tribe": "HerculesBeetle_Ground",
+      "combi_rank": 630,
+      "zukan_index": 113,
+      "order": 55
+    },
+    {
+      "key": "DarkScorpion_Ground",
+      "tribe": "DarkScorpion_Ground",
+      "combi_rank": 640,
+      "zukan_index": 99,
+      "order": 56
+    },
+    {
+      "key": "WhiteMoth_Neutral",
+      "tribe": "WhiteMoth_Neutral",
+      "combi_rank": 650,
+      "zukan_index": 116,
+      "order": 57
+    },
+    {
+      "key": "IceNarwhal",
+      "tribe": "IceNarwhal",
+      "combi_rank": 710,
+      "zukan_index": 151,
+      "order": 58
+    },
+    {
+      "key": "GhostAnglerfish_Fire",
+      "tribe": "GhostAnglerfish_Fire",
+      "combi_rank": 720,
+      "zukan_index": 97,
+      "order": 59
+    },
+    {
+      "key": "GoldenHorse",
+      "tribe": "GoldenHorse",
+      "combi_rank": 730,
+      "zukan_index": 154,
+      "order": 60
+    },
+    {
+      "key": "Suzaku_Water",
+      "tribe": "Suzaku_Water",
+      "combi_rank": 740,
+      "zukan_index": 122,
+      "order": 61
+    },
+    {
+      "key": "VolcanoDragon",
+      "tribe": "VolcanoDragon",
+      "combi_rank": 750,
+      "zukan_index": 105,
+      "order": 62
+    },
+    {
+      "key": "MushroomLady",
+      "tribe": "MushroomLady",
+      "combi_rank": 760,
+      "zukan_index": 179,
+      "order": 63
+    },
+    {
+      "key": "LazyDragon_Electric_Tower",
+      "tribe": "LazyDragon_Electric",
+      "combi_rank": 770,
+      "zukan_index": 94,
+      "order": 64
+    },
+    {
+      "key": "GrimGirl",
+      "tribe": "GrimGirl",
+      "combi_rank": 780,
+      "zukan_index": 153,
+      "order": 65
+    },
+    {
+      "key": "CubeTurtle",
+      "tribe": "CubeTurtle",
+      "combi_rank": 790,
+      "zukan_index": 142,
+      "order": 66
+    },
+    {
+      "key": "AmaterasuWolf_Dark",
+      "tribe": "AmaterasuWolf_Dark",
+      "combi_rank": 800,
+      "zukan_index": 111,
+      "order": 67
+    },
+    {
+      "key": "SleeveRabbit",
+      "tribe": "SleeveRabbit",
+      "combi_rank": 810,
+      "zukan_index": 170,
+      "order": 68
+    },
+    {
+      "key": "FlowerDoll_Fire",
+      "tribe": "FlowerDoll_Fire",
+      "combi_rank": 820,
+      "zukan_index": 89,
+      "order": 69
+    },
+    {
+      "key": "Yeti",
+      "tribe": "Yeti",
+      "combi_rank": 830,
+      "zukan_index": 134,
+      "order": 70
+    },
+    {
+      "key": "Ronin_Dark",
+      "tribe": "Ronin_Dark",
+      "combi_rank": 840,
+      "zukan_index": 85,
+      "order": 71
+    },
+    {
+      "key": "ScorpionMan_Electric",
+      "tribe": "ScorpionMan_Electric",
+      "combi_rank": 850,
+      "zukan_index": 141,
+      "order": 72
+    },
+    {
+      "key": "SnowPeafowl",
+      "tribe": "SnowPeafowl",
+      "combi_rank": 860,
+      "zukan_index": 114,
+      "order": 73
+    },
+    {
+      "key": "Sekhmet",
+      "tribe": "Sekhmet",
+      "combi_rank": 870,
+      "zukan_index": 140,
+      "order": 74
+    },
+    {
+      "key": "GhostAnglerfish",
+      "tribe": "GhostAnglerfish",
+      "combi_rank": 880,
+      "zukan_index": 97,
+      "order": 75
+    },
+    {
+      "key": "LanternButler",
+      "tribe": "LanternButler",
+      "combi_rank": 890,
+      "zukan_index": 180,
+      "order": 76
+    },
+    {
+      "key": "FengyunDeeper_Electric",
+      "tribe": "FengyunDeeper_Electric",
+      "combi_rank": 900,
+      "zukan_index": 83,
+      "order": 77
+    },
+    {
+      "key": "HadesBird_Electric",
+      "tribe": "HadesBird_Electric",
+      "combi_rank": 960,
+      "zukan_index": 80,
+      "order": 78
+    },
+    {
+      "key": "SnakeGirl",
+      "tribe": "SnakeGirl",
+      "combi_rank": 970,
+      "zukan_index": 178,
+      "order": 79
+    },
+    {
+      "key": "CandleGhost",
+      "tribe": "CandleGhost",
+      "combi_rank": 980,
+      "zukan_index": 135,
+      "order": 80
+    },
+    {
+      "key": "KingSunfish_Thunder",
+      "tribe": "KingSunfish_Thunder",
+      "combi_rank": 1000,
+      "zukan_index": 169,
+      "order": 81
+    },
+    {
+      "key": "DarkFlameFox",
+      "tribe": "DarkFlameFox",
+      "combi_rank": 1010,
+      "zukan_index": 115,
+      "order": 82
+    },
+    {
+      "key": "ElecPanda",
+      "tribe": "ElecPanda",
+      "combi_rank": 1020,
+      "zukan_index": 185,
+      "order": 83
+    },
+    {
+      "key": "Plesiosaur",
+      "tribe": "Plesiosaur",
+      "combi_rank": 1030,
+      "zukan_index": 110,
+      "order": 84
+    },
+    {
+      "key": "WhiteTiger",
+      "tribe": "WhiteTiger",
+      "combi_rank": 1040,
+      "zukan_index": 132,
+      "order": 85
+    },
+    {
+      "key": "RedArmorBird",
+      "tribe": "RedArmorBird",
+      "combi_rank": 1050,
+      "zukan_index": 104,
+      "order": 86
+    },
+    {
+      "key": "VolcanicMonster",
+      "tribe": "VolcanicMonster",
+      "combi_rank": 1060,
+      "zukan_index": 129,
+      "order": 87
+    },
+    {
+      "key": "GrassMammoth_Ice",
+      "tribe": "GrassMammoth_Ice",
+      "combi_rank": 1070,
+      "zukan_index": 87,
+      "order": 88
+    },
+    {
+      "key": "SakuraSaurus_Water",
+      "tribe": "SakuraSaurus_Water",
+      "combi_rank": 1080,
+      "zukan_index": 108,
+      "order": 89
+    },
+    {
+      "key": "LazyDragon",
+      "tribe": "LazyDragon",
+      "combi_rank": 1090,
+      "zukan_index": 94,
+      "order": 90
+    },
+    {
+      "key": "IceSeal_Ground",
+      "tribe": "IceSeal_Ground",
+      "combi_rank": 1100,
+      "zukan_index": 72,
+      "order": 91
+    },
+    {
+      "key": "RockBeast",
+      "tribe": "RockBeast",
+      "combi_rank": 1110,
+      "zukan_index": 131,
+      "order": 92
+    },
+    {
+      "key": "DarkScorpion",
+      "tribe": "DarkScorpion",
+      "combi_rank": 1120,
+      "zukan_index": 99,
+      "order": 93
+    },
+    {
+      "key": "MysteryMask",
+      "tribe": "MysteryMask",
+      "combi_rank": 1140,
+      "zukan_index": 150,
+      "order": 94
+    },
+    {
+      "key": "NightBlueHorse",
+      "tribe": "NightBlueHorse",
+      "combi_rank": 1150,
+      "zukan_index": 130,
+      "order": 95
+    },
+    {
+      "key": "GrassRabbitMan",
+      "tribe": "GrassRabbitMan",
+      "combi_rank": 1160,
+      "zukan_index": 152,
+      "order": 96
+    },
+    {
+      "key": "MummyPal",
+      "tribe": "MummyPal",
+      "combi_rank": 1170,
+      "zukan_index": 120,
+      "order": 97
+    },
+    {
+      "key": "MoonChild",
+      "tribe": "MoonChild",
+      "combi_rank": 1180,
+      "zukan_index": 181,
+      "order": 98
+    },
+    {
+      "key": "SumoDog",
+      "tribe": "SumoDog",
+      "combi_rank": 1190,
+      "zukan_index": 156,
+      "order": 99
+    },
+    {
+      "key": "Suzaku",
+      "tribe": "Suzaku",
+      "combi_rank": 1200,
+      "zukan_index": 122,
+      "order": 100
+    },
+    {
+      "key": "SkyDragon",
+      "tribe": "SkyDragon",
+      "combi_rank": 1210,
+      "zukan_index": 124,
+      "order": 101
+    },
+    {
+      "key": "BlueDragon_Ice",
+      "tribe": "BlueDragon_Ice",
+      "combi_rank": 1220,
+      "zukan_index": 41,
+      "order": 102
+    },
+    {
+      "key": "GhostRabbit",
+      "tribe": "GhostRabbit",
+      "combi_rank": 1230,
+      "zukan_index": 148,
+      "order": 103
+    },
+    {
+      "key": "TropicalOstrich",
+      "tribe": "TropicalOstrich",
+      "combi_rank": 1240,
+      "zukan_index": 106,
+      "order": 104
+    },
+    {
+      "key": "BadCatgirl",
+      "tribe": "BadCatgirl",
+      "combi_rank": 1250,
+      "zukan_index": 143,
+      "order": 105
+    },
+    {
+      "key": "IceWitch",
+      "tribe": "IceWitch",
+      "combi_rank": 1260,
+      "zukan_index": 119,
+      "order": 106
+    },
+    {
+      "key": "Manticore_Dark",
+      "tribe": "Manticore_Dark",
+      "combi_rank": 1270,
+      "zukan_index": 112,
+      "order": 107
+    },
+    {
+      "key": "HerculesBeetle",
+      "tribe": "HerculesBeetle",
+      "combi_rank": 1280,
+      "zukan_index": 113,
+      "order": 108
+    },
+    {
+      "key": "Werewolf_Ice",
+      "tribe": "Werewolf_Ice",
+      "combi_rank": 1290,
+      "zukan_index": 56,
+      "order": 109
+    },
+    {
+      "key": "SkyDragon_Grass",
+      "tribe": "SkyDragon_Grass",
+      "combi_rank": 1300,
+      "zukan_index": 124,
+      "order": 110
+    },
+    {
+      "key": "GhostRabbit_Grass",
+      "tribe": "GhostRabbit_Grass",
+      "combi_rank": 1320,
+      "zukan_index": 148,
+      "order": 111
+    },
+    {
+      "key": "TentacleTurtle_Ground",
+      "tribe": "TentacleTurtle_Ground",
+      "combi_rank": 1330,
+      "zukan_index": 37,
+      "order": 112
+    },
+    {
+      "key": "GrassMammoth",
+      "tribe": "GrassMammoth",
+      "combi_rank": 1340,
+      "zukan_index": 87,
+      "order": 113
+    },
+    {
+      "key": "RedFlowerBird",
+      "tribe": "RedFlowerBird",
+      "combi_rank": 1350,
+      "zukan_index": 173,
+      "order": 114
+    },
+    {
+      "key": "Manticore",
+      "tribe": "Manticore",
+      "combi_rank": 1360,
+      "zukan_index": 112,
+      "order": 115
+    },
+    {
+      "key": "KingSunfish",
+      "tribe": "KingSunfish",
+      "combi_rank": 1370,
+      "zukan_index": 169,
+      "order": 116
+    },
+    {
+      "key": "SakuraSaurus",
+      "tribe": "SakuraSaurus",
+      "combi_rank": 1380,
+      "zukan_index": 108,
+      "order": 117
+    },
+    {
+      "key": "BlueberryFairy",
+      "tribe": "BlueberryFairy",
+      "combi_rank": 1390,
+      "zukan_index": 147,
+      "order": 118
+    },
+    {
+      "key": "ThunderFluffyBird",
+      "tribe": "ThunderFluffyBird",
+      "combi_rank": 1400,
+      "zukan_index": 172,
+      "order": 119
+    },
+    {
+      "key": "PandaGirl",
+      "tribe": "PandaGirl",
+      "combi_rank": 1410,
+      "zukan_index": 90,
+      "order": 120
+    },
+    {
+      "key": "SwordCutlassfish",
+      "tribe": "SwordCutlassfish",
+      "combi_rank": 1420,
+      "zukan_index": 128,
+      "order": 121
+    },
+    {
+      "key": "BirdDragon_Ice",
+      "tribe": "BirdDragon_Ice",
+      "combi_rank": 1430,
+      "zukan_index": 64,
+      "order": 122
+    },
+    {
+      "key": "GrassPanda_Electric_Tower",
+      "tribe": "GrassPanda_Electric",
+      "combi_rank": 1440,
+      "zukan_index": 102,
+      "order": 123
+    },
+    {
+      "key": "MushroomDragon_Dark",
+      "tribe": "MushroomDragon_Dark",
+      "combi_rank": 1450,
+      "zukan_index": 118,
+      "order": 124
+    },
+    {
+      "key": "SifuDog",
+      "tribe": "SifuDog",
+      "combi_rank": 1460,
+      "zukan_index": 155,
+      "order": 125
+    },
+    {
+      "key": "Baphomet",
+      "tribe": "Baphomet",
+      "combi_rank": 1470,
+      "zukan_index": 91,
+      "order": 126
+    },
+    {
+      "key": "VioletFairy",
+      "tribe": "VioletFairy",
+      "combi_rank": 1480,
+      "zukan_index": 66,
+      "order": 127
+    },
+    {
+      "key": "FoxMage_Dark",
+      "tribe": "FoxMage_Dark",
+      "combi_rank": 1490,
+      "zukan_index": 78,
+      "order": 128
+    },
+    {
+      "key": "ElecSnail_Ground",
+      "tribe": "ElecSnail_Ground",
+      "combi_rank": 1500,
+      "zukan_index": 163,
+      "order": 129
+    },
+    {
+      "key": "ScorpionMan",
+      "tribe": "ScorpionMan",
+      "combi_rank": 1510,
+      "zukan_index": 141,
+      "order": 130
+    },
+    {
+      "key": "MushroomDragon",
+      "tribe": "MushroomDragon",
+      "combi_rank": 1520,
+      "zukan_index": 118,
+      "order": 131
+    },
+    {
+      "key": "KingAlpaca_Ice",
+      "tribe": "KingAlpaca_Ice",
+      "combi_rank": 1530,
+      "zukan_index": 21,
+      "order": 132
+    },
+    {
+      "key": "OniGhostGirl",
+      "tribe": "OniGhostGirl",
+      "combi_rank": 1540,
+      "zukan_index": 168,
+      "order": 133
+    },
+    {
+      "key": "DrillGame",
+      "tribe": "DrillGame",
+      "combi_rank": 1550,
+      "zukan_index": 107,
+      "order": 134
+    },
+    {
+      "key": "Ronin",
+      "tribe": "Ronin",
+      "combi_rank": 1560,
+      "zukan_index": 85,
+      "order": 135
+    },
+    {
+      "key": "CatVampire",
+      "tribe": "CatVampire",
+      "combi_rank": 1570,
+      "zukan_index": 65,
+      "order": 136
+    },
+    {
+      "key": "CactusDoll_Dark",
+      "tribe": "CactusDoll_Dark",
+      "combi_rank": 1580,
+      "zukan_index": 100,
+      "order": 137
+    },
+    {
+      "key": "SwordCutlassfish_Fire",
+      "tribe": "SwordCutlassfish_Fire",
+      "combi_rank": 1590,
+      "zukan_index": 128,
+      "order": 138
+    },
+    {
+      "key": "ThunderDog_Ice",
+      "tribe": "ThunderDog_Ice",
+      "combi_rank": 1600,
+      "zukan_index": 98,
+      "order": 139
+    },
+    {
+      "key": "BlackPuppy_Ice",
+      "tribe": "BlackPuppy_Ice",
+      "combi_rank": 1610,
+      "zukan_index": 149,
+      "order": 140
+    },
+    {
+      "key": "LazyCatfish_Gold",
+      "tribe": "LazyCatfish_Gold",
+      "combi_rank": 1620,
+      "zukan_index": 109,
+      "order": 141
+    },
+    {
+      "key": "OctopusGirl_Neutral",
+      "tribe": "OctopusGirl_Neutral",
+      "combi_rank": 1630,
+      "zukan_index": 48,
+      "order": 142
+    },
+    {
+      "key": "FairyDragon_Water",
+      "tribe": "FairyDragon_Water",
+      "combi_rank": 1640,
+      "zukan_index": 63,
+      "order": 143
+    },
+    {
+      "key": "BirdDragon",
+      "tribe": "BirdDragon",
+      "combi_rank": 1650,
+      "zukan_index": 64,
+      "order": 144
+    },
+    {
+      "key": "IceSeal",
+      "tribe": "IceSeal",
+      "combi_rank": 1660,
+      "zukan_index": 72,
+      "order": 145
+    },
+    {
+      "key": "AmaterasuWolf",
+      "tribe": "AmaterasuWolf",
+      "combi_rank": 1670,
+      "zukan_index": 111,
+      "order": 146
+    },
+    {
+      "key": "BrownRabbit",
+      "tribe": "BrownRabbit",
+      "combi_rank": 1680,
+      "zukan_index": 165,
+      "order": 147
+    },
+    {
+      "key": "ThunderBird",
+      "tribe": "ThunderBird",
+      "combi_rank": 1690,
+      "zukan_index": 96,
+      "order": 148
+    },
+    {
+      "key": "VenusFlytrap",
+      "tribe": "VenusFlytrap",
+      "combi_rank": 1700,
+      "zukan_index": 136,
+      "order": 149
+    },
+    {
+      "key": "GhostBeast",
+      "tribe": "GhostBeast",
+      "combi_rank": 1710,
+      "zukan_index": 117,
+      "order": 150
+    },
+    {
+      "key": "FlowerDoll",
+      "tribe": "FlowerDoll",
+      "combi_rank": 1720,
+      "zukan_index": 89,
+      "order": 151
+    },
+    {
+      "key": "PurpleSpider",
+      "tribe": "PurpleSpider",
+      "combi_rank": 1730,
+      "zukan_index": 71,
+      "order": 152
+    },
+    {
+      "key": "MimicDog",
+      "tribe": "MimicDog",
+      "combi_rank": 1740,
+      "zukan_index": 144,
+      "order": 153
+    },
+    {
+      "key": "ElecLizard",
+      "tribe": "ElecLizard",
+      "combi_rank": 1750,
+      "zukan_index": 167,
+      "order": 154
+    },
+    {
+      "key": "BlackPuppy",
+      "tribe": "BlackPuppy",
+      "combi_rank": 1760,
+      "zukan_index": 149,
+      "order": 155
+    },
+    {
+      "key": "HoodGhost",
+      "tribe": "HoodGhost",
+      "combi_rank": 1770,
+      "zukan_index": 166,
+      "order": 156
+    },
+    {
+      "key": "ElecSnail",
+      "tribe": "ElecSnail",
+      "combi_rank": 1780,
+      "zukan_index": 163,
+      "order": 157
+    },
+    {
+      "key": "QueenBee",
+      "tribe": "QueenBee",
+      "combi_rank": 1790,
+      "zukan_index": 68,
+      "order": 158
+    },
+    {
+      "key": "CatMage_Fire",
+      "tribe": "CatMage_Fire",
+      "combi_rank": 1800,
+      "zukan_index": 79,
+      "order": 159
+    },
+    {
+      "key": "WhiteMoth",
+      "tribe": "WhiteMoth",
+      "combi_rank": 1810,
+      "zukan_index": 116,
+      "order": 160
+    },
+    {
+      "key": "BlueDragon",
+      "tribe": "BlueDragon",
+      "combi_rank": 1830,
+      "zukan_index": 41,
+      "order": 161
+    },
+    {
+      "key": "Serpent_Ground",
+      "tribe": "Serpent_Ground",
+      "combi_rank": 1840,
+      "zukan_index": 75,
+      "order": 162
+    },
+    {
+      "key": "CaptainPenguin_Black",
+      "tribe": "CaptainPenguin_Black",
+      "combi_rank": 1850,
+      "zukan_index": 18,
+      "order": 163
+    },
+    {
+      "key": "KendoFrog_Dark",
+      "tribe": "KendoFrog_Dark",
+      "combi_rank": 1860,
+      "zukan_index": 9,
+      "order": 164
+    },
+    {
+      "key": "FireKirin_Dark",
+      "tribe": "FireKirin_Dark",
+      "combi_rank": 1870,
+      "zukan_index": 93,
+      "order": 165
+    },
+    {
+      "key": "Gorilla_Ground",
+      "tribe": "Gorilla_Ground",
+      "combi_rank": 1880,
+      "zukan_index": 74,
+      "order": 166
+    },
+    {
+      "key": "FlowerDinosaur_Electric",
+      "tribe": "FlowerDinosaur_Electric",
+      "combi_rank": 1890,
+      "zukan_index": 84,
+      "order": 167
+    },
+    {
+      "key": "LongCat",
+      "tribe": "LongCat",
+      "combi_rank": 1900,
+      "zukan_index": 162,
+      "order": 168
+    },
+    {
+      "key": "RaijinDaughter_Water",
+      "tribe": "RaijinDaughter_Water",
+      "combi_rank": 1910,
+      "zukan_index": 92,
+      "order": 169
+    },
+    {
+      "key": "ThunderDog",
+      "tribe": "ThunderDog",
+      "combi_rank": 1920,
+      "zukan_index": 98,
+      "order": 170
+    },
+    {
+      "key": "IceDeer",
+      "tribe": "IceDeer",
+      "combi_rank": 1930,
+      "zukan_index": 101,
+      "order": 171
+    },
+    {
+      "key": "BerryGoat_Dark",
+      "tribe": "BerryGoat_Dark",
+      "combi_rank": 1940,
+      "zukan_index": 34,
+      "order": 172
+    },
+    {
+      "key": "WeaselDragon_Fire",
+      "tribe": "WeaselDragon_Fire",
+      "combi_rank": 1950,
+      "zukan_index": 103,
+      "order": 173
+    },
+    {
+      "key": "FengyunDeeper",
+      "tribe": "FengyunDeeper",
+      "combi_rank": 1960,
+      "zukan_index": 83,
+      "order": 174
+    },
+    {
+      "key": "IceFox",
+      "tribe": "IceFox",
+      "combi_rank": 1970,
+      "zukan_index": 95,
+      "order": 175
+    },
+    {
+      "key": "FireKirin",
+      "tribe": "FireKirin",
+      "combi_rank": 1980,
+      "zukan_index": 93,
+      "order": 176
+    },
+    {
+      "key": "LeafPrincess",
+      "tribe": "LeafPrincess",
+      "combi_rank": 1990,
+      "zukan_index": 125,
+      "order": 177
+    },
+    {
+      "key": "DandelionGirl",
+      "tribe": "DandelionGirl",
+      "combi_rank": 2000,
+      "zukan_index": 164,
+      "order": 178
+    },
+    {
+      "key": "Mutant",
+      "tribe": "Mutant",
+      "combi_rank": 2010,
+      "zukan_index": 82,
+      "order": 179
+    },
+    {
+      "key": "GrassMinotaur",
+      "tribe": "GrassMinotaur",
+      "combi_rank": 2020,
+      "zukan_index": 81,
+      "order": 180
+    },
+    {
+      "key": "SweetsSheep_Ground",
+      "tribe": "SweetsSheep_Ground",
+      "combi_rank": 2030,
+      "zukan_index": 39,
+      "order": 181
+    },
+    {
+      "key": "CatMage",
+      "tribe": "CatMage",
+      "combi_rank": 2040,
+      "zukan_index": 79,
+      "order": 182
+    },
+    {
+      "key": "RobinHood_Ground",
+      "tribe": "RobinHood_Ground",
+      "combi_rank": 2050,
+      "zukan_index": 76,
+      "order": 183
+    },
+    {
+      "key": "GrassPanda",
+      "tribe": "GrassPanda",
+      "combi_rank": 2060,
+      "zukan_index": 102,
+      "order": 184
+    },
+    {
+      "key": "CaptainPenguin",
+      "tribe": "CaptainPenguin",
+      "combi_rank": 2070,
+      "zukan_index": 18,
+      "order": 185
+    },
+    {
+      "key": "FoxMage",
+      "tribe": "FoxMage",
+      "combi_rank": 2080,
+      "zukan_index": 78,
+      "order": 186
+    },
+    {
+      "key": "PinkLizard",
+      "tribe": "PinkLizard",
+      "combi_rank": 2090,
+      "zukan_index": 69,
+      "order": 187
+    },
+    {
+      "key": "FlowerDinosaur",
+      "tribe": "FlowerDinosaur",
+      "combi_rank": 2100,
+      "zukan_index": 84,
+      "order": 188
+    },
+    {
+      "key": "Werewolf",
+      "tribe": "Werewolf",
+      "combi_rank": 2110,
+      "zukan_index": 56,
+      "order": 189
+    },
+    {
+      "key": "NaughtyCat",
+      "tribe": "NaughtyCat",
+      "combi_rank": 2120,
+      "zukan_index": 70,
+      "order": 190
+    },
+    {
+      "key": "IceCrocodile",
+      "tribe": "IceCrocodile",
+      "combi_rank": 2130,
+      "zukan_index": 86,
+      "order": 191
+    },
+    {
+      "key": "Gorilla",
+      "tribe": "Gorilla",
+      "combi_rank": 2140,
+      "zukan_index": 74,
+      "order": 192
+    },
+    {
+      "key": "MopKing",
+      "tribe": "MopKing",
+      "combi_rank": 2150,
+      "zukan_index": 36,
+      "order": 193
+    },
+    {
+      "key": "FeatherOstrich",
+      "tribe": "FeatherOstrich",
+      "combi_rank": 2210,
+      "zukan_index": 123,
+      "order": 194
+    },
+    {
+      "key": "KingAlpaca",
+      "tribe": "KingAlpaca",
+      "combi_rank": 2220,
+      "zukan_index": 21,
+      "order": 195
+    },
+    {
+      "key": "GuardianDog",
+      "tribe": "GuardianDog",
+      "combi_rank": 2230,
+      "zukan_index": 127,
+      "order": 196
+    },
+    {
+      "key": "StuffedShark_Fire",
+      "tribe": "StuffedShark_Fire",
+      "combi_rank": 2240,
+      "zukan_index": 88,
+      "order": 197
+    },
+    {
+      "key": "GhostBlackCat",
+      "tribe": "GhostBlackCat",
+      "combi_rank": 2250,
+      "zukan_index": 50,
+      "order": 198
+    },
+    {
+      "key": "RobinHood",
+      "tribe": "RobinHood",
+      "combi_rank": 2260,
+      "zukan_index": 76,
+      "order": 199
+    },
+    {
+      "key": "Kirin",
+      "tribe": "Kirin",
+      "combi_rank": 2270,
+      "zukan_index": 54,
+      "order": 200
+    },
+    {
+      "key": "FairyDragon",
+      "tribe": "FairyDragon",
+      "combi_rank": 2280,
+      "zukan_index": 63,
+      "order": 201
+    },
+    {
+      "key": "LazyCatfish",
+      "tribe": "LazyCatfish",
+      "combi_rank": 2290,
+      "zukan_index": 109,
+      "order": 202
+    },
+    {
+      "key": "BluePlatypus_Fire",
+      "tribe": "BluePlatypus_Fire",
+      "combi_rank": 2300,
+      "zukan_index": 5,
+      "order": 203
+    },
+    {
+      "key": "SmallArmadillo",
+      "tribe": "SmallArmadillo",
+      "combi_rank": 2310,
+      "zukan_index": 126,
+      "order": 204
+    },
+    {
+      "key": "FlameBuffalo",
+      "tribe": "FlameBuffalo",
+      "combi_rank": 2320,
+      "zukan_index": 58,
+      "order": 205
+    },
+    {
+      "key": "WeaselDragon",
+      "tribe": "WeaselDragon",
+      "combi_rank": 2330,
+      "zukan_index": 103,
+      "order": 206
+    },
+    {
+      "key": "CatBat",
+      "tribe": "CatBat",
+      "combi_rank": 2340,
+      "zukan_index": 52,
+      "order": 207
+    },
+    {
+      "key": "SoldierBee",
+      "tribe": "SoldierBee",
+      "combi_rank": 2350,
+      "zukan_index": 67,
+      "order": 208
+    },
+    {
+      "key": "ElecPomeranian",
+      "tribe": "ElecPomeranian",
+      "combi_rank": 2360,
+      "zukan_index": 62,
+      "order": 209
+    },
+    {
+      "key": "DarkCrow",
+      "tribe": "DarkCrow",
+      "combi_rank": 2370,
+      "zukan_index": 57,
+      "order": 210
+    },
+    {
+      "key": "FlyingManta_Thunder",
+      "tribe": "FlyingManta_Thunder",
+      "combi_rank": 2380,
+      "zukan_index": 7,
+      "order": 211
+    },
+    {
+      "key": "SmallYeti",
+      "tribe": "SmallYeti",
+      "combi_rank": 2390,
+      "zukan_index": 133,
+      "order": 212
+    },
+    {
+      "key": "RaijinDaughter",
+      "tribe": "RaijinDaughter",
+      "combi_rank": 2400,
+      "zukan_index": 92,
+      "order": 213
+    },
+    {
+      "key": "TentacleTurtle",
+      "tribe": "TentacleTurtle",
+      "combi_rank": 2410,
+      "zukan_index": 37,
+      "order": 214
+    },
+    {
+      "key": "CactusDoll",
+      "tribe": "CactusDoll",
+      "combi_rank": 2420,
+      "zukan_index": 100,
+      "order": 215
+    },
+    {
+      "key": "SharkKid_Fire",
+      "tribe": "SharkKid_Fire",
+      "combi_rank": 2430,
+      "zukan_index": 55,
+      "order": 216
+    },
+    {
+      "key": "Serpent",
+      "tribe": "Serpent",
+      "combi_rank": 2440,
+      "zukan_index": 75,
+      "order": 217
+    },
+    {
+      "key": "StuffedShark",
+      "tribe": "StuffedShark",
+      "combi_rank": 2450,
+      "zukan_index": 88,
+      "order": 218
+    },
+    {
+      "key": "PinkRabbit_Grass",
+      "tribe": "PinkRabbit_Grass",
+      "combi_rank": 2460,
+      "zukan_index": 44,
+      "order": 219
+    },
+    {
+      "key": "Kelpie_Fire",
+      "tribe": "Kelpie_Fire",
+      "combi_rank": 2470,
+      "zukan_index": 43,
+      "order": 220
+    },
+    {
+      "key": "FluffyBird",
+      "tribe": "FluffyBird",
+      "combi_rank": 2480,
+      "zukan_index": 59,
+      "order": 221
+    },
+    {
+      "key": "Penguin_Electric",
+      "tribe": "Penguin_Electric",
+      "combi_rank": 2490,
+      "zukan_index": 17,
+      "order": 222
+    },
+    {
+      "key": "Kitsunebi_Ice",
+      "tribe": "Kitsunebi_Ice",
+      "combi_rank": 2500,
+      "zukan_index": 29,
+      "order": 223
+    },
+    {
+      "key": "WindChimes_Ice",
+      "tribe": "WindChimes_Ice",
+      "combi_rank": 2510,
+      "zukan_index": 38,
+      "order": 224
+    },
+    {
+      "key": "ClioneTwins",
+      "tribe": "ClioneTwins",
+      "combi_rank": 2520,
+      "zukan_index": 47,
+      "order": 225
+    },
+    {
+      "key": "OctopusGirl",
+      "tribe": "OctopusGirl",
+      "combi_rank": 2530,
+      "zukan_index": 48,
+      "order": 226
+    },
+    {
+      "key": "NegativeOctopus_Neutral",
+      "tribe": "NegativeOctopus_Neutral",
+      "combi_rank": 2540,
+      "zukan_index": 30,
+      "order": 227
+    },
+    {
+      "key": "SharkKid",
+      "tribe": "SharkKid",
+      "combi_rank": 2550,
+      "zukan_index": 55,
+      "order": 228
+    },
+    {
+      "key": "HawkBird",
+      "tribe": "HawkBird",
+      "combi_rank": 2560,
+      "zukan_index": 51,
+      "order": 229
+    },
+    {
+      "key": "Eagle",
+      "tribe": "Eagle",
+      "combi_rank": 2570,
+      "zukan_index": 49,
+      "order": 230
+    },
+    {
+      "key": "Deer_Ground",
+      "tribe": "Deer_Ground",
+      "combi_rank": 2580,
+      "zukan_index": 32,
+      "order": 231
+    },
+    {
+      "key": "JellyfishGhost",
+      "tribe": "JellyfishGhost",
+      "combi_rank": 2590,
+      "zukan_index": 46,
+      "order": 232
+    },
+    {
+      "key": "KendoFrog",
+      "tribe": "KendoFrog",
+      "combi_rank": 2600,
+      "zukan_index": 9,
+      "order": 233
+    },
+    {
+      "key": "BerryGoat",
+      "tribe": "BerryGoat",
+      "combi_rank": 2610,
+      "zukan_index": 34,
+      "order": 234
+    },
+    {
+      "key": "CuteButterfly",
+      "tribe": "CuteButterfly",
+      "combi_rank": 2620,
+      "zukan_index": 61,
+      "order": 235
+    },
+    {
+      "key": "LeafMomonga",
+      "tribe": "LeafMomonga",
+      "combi_rank": 2630,
+      "zukan_index": 10,
+      "order": 236
+    },
+    {
+      "key": "LizardMan_Fire",
+      "tribe": "LizardMan_Fire",
+      "combi_rank": 2640,
+      "zukan_index": 73,
+      "order": 237
+    },
+    {
+      "key": "JellyfishFairy",
+      "tribe": "JellyfishFairy",
+      "combi_rank": 2650,
+      "zukan_index": 45,
+      "order": 238
+    },
+    {
+      "key": "FlowerRabbit",
+      "tribe": "FlowerRabbit",
+      "combi_rank": 2660,
+      "zukan_index": 77,
+      "order": 239
+    },
+    {
+      "key": "Garm",
+      "tribe": "Garm",
+      "combi_rank": 2680,
+      "zukan_index": 33,
+      "order": 240
+    },
+    {
+      "key": "LittleBriarRose",
+      "tribe": "LittleBriarRose",
+      "combi_rank": 2690,
+      "zukan_index": 60,
+      "order": 241
+    },
+    {
+      "key": "LavaGirl",
+      "tribe": "LavaGirl",
+      "combi_rank": 2700,
+      "zukan_index": 25,
+      "order": 242
+    },
+    {
+      "key": "Deer",
+      "tribe": "Deer",
+      "combi_rank": 2710,
+      "zukan_index": 32,
+      "order": 243
+    },
+    {
+      "key": "Alpaca",
+      "tribe": "Alpaca",
+      "combi_rank": 2720,
+      "zukan_index": 20,
+      "order": 244
+    },
+    {
+      "key": "ColorfulBird",
+      "tribe": "ColorfulBird",
+      "combi_rank": 2730,
+      "zukan_index": 53,
+      "order": 245
+    },
+    {
+      "key": "FlyingManta",
+      "tribe": "FlyingManta",
+      "combi_rank": 2740,
+      "zukan_index": 7,
+      "order": 246
+    },
+    {
+      "key": "Bastet_Ice",
+      "tribe": "Bastet_Ice",
+      "combi_rank": 2750,
+      "zukan_index": 27,
+      "order": 247
+    },
+    {
+      "key": "Quest_Farmer03_PinkCat",
+      "tribe": "PinkCat",
+      "combi_rank": 2760,
+      "zukan_index": 2,
+      "order": 248
+    },
+    {
+      "key": "NegativeOctopus",
+      "tribe": "NegativeOctopus",
+      "combi_rank": 2770,
+      "zukan_index": 30,
+      "order": 249
+    },
+    {
+      "key": "WindChimes",
+      "tribe": "WindChimes",
+      "combi_rank": 2780,
+      "zukan_index": 38,
+      "order": 250
+    },
+    {
+      "key": "CuteMole",
+      "tribe": "CuteMole",
+      "combi_rank": 2790,
+      "zukan_index": 31,
+      "order": 251
+    },
+    {
+      "key": "CowPal",
+      "tribe": "CowPal",
+      "combi_rank": 2800,
+      "zukan_index": 40,
+      "order": 252
+    },
+    {
+      "key": "Kelpie",
+      "tribe": "Kelpie",
+      "combi_rank": 2810,
+      "zukan_index": 43,
+      "order": 253
+    },
+    {
+      "key": "SweetsSheep",
+      "tribe": "SweetsSheep",
+      "combi_rank": 2820,
+      "zukan_index": 39,
+      "order": 254
+    },
+    {
+      "key": "Monkey_Fire",
+      "tribe": "Monkey_Fire",
+      "combi_rank": 2830,
+      "zukan_index": 23,
+      "order": 255
+    },
+    {
+      "key": "MopBaby",
+      "tribe": "MopBaby",
+      "combi_rank": 2840,
+      "zukan_index": 35,
+      "order": 256
+    },
+    {
+      "key": "Hedgehog_Ice",
+      "tribe": "Hedgehog_Ice",
+      "combi_rank": 2850,
+      "zukan_index": 15,
+      "order": 257
+    },
+    {
+      "key": "PinkRabbit",
+      "tribe": "PinkRabbit",
+      "combi_rank": 2860,
+      "zukan_index": 44,
+      "order": 258
+    },
+    {
+      "key": "FlameBambi",
+      "tribe": "FlameBambi",
+      "combi_rank": 2870,
+      "zukan_index": 26,
+      "order": 259
+    },
+    {
+      "key": "Boar",
+      "tribe": "Boar",
+      "combi_rank": 2880,
+      "zukan_index": 28,
+      "order": 260
+    },
+    {
+      "key": "WoolFox",
+      "tribe": "WoolFox",
+      "combi_rank": 2890,
+      "zukan_index": 8,
+      "order": 261
+    },
+    {
+      "key": "Monkey",
+      "tribe": "Monkey",
+      "combi_rank": 2900,
+      "zukan_index": 23,
+      "order": 262
+    },
+    {
+      "key": "DreamDemon",
+      "tribe": "DreamDemon",
+      "combi_rank": 2910,
+      "zukan_index": 22,
+      "order": 263
+    },
+    {
+      "key": "NightFox",
+      "tribe": "NightFox",
+      "combi_rank": 2920,
+      "zukan_index": 24,
+      "order": 264
+    },
+    {
+      "key": "SamuraiDog",
+      "tribe": "SamuraiDog",
+      "combi_rank": 2930,
+      "zukan_index": 13,
+      "order": 265
+    },
+    {
+      "key": "WizardOwl",
+      "tribe": "WizardOwl",
+      "combi_rank": 2940,
+      "zukan_index": 19,
+      "order": 266
+    },
+    {
+      "key": "PlantSlime_Flower",
+      "tribe": "PlantSlime",
+      "combi_rank": 2950,
+      "zukan_index": 12,
+      "order": 267
+    },
+    {
+      "key": "Penguin",
+      "tribe": "Penguin",
+      "combi_rank": 2960,
+      "zukan_index": 17,
+      "order": 268
+    },
+    {
+      "key": "CloverFairy",
+      "tribe": "CloverFairy",
+      "combi_rank": 2970,
+      "zukan_index": 14,
+      "order": 269
+    },
+    {
+      "key": "BluePlatypus",
+      "tribe": "Blueplatypus",
+      "combi_rank": 2980,
+      "zukan_index": 5,
+      "order": 270
+    },
+    {
+      "key": "Kitsunebi",
+      "tribe": "Kitsunebi",
+      "combi_rank": 2990,
+      "zukan_index": 29,
+      "order": 271
+    },
+    {
+      "key": "NegativeKoala",
+      "tribe": "NegativeKoala",
+      "combi_rank": 3000,
+      "zukan_index": 16,
+      "order": 272
+    },
+    {
+      "key": "ElecCat",
+      "tribe": "ElecCat",
+      "combi_rank": 3010,
+      "zukan_index": 42,
+      "order": 273
+    },
+    {
+      "key": "Carbunclo",
+      "tribe": "Carbunclo",
+      "combi_rank": 3020,
+      "zukan_index": 4,
+      "order": 274
+    },
+    {
+      "key": "Hedgehog",
+      "tribe": "Hedgehog",
+      "combi_rank": 3030,
+      "zukan_index": 15,
+      "order": 275
+    },
+    {
+      "key": "Bastet",
+      "tribe": "Bastet",
+      "combi_rank": 3040,
+      "zukan_index": 27,
+      "order": 276
+    },
+    {
+      "key": "Quest_Farmer03_SheepBall",
+      "tribe": "SheepBall",
+      "combi_rank": 3050,
+      "zukan_index": 1,
+      "order": 277
+    },
+    {
+      "key": "CuteFox",
+      "tribe": "CuteFox",
+      "combi_rank": 3060,
+      "zukan_index": 6,
+      "order": 278
+    },
+    {
+      "key": "Ganesha",
+      "tribe": "Ganesha",
+      "combi_rank": 3070,
+      "zukan_index": 11,
+      "order": 279
+    },
+    {
+      "key": "ChickenPal",
+      "tribe": "ChickenPal",
+      "combi_rank": 3080,
+      "zukan_index": 3,
+      "order": 280
+    },
+    {
+      "key": "YakushimaBoss001",
+      "tribe": "YakushimaBoss001",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 281
+    },
+    {
+      "key": "YakushimaBoss001_Small",
+      "tribe": "YakushimaBoss001_Small",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 282
+    },
+    {
+      "key": "YakushimaMonster001",
+      "tribe": "YakushimaMonster001",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 283
+    },
+    {
+      "key": "YakushimaMonster001_Blue",
+      "tribe": "YakushimaMonster001_Blue",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 284
+    },
+    {
+      "key": "YakushimaMonster001_Pink",
+      "tribe": "YakushimaMonster001_Pink",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 285
+    },
+    {
+      "key": "YakushimaMonster001_Purple",
+      "tribe": "YakushimaMonster001_Purple",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 286
+    },
+    {
+      "key": "YakushimaMonster001_Rainbow",
+      "tribe": "YakushimaMonster001_Rainbow",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 287
+    },
+    {
+      "key": "YakushimaMonster001_Red",
+      "tribe": "YakushimaMonster001_Red",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 288
+    },
+    {
+      "key": "YakushimaMonster002",
+      "tribe": "YakushimaMonster002",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 289
+    },
+    {
+      "key": "YakushimaMonster003",
+      "tribe": "YakushimaMonster003",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 290
+    },
+    {
+      "key": "YakushimaMonster003_Purple",
+      "tribe": "YakushimaMonster003_Purple",
+      "combi_rank": 3100,
+      "zukan_index": -1,
+      "order": 291
+    },
+    {
+      "key": "LizardMan_Oilrig",
+      "tribe": "LizardMan",
+      "combi_rank": 9999,
+      "zukan_index": 73,
+      "order": 292
+    },
+    {
+      "key": "HadesBird_Oilrig",
+      "tribe": "HadesBird",
+      "combi_rank": 9999,
+      "zukan_index": 80,
+      "order": 293
+    },
+    {
+      "key": "Baphomet_Dark_Oilrig",
+      "tribe": "Baphomet_Dark",
+      "combi_rank": 9999,
+      "zukan_index": 91,
+      "order": 294
+    },
+    {
+      "key": "DarkAlien_Oilrig",
+      "tribe": "DarkAlien",
+      "combi_rank": 9999,
+      "zukan_index": 145,
+      "order": 295
+    },
+    {
+      "key": "SUMMON_WhiteAlienDragon_MAX",
+      "tribe": "WhiteAlienDragon",
+      "combi_rank": 9999,
+      "zukan_index": 146,
+      "order": 296
+    },
+    {
+      "key": "WingGolem_Oilrig",
+      "tribe": "WingGolem",
+      "combi_rank": 9999,
+      "zukan_index": 159,
+      "order": 297
+    },
+    {
+      "key": "Horus_Oilrig",
+      "tribe": "Horus",
+      "combi_rank": 9999,
+      "zukan_index": 188,
+      "order": 298
+    },
+    {
+      "key": "ArmorWoodlouse",
+      "tribe": "ArmorWoodlouse",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 299
+    },
+    {
+      "key": "BeardedDragon",
+      "tribe": "BeardedDragon",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 300
+    },
+    {
+      "key": "BlackFurDragon",
+      "tribe": "BlackFurDragon",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 301
+    },
+    {
+      "key": "BlueWoolRabbit",
+      "tribe": "BlueWoolRabbit",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 302
+    },
+    {
+      "key": "CandleWitch",
+      "tribe": "CandleWitch",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 303
+    },
+    {
+      "key": "CuteOrca",
+      "tribe": "CuteOrca",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 304
+    },
+    {
+      "key": "DarkMutant",
+      "tribe": "DarkMutant",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 305
+    },
+    {
+      "key": "ElecLion",
+      "tribe": "ElecLion",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 306
+    },
+    {
+      "key": "ElecSnail_Fire",
+      "tribe": "ElecSnail_Fire",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 307
+    },
+    {
+      "key": "FrozenBear",
+      "tribe": "FrozenBear",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 308
+    },
+    {
+      "key": "GrassDragon",
+      "tribe": "GrassDragon",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 309
+    },
+    {
+      "key": "IceVeilDragon",
+      "tribe": "IceVeilDragon",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 310
+    },
+    {
+      "key": "KingCrab",
+      "tribe": "KingCrab",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 311
+    },
+    {
+      "key": "LeafBird",
+      "tribe": "LeafBird",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 312
+    },
+    {
+      "key": "MedjedBird",
+      "tribe": "MedjedBird",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 313
+    },
+    {
+      "key": "MexicanSalamander",
+      "tribe": "MexicanSalamander",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 314
+    },
+    {
+      "key": "Monkey_Ice",
+      "tribe": "Monkey_Ice",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 315
+    },
+    {
+      "key": "MonochromeMushroom",
+      "tribe": "MonochromeMushroom",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 316
+    },
+    {
+      "key": "PinkKangaroo",
+      "tribe": "PinkKangaroo",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 317
+    },
+    {
+      "key": "RockCheetah",
+      "tribe": "RockCheetah",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 318
+    },
+    {
+      "key": "SnakeQueen",
+      "tribe": "SnakeQueen",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 319
+    },
+    {
+      "key": "StrawHatCat",
+      "tribe": "Strawhatcat",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 320
+    },
+    {
+      "key": "VolcanicTurtle",
+      "tribe": "VolcanicTurtle",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 321
+    },
+    {
+      "key": "WaterLizard",
+      "tribe": "WaterLizard",
+      "combi_rank": 9999,
+      "zukan_index": -1,
+      "order": 322
+    }
+  ],
+  "unique_combos": [
+    {
+      "parent_a": "LazyDragon",
+      "parent_b": "ElecCat",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LazyDragon_Electric"
+    },
+    {
+      "parent_a": "Baphomet",
+      "parent_b": "GhostBeast",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Baphomet_Dark"
+    },
+    {
+      "parent_a": "Bastet",
+      "parent_b": "Penguin",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Bastet_Ice"
+    },
+    {
+      "parent_a": "BirdDragon",
+      "parent_b": "IceFox",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BirdDragon_Ice"
+    },
+    {
+      "parent_a": "Deer",
+      "parent_b": "WindChimes",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Deer_Ground"
+    },
+    {
+      "parent_a": "FairyDragon",
+      "parent_b": "Serpent",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FairyDragon_Water"
+    },
+    {
+      "parent_a": "FireKirin",
+      "parent_b": "CatMage",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FireKirin_Dark"
+    },
+    {
+      "parent_a": "GrassMammoth",
+      "parent_b": "Yeti",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassMammoth_Ice"
+    },
+    {
+      "parent_a": "GrassPanda",
+      "parent_b": "ElecPanda",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassPanda_Electric"
+    },
+    {
+      "parent_a": "FlowerDinosaur",
+      "parent_b": "ThunderDog",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FlowerDinosaur_Electric"
+    },
+    {
+      "parent_a": "Hedgehog",
+      "parent_b": "Penguin",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Hedgehog_Ice"
+    },
+    {
+      "parent_a": "IceHorse",
+      "parent_b": "HadesBird",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "IceHorse_Dark"
+    },
+    {
+      "parent_a": "KingAlpaca",
+      "parent_b": "IceDeer",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "KingAlpaca_Ice"
+    },
+    {
+      "parent_a": "LilyQueen",
+      "parent_b": "DarkScorpion",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LilyQueen_Dark"
+    },
+    {
+      "parent_a": "LizardMan",
+      "parent_b": "LavaGirl",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LizardMan_Fire"
+    },
+    {
+      "parent_a": "Manticore",
+      "parent_b": "CatVampire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Manticore_Dark"
+    },
+    {
+      "parent_a": "RobinHood",
+      "parent_b": "CuteMole",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "RobinHood_Ground"
+    },
+    {
+      "parent_a": "SakuraSaurus",
+      "parent_b": "Blueplatypus",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SakuraSaurus_Water"
+    },
+    {
+      "parent_a": "Serpent",
+      "parent_b": "LazyCatfish",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Serpent_Ground"
+    },
+    {
+      "parent_a": "SharkKid",
+      "parent_b": "FlameBambi",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SharkKid_Fire"
+    },
+    {
+      "parent_a": "Suzaku",
+      "parent_b": "Umihebi",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Suzaku_Water"
+    },
+    {
+      "parent_a": "VolcanicMonster",
+      "parent_b": "IceFox",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "VolcanicMonster_Ice"
+    },
+    {
+      "parent_a": "WindChimes",
+      "parent_b": "MopBaby",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WindChimes_Ice"
+    },
+    {
+      "parent_a": "IceHorse",
+      "parent_b": "IceHorse",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "IceHorse"
+    },
+    {
+      "parent_a": "JetDragon",
+      "parent_b": "JetDragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "JetDragon"
+    },
+    {
+      "parent_a": "SaintCentaur",
+      "parent_b": "SaintCentaur",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SaintCentaur"
+    },
+    {
+      "parent_a": "BlackCentaur",
+      "parent_b": "BlackCentaur",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlackCentaur"
+    },
+    {
+      "parent_a": "LilyQueen",
+      "parent_b": "LilyQueen",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LilyQueen"
+    },
+    {
+      "parent_a": "Horus",
+      "parent_b": "Horus",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Horus"
+    },
+    {
+      "parent_a": "ElecPanda",
+      "parent_b": "ElecPanda",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ElecPanda"
+    },
+    {
+      "parent_a": "ThunderDragonMan",
+      "parent_b": "ThunderDragonMan",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ThunderDragonMan"
+    },
+    {
+      "parent_a": "BlackGriffon",
+      "parent_b": "BlackGriffon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlackGriffon"
+    },
+    {
+      "parent_a": "Umihebi_Fire",
+      "parent_b": "Umihebi_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Umihebi_Fire"
+    },
+    {
+      "parent_a": "LazyDragon_Electric",
+      "parent_b": "LazyDragon_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LazyDragon_Electric"
+    },
+    {
+      "parent_a": "Baphomet_Dark",
+      "parent_b": "Baphomet_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Baphomet_Dark"
+    },
+    {
+      "parent_a": "Bastet_Ice",
+      "parent_b": "Bastet_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Bastet_Ice"
+    },
+    {
+      "parent_a": "BirdDragon_Ice",
+      "parent_b": "BirdDragon_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BirdDragon_Ice"
+    },
+    {
+      "parent_a": "Deer_Ground",
+      "parent_b": "Deer_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Deer_Ground"
+    },
+    {
+      "parent_a": "FairyDragon_Water",
+      "parent_b": "FairyDragon_Water",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FairyDragon_Water"
+    },
+    {
+      "parent_a": "FireKirin_Dark",
+      "parent_b": "FireKirin_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FireKirin_Dark"
+    },
+    {
+      "parent_a": "GrassMammoth_Ice",
+      "parent_b": "GrassMammoth_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassMammoth_Ice"
+    },
+    {
+      "parent_a": "GrassPanda_Electric",
+      "parent_b": "GrassPanda_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassPanda_Electric"
+    },
+    {
+      "parent_a": "FlowerDinosaur_Electric",
+      "parent_b": "FlowerDinosaur_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FlowerDinosaur_Electric"
+    },
+    {
+      "parent_a": "Hedgehog_Ice",
+      "parent_b": "Hedgehog_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Hedgehog_Ice"
+    },
+    {
+      "parent_a": "IceHorse_Dark",
+      "parent_b": "IceHorse_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "IceHorse_Dark"
+    },
+    {
+      "parent_a": "KingAlpaca_Ice",
+      "parent_b": "KingAlpaca_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "KingAlpaca_Ice"
+    },
+    {
+      "parent_a": "LilyQueen_Dark",
+      "parent_b": "LilyQueen_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LilyQueen_Dark"
+    },
+    {
+      "parent_a": "LizardMan_Fire",
+      "parent_b": "LizardMan_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LizardMan_Fire"
+    },
+    {
+      "parent_a": "Manticore_Dark",
+      "parent_b": "Manticore_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Manticore_Dark"
+    },
+    {
+      "parent_a": "RobinHood_Ground",
+      "parent_b": "RobinHood_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "RobinHood_Ground"
+    },
+    {
+      "parent_a": "SakuraSaurus_Water",
+      "parent_b": "SakuraSaurus_Water",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SakuraSaurus_Water"
+    },
+    {
+      "parent_a": "Serpent_Ground",
+      "parent_b": "Serpent_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Serpent_Ground"
+    },
+    {
+      "parent_a": "SharkKid_Fire",
+      "parent_b": "SharkKid_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SharkKid_Fire"
+    },
+    {
+      "parent_a": "Suzaku_Water",
+      "parent_b": "Suzaku_Water",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Suzaku_Water"
+    },
+    {
+      "parent_a": "VolcanicMonster_Ice",
+      "parent_b": "VolcanicMonster_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "VolcanicMonster_Ice"
+    },
+    {
+      "parent_a": "WindChimes_Ice",
+      "parent_b": "WindChimes_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WindChimes_Ice"
+    },
+    {
+      "parent_a": "PinkKangaroo",
+      "parent_b": "PinkKangaroo",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "PinkKangaroo"
+    },
+    {
+      "parent_a": "BeardedDragon",
+      "parent_b": "BeardedDragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BeardedDragon"
+    },
+    {
+      "parent_a": "BlackFurDragon",
+      "parent_b": "BlackFurDragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlackFurDragon"
+    },
+    {
+      "parent_a": "WaterLizard",
+      "parent_b": "WaterLizard",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WaterLizard"
+    },
+    {
+      "parent_a": "ElecLion",
+      "parent_b": "ElecLion",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ElecLion"
+    },
+    {
+      "parent_a": "GrassDragon",
+      "parent_b": "GrassDragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassDragon"
+    },
+    {
+      "parent_a": "DarkMutant",
+      "parent_b": "DarkMutant",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "DarkMutant"
+    },
+    {
+      "parent_a": "Umihebi",
+      "parent_b": "Manticore",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Umihebi_Fire"
+    },
+    {
+      "parent_a": "NightLady",
+      "parent_b": "NightLady",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "NightLady"
+    },
+    {
+      "parent_a": "NightLady_Dark",
+      "parent_b": "NightLady_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "NightLady_Dark"
+    },
+    {
+      "parent_a": "NightLady",
+      "parent_b": "NightLady_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "NightLady"
+    },
+    {
+      "parent_a": "Gorilla_Ground",
+      "parent_b": "Gorilla_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Gorilla_Ground"
+    },
+    {
+      "parent_a": "KingBahamut_Dragon",
+      "parent_b": "KingBahamut_Dragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "KingBahamut_Dragon"
+    },
+    {
+      "parent_a": "FoxMage_Dark",
+      "parent_b": "FoxMage_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FoxMage_Dark"
+    },
+    {
+      "parent_a": "CatMage_Fire",
+      "parent_b": "CatMage_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "CatMage_Fire"
+    },
+    {
+      "parent_a": "HerculesBeetle_Ground",
+      "parent_b": "HerculesBeetle_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "HerculesBeetle_Ground"
+    },
+    {
+      "parent_a": "WeaselDragon_Fire",
+      "parent_b": "WeaselDragon_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WeaselDragon_Fire"
+    },
+    {
+      "parent_a": "SkyDragon_Grass",
+      "parent_b": "SkyDragon_Grass",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SkyDragon_Grass"
+    },
+    {
+      "parent_a": "HadesBird_Electric",
+      "parent_b": "HadesBird_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "HadesBird_Electric"
+    },
+    {
+      "parent_a": "Ronin_Dark",
+      "parent_b": "Ronin_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Ronin_Dark"
+    },
+    {
+      "parent_a": "DarkScorpion_Ground",
+      "parent_b": "DarkScorpion_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "DarkScorpion_Ground"
+    },
+    {
+      "parent_a": "MimicDog",
+      "parent_b": "MimicDog",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "MimicDog"
+    },
+    {
+      "parent_a": "CatMage",
+      "parent_b": "FoxMage",
+      "gender_a": "NoneMale",
+      "gender_b": "NoneFemale",
+      "child": "FoxMage_Dark"
+    },
+    {
+      "parent_a": "CatMage",
+      "parent_b": "FoxMage",
+      "gender_a": "NoneFemale",
+      "gender_b": "NoneMale",
+      "child": "CatMage_Fire"
+    },
+    {
+      "parent_a": "Gorilla",
+      "parent_b": "SmallArmadillo",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Gorilla_Ground"
+    },
+    {
+      "parent_a": "WeaselDragon",
+      "parent_b": "FlameBuffalo",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WeaselDragon_Fire"
+    },
+    {
+      "parent_a": "SkyDragon",
+      "parent_b": "LeafPrincess",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SkyDragon_Grass"
+    },
+    {
+      "parent_a": "HadesBird",
+      "parent_b": "ThunderBird",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "HadesBird_Electric"
+    },
+    {
+      "parent_a": "Ronin",
+      "parent_b": "CandleGhost",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Ronin_Dark"
+    },
+    {
+      "parent_a": "DarkScorpion",
+      "parent_b": "WingGolem",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "DarkScorpion_Ground"
+    },
+    {
+      "parent_a": "MoonQueen",
+      "parent_b": "MoonQueen",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "MoonQueen"
+    },
+    {
+      "parent_a": "DarkAlien",
+      "parent_b": "DarkAlien",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "DarkAlien"
+    },
+    {
+      "parent_a": "WhiteAlienDragon",
+      "parent_b": "WhiteAlienDragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteAlienDragon"
+    },
+    {
+      "parent_a": "DarkMechaDragon",
+      "parent_b": "DarkMechaDragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "DarkMechaDragon"
+    },
+    {
+      "parent_a": "SnowTigerBeastman",
+      "parent_b": "SnowTigerBeastman",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SnowTigerBeastman"
+    },
+    {
+      "parent_a": "Kitsunebi",
+      "parent_b": "IceFox",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Kitsunebi_Ice"
+    },
+    {
+      "parent_a": "RaijinDaughter",
+      "parent_b": "MysteryMask",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "RaijinDaughter_Water"
+    },
+    {
+      "parent_a": "WhiteTiger",
+      "parent_b": "FeatherOstrich",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteTiger_Ground"
+    },
+    {
+      "parent_a": "FengyunDeeper",
+      "parent_b": "BlueThunderHorse",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FengyunDeeper_Electric"
+    },
+    {
+      "parent_a": "BerryGoat",
+      "parent_b": "PurpleSpider",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BerryGoat_Dark"
+    },
+    {
+      "parent_a": "Werewolf",
+      "parent_b": "MopKing",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Werewolf_Ice"
+    },
+    {
+      "parent_a": "Horus",
+      "parent_b": "Umihebi",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Horus_Water"
+    },
+    {
+      "parent_a": "PinkRabbit",
+      "parent_b": "LittleBriarRose",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "PinkRabbit_Grass"
+    },
+    {
+      "parent_a": "HerculesBeetle",
+      "parent_b": "DrillGame",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "HerculesBeetle_Ground"
+    },
+    {
+      "parent_a": "AmaterasuWolf",
+      "parent_b": "BadCatgirl",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "AmaterasuWolf_Dark"
+    },
+    {
+      "parent_a": "Kitsunebi_Ice",
+      "parent_b": "Kitsunebi_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Kitsunebi_Ice"
+    },
+    {
+      "parent_a": "RaijinDaughter_Water",
+      "parent_b": "RaijinDaughter_Water",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "RaijinDaughter_Water"
+    },
+    {
+      "parent_a": "WhiteTiger_Ground",
+      "parent_b": "WhiteTiger_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteTiger_Ground"
+    },
+    {
+      "parent_a": "FengyunDeeper_Electric",
+      "parent_b": "FengyunDeeper_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FengyunDeeper_Electric"
+    },
+    {
+      "parent_a": "BerryGoat_Dark",
+      "parent_b": "BerryGoat_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BerryGoat_Dark"
+    },
+    {
+      "parent_a": "Werewolf_Ice",
+      "parent_b": "Werewolf_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Werewolf_Ice"
+    },
+    {
+      "parent_a": "Horus_Water",
+      "parent_b": "Horus_Water",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Horus_Water"
+    },
+    {
+      "parent_a": "PinkRabbit_Grass",
+      "parent_b": "PinkRabbit_Grass",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "PinkRabbit_Grass"
+    },
+    {
+      "parent_a": "HerculesBeetle_Ground",
+      "parent_b": "HerculesBeetle_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "HerculesBeetle_Ground"
+    },
+    {
+      "parent_a": "AmaterasuWolf_Dark",
+      "parent_b": "AmaterasuWolf_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "AmaterasuWolf_Dark"
+    },
+    {
+      "parent_a": "GoldenHorse",
+      "parent_b": "Deer_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteDeer"
+    },
+    {
+      "parent_a": "WhiteDeer",
+      "parent_b": "WhiteDeer",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteDeer"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster001_Blue",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Blue"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster001_Red",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Red"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster001_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster001_Pink",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Pink"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster001_Rainbow",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster002",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster001",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster001_Blue",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Blue"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster001_Red",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster001_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster001_Pink",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Pink"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster001_Rainbow",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster002",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Blue",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaMonster001_Red",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Red"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaMonster001_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaMonster001_Pink",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Pink"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaMonster001_Rainbow",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaMonster002",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Red",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaMonster001_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaMonster001_Pink",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Pink"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaMonster001_Rainbow",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaMonster002",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster003_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster003_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Purple",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Pink",
+      "parent_b": "YakushimaMonster001_Pink",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Pink"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Pink",
+      "parent_b": "YakushimaMonster001_Rainbow",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Pink",
+      "parent_b": "YakushimaMonster002",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Pink",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Pink",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Pink",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Pink",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Rainbow",
+      "parent_b": "YakushimaMonster001_Rainbow",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Rainbow",
+      "parent_b": "YakushimaMonster002",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Rainbow",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Rainbow",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster001_Rainbow"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Rainbow",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster001_Rainbow",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster002",
+      "parent_b": "YakushimaMonster002",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster002",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster002",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster002"
+    },
+    {
+      "parent_a": "YakushimaMonster002",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster002",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster003",
+      "parent_b": "YakushimaMonster003",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster003"
+    },
+    {
+      "parent_a": "YakushimaMonster003",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster003_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster003",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster003",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaMonster003_Purple",
+      "parent_b": "YakushimaMonster003_Purple",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaMonster003_Purple"
+    },
+    {
+      "parent_a": "YakushimaMonster003_Purple",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaMonster003_Purple",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "YakushimaBoss001",
+      "parent_b": "YakushimaBoss001",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaBoss001",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001"
+    },
+    {
+      "parent_a": "YakushimaBoss001_Small",
+      "parent_b": "YakushimaBoss001_Small",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "YakushimaBoss001_Small"
+    },
+    {
+      "parent_a": "NegativeOctopus_Neutral",
+      "parent_b": "NegativeOctopus_Neutral",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "NegativeOctopus_Neutral"
+    },
+    {
+      "parent_a": "Penguin_Electric",
+      "parent_b": "Penguin_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Penguin_Electric"
+    },
+    {
+      "parent_a": "CaptainPenguin_Black",
+      "parent_b": "CaptainPenguin_Black",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "CaptainPenguin_Black"
+    },
+    {
+      "parent_a": "FlyingManta_Thunder",
+      "parent_b": "FlyingManta_Thunder",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FlyingManta_Thunder"
+    },
+    {
+      "parent_a": "BluePlatypus_Fire",
+      "parent_b": "BluePlatypus_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BluePlatypus_Fire"
+    },
+    {
+      "parent_a": "LazyCatfish_Gold",
+      "parent_b": "LazyCatfish_Gold",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LazyCatfish_Gold"
+    },
+    {
+      "parent_a": "TentacleTurtle_Ground",
+      "parent_b": "TentacleTurtle_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "TentacleTurtle_Ground"
+    },
+    {
+      "parent_a": "KendoFrog_Dark",
+      "parent_b": "KendoFrog_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "KendoFrog_Dark"
+    },
+    {
+      "parent_a": "BlueDragon_Ice",
+      "parent_b": "BlueDragon_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlueDragon_Ice"
+    },
+    {
+      "parent_a": "IceNarwhal_Fire",
+      "parent_b": "IceNarwhal_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "IceNarwhal_Fire"
+    },
+    {
+      "parent_a": "GhostAnglerfish_Fire",
+      "parent_b": "GhostAnglerfish_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GhostAnglerfish_Fire"
+    },
+    {
+      "parent_a": "StuffedShark_Fire",
+      "parent_b": "StuffedShark_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "StuffedShark_Fire"
+    },
+    {
+      "parent_a": "PoseidonOrca",
+      "parent_b": "PoseidonOrca",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "PoseidonOrca"
+    },
+    {
+      "parent_a": "NegativeOctopus",
+      "parent_b": "PinkRabbit",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "NegativeOctopus_Neutral"
+    },
+    {
+      "parent_a": "Penguin",
+      "parent_b": "ElecCat",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Penguin_Electric"
+    },
+    {
+      "parent_a": "CaptainPenguin",
+      "parent_b": "ThunderDog",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "CaptainPenguin_Black"
+    },
+    {
+      "parent_a": "FlyingManta",
+      "parent_b": "Kirin",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FlyingManta_Thunder"
+    },
+    {
+      "parent_a": "Blueplatypus",
+      "parent_b": "LavaGirl",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BluePlatypus_Fire"
+    },
+    {
+      "parent_a": "LazyCatfish",
+      "parent_b": "Deer_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LazyCatfish_Gold"
+    },
+    {
+      "parent_a": "TentacleTurtle",
+      "parent_b": "DrillGame",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "TentacleTurtle_Ground"
+    },
+    {
+      "parent_a": "KendoFrog",
+      "parent_b": "Ronin_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "KendoFrog_Dark"
+    },
+    {
+      "parent_a": "BlueDragon",
+      "parent_b": "SnowPeafowl",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlueDragon_Ice"
+    },
+    {
+      "parent_a": "IceNarwhal",
+      "parent_b": "WeaselDragon_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "IceNarwhal_Fire"
+    },
+    {
+      "parent_a": "GhostAnglerfish",
+      "parent_b": "CandleGhost",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GhostAnglerfish_Fire"
+    },
+    {
+      "parent_a": "StuffedShark",
+      "parent_b": "SharkKid_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "StuffedShark_Fire"
+    },
+    {
+      "parent_a": "LegendDeer",
+      "parent_b": "LegendDeer",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "LegendDeer"
+    },
+    {
+      "parent_a": "Monkey_Fire",
+      "parent_b": "Monkey_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Monkey_Fire"
+    },
+    {
+      "parent_a": "Kirin_Ice",
+      "parent_b": "Kirin_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Kirin_Ice"
+    },
+    {
+      "parent_a": "ThunderDog_Ice",
+      "parent_b": "ThunderDog_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ThunderDog_Ice"
+    },
+    {
+      "parent_a": "ThunderBird_Ice",
+      "parent_b": "ThunderBird_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ThunderBird_Ice"
+    },
+    {
+      "parent_a": "SweetsSheep_Ground",
+      "parent_b": "SweetsSheep_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SweetsSheep_Ground"
+    },
+    {
+      "parent_a": "ScorpionMan_Electric",
+      "parent_b": "ScorpionMan_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ScorpionMan_Electric"
+    },
+    {
+      "parent_a": "BlackPuppy_Ice",
+      "parent_b": "BlackPuppy_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlackPuppy_Ice"
+    },
+    {
+      "parent_a": "GhostRabbit_Grass",
+      "parent_b": "GhostRabbit_Grass",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GhostRabbit_Grass"
+    },
+    {
+      "parent_a": "NightBlueHorse_Neutral",
+      "parent_b": "NightBlueHorse_Neutral",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "NightBlueHorse_Neutral"
+    },
+    {
+      "parent_a": "OctopusGirl_Neutral",
+      "parent_b": "OctopusGirl_Neutral",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "OctopusGirl_Neutral"
+    },
+    {
+      "parent_a": "WhiteMoth_Neutral",
+      "parent_b": "WhiteMoth_Neutral",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteMoth_Neutral"
+    },
+    {
+      "parent_a": "WingGolem_Fire",
+      "parent_b": "WingGolem_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WingGolem_Fire"
+    },
+    {
+      "parent_a": "FlowerDoll_Fire",
+      "parent_b": "FlowerDoll_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FlowerDoll_Fire"
+    },
+    {
+      "parent_a": "WhiteDeer_Dark",
+      "parent_b": "WhiteDeer_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteDeer_Dark"
+    },
+    {
+      "parent_a": "IceSeal_Ground",
+      "parent_b": "IceSeal_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "IceSeal_Ground"
+    },
+    {
+      "parent_a": "KingSunfish_Thunder",
+      "parent_b": "KingSunfish_Thunder",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "KingSunfish_Thunder"
+    },
+    {
+      "parent_a": "GrassGolem_Dark",
+      "parent_b": "GrassGolem_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassGolem_Dark"
+    },
+    {
+      "parent_a": "CubeTurtle_Neutral",
+      "parent_b": "CubeTurtle_Neutral",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "CubeTurtle_Neutral"
+    },
+    {
+      "parent_a": "GhostDragon_Fire",
+      "parent_b": "GhostDragon_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GhostDragon_Fire"
+    },
+    {
+      "parent_a": "VolcanoDragon_Ice",
+      "parent_b": "VolcanoDragon_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "VolcanoDragon_Ice"
+    },
+    {
+      "parent_a": "RockBeast_Ice",
+      "parent_b": "RockBeast_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "RockBeast_Ice"
+    },
+    {
+      "parent_a": "SwordCutlassfish_Fire",
+      "parent_b": "SwordCutlassfish_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SwordCutlassfish_Fire"
+    },
+    {
+      "parent_a": "ElecSnail_Ground",
+      "parent_b": "ElecSnail_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ElecSnail_Ground"
+    },
+    {
+      "parent_a": "CactusDoll_Dark",
+      "parent_b": "CactusDoll_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "CactusDoll_Dark"
+    },
+    {
+      "parent_a": "GrassMinotaur_Ice",
+      "parent_b": "GrassMinotaur_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassMinotaur_Ice"
+    },
+    {
+      "parent_a": "Monkey",
+      "parent_b": "LavaGirl",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Monkey_Fire"
+    },
+    {
+      "parent_a": "Kirin",
+      "parent_b": "SnowPeafowl",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Kirin_Ice"
+    },
+    {
+      "parent_a": "ThunderDog",
+      "parent_b": "IceFox",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ThunderDog_Ice"
+    },
+    {
+      "parent_a": "ThunderBird",
+      "parent_b": "SnowPeafowl",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ThunderBird_Ice"
+    },
+    {
+      "parent_a": "SweetsSheep",
+      "parent_b": "SmallArmadillo",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SweetsSheep_Ground"
+    },
+    {
+      "parent_a": "ScorpionMan",
+      "parent_b": "HadesBird_Electric",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ScorpionMan_Electric"
+    },
+    {
+      "parent_a": "BlackPuppy",
+      "parent_b": "IceCrocodile",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlackPuppy_Ice"
+    },
+    {
+      "parent_a": "GhostRabbit",
+      "parent_b": "FlowerDoll",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GhostRabbit_Grass"
+    },
+    {
+      "parent_a": "NightBlueHorse",
+      "parent_b": "WhiteDeer",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "NightBlueHorse_Neutral"
+    },
+    {
+      "parent_a": "OctopusGirl",
+      "parent_b": "LongCat",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "OctopusGirl_Neutral"
+    },
+    {
+      "parent_a": "WhiteMoth",
+      "parent_b": "SleeveRabbit",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteMoth_Neutral"
+    },
+    {
+      "parent_a": "WingGolem",
+      "parent_b": "RedArmorBird",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WingGolem_Fire"
+    },
+    {
+      "parent_a": "FlowerDoll",
+      "parent_b": "Ronin",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FlowerDoll_Fire"
+    },
+    {
+      "parent_a": "WhiteDeer",
+      "parent_b": "AmaterasuWolf_Dark",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "WhiteDeer_Dark"
+    },
+    {
+      "parent_a": "IceSeal",
+      "parent_b": "Serpent_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "IceSeal_Ground"
+    },
+    {
+      "parent_a": "KingSunfish",
+      "parent_b": "ElecLizard",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "KingSunfish_Thunder"
+    },
+    {
+      "parent_a": "GrassGolem",
+      "parent_b": "CandleGhost",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassGolem_Dark"
+    },
+    {
+      "parent_a": "CubeTurtle",
+      "parent_b": "WhiteDeer",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "CubeTurtle_Neutral"
+    },
+    {
+      "parent_a": "GhostDragon",
+      "parent_b": "Suzaku",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GhostDragon_Fire"
+    },
+    {
+      "parent_a": "VolcanoDragon",
+      "parent_b": "VolcanicMonster_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "VolcanoDragon_Ice"
+    },
+    {
+      "parent_a": "RockBeast",
+      "parent_b": "Yeti",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "RockBeast_Ice"
+    },
+    {
+      "parent_a": "SwordCutlassfish",
+      "parent_b": "SharkKid_Fire",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "SwordCutlassfish_Fire"
+    },
+    {
+      "parent_a": "ElecSnail",
+      "parent_b": "TentacleTurtle_Ground",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "ElecSnail_Ground"
+    },
+    {
+      "parent_a": "CactusDoll",
+      "parent_b": "BlueberryFairy",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "CactusDoll_Dark"
+    },
+    {
+      "parent_a": "GrassMinotaur",
+      "parent_b": "RockBeast_Ice",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "GrassMinotaur_Ice"
+    },
+    {
+      "parent_a": "BlueSkyDragon",
+      "parent_b": "BlueSkyDragon",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "BlueSkyDragon"
+    },
+    {
+      "parent_a": "FlowerPrince",
+      "parent_b": "FlowerPrince",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "FlowerPrince"
+    },
+    {
+      "parent_a": "Mothman",
+      "parent_b": "Mothman",
+      "gender_a": "NoneNone",
+      "gender_b": "NoneNone",
+      "child": "Mothman"
+    }
+  ]
+}

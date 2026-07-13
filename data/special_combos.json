@@ -1,0 +1,1792 @@
+{
+  "LazyDragon_Electric": [
+    {
+      "a": "LazyDragon",
+      "b": "ElecCat",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "LazyDragon_Electric",
+      "b": "LazyDragon_Electric",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Baphomet_Dark": [
+    {
+      "a": "Baphomet",
+      "b": "GhostBeast",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Baphomet_Dark",
+      "b": "Baphomet_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Bastet_Ice": [
+    {
+      "a": "Bastet",
+      "b": "Penguin",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Bastet_Ice",
+      "b": "Bastet_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BirdDragon_Ice": [
+    {
+      "a": "BirdDragon",
+      "b": "IceFox",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "BirdDragon_Ice",
+      "b": "BirdDragon_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Deer_Ground": [
+    {
+      "a": "Deer",
+      "b": "WindChimes",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Deer_Ground",
+      "b": "Deer_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FairyDragon_Water": [
+    {
+      "a": "FairyDragon",
+      "b": "Serpent",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "FairyDragon_Water",
+      "b": "FairyDragon_Water",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FireKirin_Dark": [
+    {
+      "a": "FireKirin",
+      "b": "CatMage",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "FireKirin_Dark",
+      "b": "FireKirin_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GrassMammoth_Ice": [
+    {
+      "a": "GrassMammoth",
+      "b": "Yeti",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "GrassMammoth_Ice",
+      "b": "GrassMammoth_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GrassPanda_Electric": [
+    {
+      "a": "GrassPanda",
+      "b": "ElecPanda",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "GrassPanda_Electric",
+      "b": "GrassPanda_Electric",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FlowerDinosaur_Electric": [
+    {
+      "a": "FlowerDinosaur",
+      "b": "ThunderDog",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "FlowerDinosaur_Electric",
+      "b": "FlowerDinosaur_Electric",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Hedgehog_Ice": [
+    {
+      "a": "Hedgehog",
+      "b": "Penguin",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Hedgehog_Ice",
+      "b": "Hedgehog_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "IceHorse_Dark": [
+    {
+      "a": "IceHorse",
+      "b": "HadesBird",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "IceHorse_Dark",
+      "b": "IceHorse_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "KingAlpaca_Ice": [
+    {
+      "a": "KingAlpaca",
+      "b": "IceDeer",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "KingAlpaca_Ice",
+      "b": "KingAlpaca_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "LilyQueen_Dark": [
+    {
+      "a": "LilyQueen",
+      "b": "DarkScorpion",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "LilyQueen_Dark",
+      "b": "LilyQueen_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "LizardMan_Fire": [
+    {
+      "a": "LizardMan",
+      "b": "LavaGirl",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "LizardMan_Fire",
+      "b": "LizardMan_Fire",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Manticore_Dark": [
+    {
+      "a": "Manticore",
+      "b": "CatVampire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Manticore_Dark",
+      "b": "Manticore_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "RobinHood_Ground": [
+    {
+      "a": "RobinHood",
+      "b": "CuteMole",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "RobinHood_Ground",
+      "b": "RobinHood_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "SakuraSaurus_Water": [
+    {
+      "a": "SakuraSaurus",
+      "b": "Blueplatypus",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "SakuraSaurus_Water",
+      "b": "SakuraSaurus_Water",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Serpent_Ground": [
+    {
+      "a": "Serpent",
+      "b": "LazyCatfish",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Serpent_Ground",
+      "b": "Serpent_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "SharkKid_Fire": [
+    {
+      "a": "SharkKid",
+      "b": "FlameBambi",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "SharkKid_Fire",
+      "b": "SharkKid_Fire",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Suzaku_Water": [
+    {
+      "a": "Suzaku",
+      "b": "Umihebi",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Suzaku_Water",
+      "b": "Suzaku_Water",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "VolcanicMonster_Ice": [
+    {
+      "a": "VolcanicMonster",
+      "b": "IceFox",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "VolcanicMonster_Ice",
+      "b": "VolcanicMonster_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WindChimes_Ice": [
+    {
+      "a": "WindChimes",
+      "b": "MopBaby",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "WindChimes_Ice",
+      "b": "WindChimes_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "IceHorse": [
+    {
+      "a": "IceHorse",
+      "b": "IceHorse",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "JetDragon": [
+    {
+      "a": "JetDragon",
+      "b": "JetDragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "SaintCentaur": [
+    {
+      "a": "SaintCentaur",
+      "b": "SaintCentaur",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BlackCentaur": [
+    {
+      "a": "BlackCentaur",
+      "b": "BlackCentaur",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "LilyQueen": [
+    {
+      "a": "LilyQueen",
+      "b": "LilyQueen",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Horus": [
+    {
+      "a": "Horus",
+      "b": "Horus",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "ElecPanda": [
+    {
+      "a": "ElecPanda",
+      "b": "ElecPanda",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "ThunderDragonMan": [
+    {
+      "a": "ThunderDragonMan",
+      "b": "ThunderDragonMan",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BlackGriffon": [
+    {
+      "a": "BlackGriffon",
+      "b": "BlackGriffon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Umihebi_Fire": [
+    {
+      "a": "Umihebi_Fire",
+      "b": "Umihebi_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Umihebi",
+      "b": "Manticore",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "PinkKangaroo": [
+    {
+      "a": "PinkKangaroo",
+      "b": "PinkKangaroo",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BeardedDragon": [
+    {
+      "a": "BeardedDragon",
+      "b": "BeardedDragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BlackFurDragon": [
+    {
+      "a": "BlackFurDragon",
+      "b": "BlackFurDragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WaterLizard": [
+    {
+      "a": "WaterLizard",
+      "b": "WaterLizard",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "ElecLion": [
+    {
+      "a": "ElecLion",
+      "b": "ElecLion",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GrassDragon": [
+    {
+      "a": "GrassDragon",
+      "b": "GrassDragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "DarkMutant": [
+    {
+      "a": "DarkMutant",
+      "b": "DarkMutant",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "NightLady": [
+    {
+      "a": "NightLady",
+      "b": "NightLady",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "NightLady",
+      "b": "NightLady_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "NightLady_Dark": [
+    {
+      "a": "NightLady_Dark",
+      "b": "NightLady_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Gorilla_Ground": [
+    {
+      "a": "Gorilla_Ground",
+      "b": "Gorilla_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Gorilla",
+      "b": "SmallArmadillo",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "KingBahamut_Dragon": [
+    {
+      "a": "KingBahamut_Dragon",
+      "b": "KingBahamut_Dragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FoxMage_Dark": [
+    {
+      "a": "FoxMage_Dark",
+      "b": "FoxMage_Dark",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "CatMage",
+      "b": "FoxMage",
+      "ga": "M",
+      "gb": "F"
+    }
+  ],
+  "CatMage_Fire": [
+    {
+      "a": "CatMage_Fire",
+      "b": "CatMage_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "CatMage",
+      "b": "FoxMage",
+      "ga": "F",
+      "gb": "M"
+    }
+  ],
+  "HerculesBeetle_Ground": [
+    {
+      "a": "HerculesBeetle_Ground",
+      "b": "HerculesBeetle_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "HerculesBeetle",
+      "b": "DrillGame",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "HerculesBeetle_Ground",
+      "b": "HerculesBeetle_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WeaselDragon_Fire": [
+    {
+      "a": "WeaselDragon_Fire",
+      "b": "WeaselDragon_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "WeaselDragon",
+      "b": "FlameBuffalo",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "SkyDragon_Grass": [
+    {
+      "a": "SkyDragon_Grass",
+      "b": "SkyDragon_Grass",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "SkyDragon",
+      "b": "LeafPrincess",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "HadesBird_Electric": [
+    {
+      "a": "HadesBird_Electric",
+      "b": "HadesBird_Electric",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "HadesBird",
+      "b": "ThunderBird",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Ronin_Dark": [
+    {
+      "a": "Ronin_Dark",
+      "b": "Ronin_Dark",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Ronin",
+      "b": "CandleGhost",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "DarkScorpion_Ground": [
+    {
+      "a": "DarkScorpion_Ground",
+      "b": "DarkScorpion_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "DarkScorpion",
+      "b": "WingGolem",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "MimicDog": [
+    {
+      "a": "MimicDog",
+      "b": "MimicDog",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "MoonQueen": [
+    {
+      "a": "MoonQueen",
+      "b": "MoonQueen",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "DarkAlien": [
+    {
+      "a": "DarkAlien",
+      "b": "DarkAlien",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WhiteAlienDragon": [
+    {
+      "a": "WhiteAlienDragon",
+      "b": "WhiteAlienDragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "DarkMechaDragon": [
+    {
+      "a": "DarkMechaDragon",
+      "b": "DarkMechaDragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "SnowTigerBeastman": [
+    {
+      "a": "SnowTigerBeastman",
+      "b": "SnowTigerBeastman",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Kitsunebi_Ice": [
+    {
+      "a": "Kitsunebi",
+      "b": "IceFox",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Kitsunebi_Ice",
+      "b": "Kitsunebi_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "RaijinDaughter_Water": [
+    {
+      "a": "RaijinDaughter",
+      "b": "MysteryMask",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "RaijinDaughter_Water",
+      "b": "RaijinDaughter_Water",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WhiteTiger_Ground": [
+    {
+      "a": "WhiteTiger",
+      "b": "FeatherOstrich",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "WhiteTiger_Ground",
+      "b": "WhiteTiger_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FengyunDeeper_Electric": [
+    {
+      "a": "FengyunDeeper",
+      "b": "BlueThunderHorse",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "FengyunDeeper_Electric",
+      "b": "FengyunDeeper_Electric",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BerryGoat_Dark": [
+    {
+      "a": "BerryGoat",
+      "b": "PurpleSpider",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "BerryGoat_Dark",
+      "b": "BerryGoat_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Werewolf_Ice": [
+    {
+      "a": "Werewolf",
+      "b": "MopKing",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Werewolf_Ice",
+      "b": "Werewolf_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Horus_Water": [
+    {
+      "a": "Horus",
+      "b": "Umihebi",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Horus_Water",
+      "b": "Horus_Water",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "PinkRabbit_Grass": [
+    {
+      "a": "PinkRabbit",
+      "b": "LittleBriarRose",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "PinkRabbit_Grass",
+      "b": "PinkRabbit_Grass",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "AmaterasuWolf_Dark": [
+    {
+      "a": "AmaterasuWolf",
+      "b": "BadCatgirl",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "AmaterasuWolf_Dark",
+      "b": "AmaterasuWolf_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WhiteDeer": [
+    {
+      "a": "GoldenHorse",
+      "b": "Deer_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "WhiteDeer",
+      "b": "WhiteDeer",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster001": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster001",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster001_Blue": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster001_Blue",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster001_Blue",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster001_Red": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster001_Red",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaMonster001_Red",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster001_Purple": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster001_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster001_Red",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster001_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaMonster001_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaMonster001_Purple",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster001_Pink": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster001_Pink",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster001_Pink",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaMonster001_Pink",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaMonster001_Pink",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Pink",
+      "b": "YakushimaMonster001_Pink",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster001_Rainbow": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster001_Rainbow",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster001_Rainbow",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaMonster001_Rainbow",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaMonster001_Rainbow",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Pink",
+      "b": "YakushimaMonster001_Rainbow",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Pink",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Pink",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Rainbow",
+      "b": "YakushimaMonster001_Rainbow",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Rainbow",
+      "b": "YakushimaMonster002",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Rainbow",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Rainbow",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster002": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaMonster002",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaMonster002",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaMonster002",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaMonster002",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Pink",
+      "b": "YakushimaMonster002",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster002",
+      "b": "YakushimaMonster002",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster002",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster002",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaBoss001": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Pink",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Rainbow",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster002",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster003",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster003_Purple",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaBoss001",
+      "b": "YakushimaBoss001",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaBoss001",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaBoss001_Small": [
+    {
+      "a": "YakushimaMonster001",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Blue",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Red",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Pink",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Rainbow",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster002",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster003",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster003_Purple",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaBoss001_Small",
+      "b": "YakushimaBoss001_Small",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster003_Purple": [
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster001_Purple",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster003",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "YakushimaMonster003_Purple",
+      "b": "YakushimaMonster003_Purple",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "YakushimaMonster003": [
+    {
+      "a": "YakushimaMonster003",
+      "b": "YakushimaMonster003",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "NegativeOctopus_Neutral": [
+    {
+      "a": "NegativeOctopus_Neutral",
+      "b": "NegativeOctopus_Neutral",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "NegativeOctopus",
+      "b": "PinkRabbit",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Penguin_Electric": [
+    {
+      "a": "Penguin_Electric",
+      "b": "Penguin_Electric",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Penguin",
+      "b": "ElecCat",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "CaptainPenguin_Black": [
+    {
+      "a": "CaptainPenguin_Black",
+      "b": "CaptainPenguin_Black",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "CaptainPenguin",
+      "b": "ThunderDog",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FlyingManta_Thunder": [
+    {
+      "a": "FlyingManta_Thunder",
+      "b": "FlyingManta_Thunder",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "FlyingManta",
+      "b": "Kirin",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BluePlatypus_Fire": [
+    {
+      "a": "BluePlatypus_Fire",
+      "b": "BluePlatypus_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Blueplatypus",
+      "b": "LavaGirl",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "LazyCatfish_Gold": [
+    {
+      "a": "LazyCatfish_Gold",
+      "b": "LazyCatfish_Gold",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "LazyCatfish",
+      "b": "Deer_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "TentacleTurtle_Ground": [
+    {
+      "a": "TentacleTurtle_Ground",
+      "b": "TentacleTurtle_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "TentacleTurtle",
+      "b": "DrillGame",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "KendoFrog_Dark": [
+    {
+      "a": "KendoFrog_Dark",
+      "b": "KendoFrog_Dark",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "KendoFrog",
+      "b": "Ronin_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BlueDragon_Ice": [
+    {
+      "a": "BlueDragon_Ice",
+      "b": "BlueDragon_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "BlueDragon",
+      "b": "SnowPeafowl",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "IceNarwhal_Fire": [
+    {
+      "a": "IceNarwhal_Fire",
+      "b": "IceNarwhal_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "IceNarwhal",
+      "b": "WeaselDragon_Fire",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GhostAnglerfish_Fire": [
+    {
+      "a": "GhostAnglerfish_Fire",
+      "b": "GhostAnglerfish_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "GhostAnglerfish",
+      "b": "CandleGhost",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "StuffedShark_Fire": [
+    {
+      "a": "StuffedShark_Fire",
+      "b": "StuffedShark_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "StuffedShark",
+      "b": "SharkKid_Fire",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "PoseidonOrca": [
+    {
+      "a": "PoseidonOrca",
+      "b": "PoseidonOrca",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "LegendDeer": [
+    {
+      "a": "LegendDeer",
+      "b": "LegendDeer",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Monkey_Fire": [
+    {
+      "a": "Monkey_Fire",
+      "b": "Monkey_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Monkey",
+      "b": "LavaGirl",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Kirin_Ice": [
+    {
+      "a": "Kirin_Ice",
+      "b": "Kirin_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "Kirin",
+      "b": "SnowPeafowl",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "ThunderDog_Ice": [
+    {
+      "a": "ThunderDog_Ice",
+      "b": "ThunderDog_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "ThunderDog",
+      "b": "IceFox",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "ThunderBird_Ice": [
+    {
+      "a": "ThunderBird_Ice",
+      "b": "ThunderBird_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "ThunderBird",
+      "b": "SnowPeafowl",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "SweetsSheep_Ground": [
+    {
+      "a": "SweetsSheep_Ground",
+      "b": "SweetsSheep_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "SweetsSheep",
+      "b": "SmallArmadillo",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "ScorpionMan_Electric": [
+    {
+      "a": "ScorpionMan_Electric",
+      "b": "ScorpionMan_Electric",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "ScorpionMan",
+      "b": "HadesBird_Electric",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BlackPuppy_Ice": [
+    {
+      "a": "BlackPuppy_Ice",
+      "b": "BlackPuppy_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "BlackPuppy",
+      "b": "IceCrocodile",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GhostRabbit_Grass": [
+    {
+      "a": "GhostRabbit_Grass",
+      "b": "GhostRabbit_Grass",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "GhostRabbit",
+      "b": "FlowerDoll",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "NightBlueHorse_Neutral": [
+    {
+      "a": "NightBlueHorse_Neutral",
+      "b": "NightBlueHorse_Neutral",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "NightBlueHorse",
+      "b": "WhiteDeer",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "OctopusGirl_Neutral": [
+    {
+      "a": "OctopusGirl_Neutral",
+      "b": "OctopusGirl_Neutral",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "OctopusGirl",
+      "b": "LongCat",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WhiteMoth_Neutral": [
+    {
+      "a": "WhiteMoth_Neutral",
+      "b": "WhiteMoth_Neutral",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "WhiteMoth",
+      "b": "SleeveRabbit",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WingGolem_Fire": [
+    {
+      "a": "WingGolem_Fire",
+      "b": "WingGolem_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "WingGolem",
+      "b": "RedArmorBird",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FlowerDoll_Fire": [
+    {
+      "a": "FlowerDoll_Fire",
+      "b": "FlowerDoll_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "FlowerDoll",
+      "b": "Ronin",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "WhiteDeer_Dark": [
+    {
+      "a": "WhiteDeer_Dark",
+      "b": "WhiteDeer_Dark",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "WhiteDeer",
+      "b": "AmaterasuWolf_Dark",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "IceSeal_Ground": [
+    {
+      "a": "IceSeal_Ground",
+      "b": "IceSeal_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "IceSeal",
+      "b": "Serpent_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "KingSunfish_Thunder": [
+    {
+      "a": "KingSunfish_Thunder",
+      "b": "KingSunfish_Thunder",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "KingSunfish",
+      "b": "ElecLizard",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GrassGolem_Dark": [
+    {
+      "a": "GrassGolem_Dark",
+      "b": "GrassGolem_Dark",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "GrassGolem",
+      "b": "CandleGhost",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "CubeTurtle_Neutral": [
+    {
+      "a": "CubeTurtle_Neutral",
+      "b": "CubeTurtle_Neutral",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "CubeTurtle",
+      "b": "WhiteDeer",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GhostDragon_Fire": [
+    {
+      "a": "GhostDragon_Fire",
+      "b": "GhostDragon_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "GhostDragon",
+      "b": "Suzaku",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "VolcanoDragon_Ice": [
+    {
+      "a": "VolcanoDragon_Ice",
+      "b": "VolcanoDragon_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "VolcanoDragon",
+      "b": "VolcanicMonster_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "RockBeast_Ice": [
+    {
+      "a": "RockBeast_Ice",
+      "b": "RockBeast_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "RockBeast",
+      "b": "Yeti",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "SwordCutlassfish_Fire": [
+    {
+      "a": "SwordCutlassfish_Fire",
+      "b": "SwordCutlassfish_Fire",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "SwordCutlassfish",
+      "b": "SharkKid_Fire",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "ElecSnail_Ground": [
+    {
+      "a": "ElecSnail_Ground",
+      "b": "ElecSnail_Ground",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "ElecSnail",
+      "b": "TentacleTurtle_Ground",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "CactusDoll_Dark": [
+    {
+      "a": "CactusDoll_Dark",
+      "b": "CactusDoll_Dark",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "CactusDoll",
+      "b": "BlueberryFairy",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "GrassMinotaur_Ice": [
+    {
+      "a": "GrassMinotaur_Ice",
+      "b": "GrassMinotaur_Ice",
+      "ga": "",
+      "gb": ""
+    },
+    {
+      "a": "GrassMinotaur",
+      "b": "RockBeast_Ice",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "BlueSkyDragon": [
+    {
+      "a": "BlueSkyDragon",
+      "b": "BlueSkyDragon",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "FlowerPrince": [
+    {
+      "a": "FlowerPrince",
+      "b": "FlowerPrince",
+      "ga": "",
+      "gb": ""
+    }
+  ],
+  "Mothman": [
+    {
+      "a": "Mothman",
+      "b": "Mothman",
+      "ga": "",
+      "gb": ""
+    }
+  ]
+}
