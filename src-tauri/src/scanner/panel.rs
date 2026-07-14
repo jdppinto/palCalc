@@ -13,8 +13,14 @@
 use image::RgbaImage;
 use serde::{Deserialize, Serialize};
 
+use super::ocr;
 use super::synth::TextSynth;
 use super::textlib::{png_base64, TextLib, TextMatch, EMPTY_LABEL};
+
+/// Minimum normalized-Levenshtein similarity for an OCR line to count as a
+/// vocabulary hit (Inventory Kamera uses ~0.90-0.95 on much larger item
+/// vocabularies; ours are 333/114 entries with distinctive names).
+pub const OCR_MIN_SIM: f64 = 0.72;
 
 /// Species-name matches at or above this are authoritative overrides.
 pub const NAME_CONFIDENCE: f32 = 0.45;
@@ -169,6 +175,36 @@ impl PanelLayout {
         hints: &[(String, String)],
         px_range: (f32, f32),
     ) -> Option<(Self, String, f32)> {
+        // OCR + dictionary first: reads the real game font directly, so it
+        // needs no font approximation and no sliding-window sweep.
+        if let Ok(lines) = ocr::read_lines_boxed(region) {
+            let best = lines
+                .iter()
+                .filter_map(|(text, rect)| {
+                    ocr::best_vocab_match(text, hints, OCR_MIN_SIM).map(|(k, s)| (k, s, *rect))
+                })
+                .max_by(|a, b| a.1.total_cmp(&b.1));
+            if let Some((key, sim, (rx, ry, rw, rh))) = best {
+                // OCR line rects hug the glyphs; pad like the synth band and
+                // clamp the implied text size into the panel-derived range.
+                let px = (rh as f32 * 1.1).clamp(px_range.0, px_range.1);
+                // Clamp the padded band inside the search region so
+                // load_validated never rejects it against the panel rect.
+                let bx = (region_origin.0 + rx - px as i32).max(region_origin.0);
+                let by = (region_origin.1 + ry - (rh as f32 * 0.3) as i32).max(region_origin.1);
+                let layout = Self {
+                    name_band: (
+                        bx,
+                        by,
+                        (rw as f32 + px * 2.0) as u32,
+                        (rh as f32 * 1.6) as u32,
+                    ),
+                    px_name: px,
+                };
+                layout.save_cache();
+                return Some((layout, key.to_string(), sim as f32));
+            }
+        }
         let (key, hit) = synth
             .best_label(region, hints, true, px_range.0, px_range.1)
             .filter(|(_, h)| h.score >= NAME_CONFIDENCE)?;
@@ -195,6 +231,9 @@ impl PanelLayout {
         band: &RgbaImage,
         all_names: &[(String, String)],
     ) -> Option<(String, f32)> {
+        if let Ok(Some((key, sim))) = ocr::read_and_match(band, all_names, OCR_MIN_SIM) {
+            return Some((key.to_string(), sim as f32));
+        }
         let (key, hit) = synth.best_label(
             band,
             all_names,
@@ -231,9 +270,6 @@ impl PanelLayout {
         px_hint: Option<f32>,
         expected_px: Option<f32>,
     ) -> (Vec<String>, Vec<(String, String)>, Option<f32>) {
-        let (synth_keys_hits, found_px) =
-            self.read_passives_hits(synth, region, passive_names, px_hint, expected_px);
-
         let row_px = expected_px.unwrap_or(self.px_name * PASSIVE_PX_RATIO);
         let bands = super::synth::detect_text_rows(region, row_px as u32 / 3);
 
@@ -241,9 +277,15 @@ impl PanelLayout {
         let mut unknown: Vec<(String, String)> = Vec::new();
         if bands.is_empty() {
             // No band structure — trust whatever synth found.
+            let (synth_keys_hits, found_px) =
+                self.read_passives_hits(synth, region, passive_names, px_hint, expected_px);
             known.extend(synth_keys_hits.iter().map(|(k, _)| k.clone()));
             return (known, unknown, found_px);
         }
+        // The synth sweep is expensive; with OCR as the primary reader it
+        // only runs if some row is left unresolved.
+        let mut synth_hits: Option<Vec<(String, u32)>> = None;
+        let mut found_px: Option<f32> = None;
         for (by, bh) in bands {
             let y0 = by.saturating_sub(4);
             let h = (bh + 8).min(region.height() - y0);
@@ -260,7 +302,7 @@ impl PanelLayout {
             if !is_boxed_row(&extended) {
                 continue;
             }
-            // Learned template first — exact renders beat synthesis.
+            // Learned template first — exact renders beat everything.
             match textlib.identify(&strip) {
                 TextMatch::Known(label) if label == EMPTY_LABEL => continue,
                 TextMatch::Known(label) => {
@@ -269,11 +311,19 @@ impl PanelLayout {
                 }
                 _ => {}
             }
+            // OCR + dictionary (Inventory Kamera recipe).
+            if let Ok(Some((key, _))) = ocr::read_and_match(&strip, passive_names, OCR_MIN_SIM) {
+                known.push(key.to_string());
+                continue;
+            }
             // Synth hit within this band?
-            match synth_keys_hits
-                .iter()
-                .find(|(_, hy)| *hy >= y0 && *hy < y0 + h)
-            {
+            let hits = synth_hits.get_or_insert_with(|| {
+                let (hits, px) =
+                    self.read_passives_hits(synth, region, passive_names, px_hint, expected_px);
+                found_px = px;
+                hits
+            });
+            match hits.iter().find(|(_, hy)| *hy >= y0 && *hy < y0 + h) {
                 Some((k, _)) => known.push(k.clone()),
                 None => {
                     if let Ok(b64) = png_base64(&strip) {
@@ -710,9 +760,8 @@ mod learned_rows {
     use palcalc_core::GameData;
 
     /// Field capture: "Downtrodden" (white-on-dark row) synth-matches at only
-    /// 0.41 — under threshold by design (false positives live at 0.41 too).
-    /// The learned-crop layer closes it: the row surfaces as unknown, one
-    /// labeling teaches it, and the re-read resolves it exactly.
+    /// 0.41 — under threshold by design. OCR + dictionary now reads it
+    /// directly; a learned crop still overrides all other layers.
     #[test]
     #[ignore = "slow; --release -- --ignored"]
     fn unknown_row_learn_roundtrip() {
@@ -740,21 +789,14 @@ mod learned_rows {
         let _ = std::fs::remove_dir_all(&dir);
         let mut lib = TextLib::load(dir.clone());
 
-        let (keys, unknowns, _) =
-            layout.read_passive_rows(&synth, &lib, &region, &names, None, expected);
-        assert!(keys.is_empty(), "no confident synth match expected: {keys:?}");
+        // OCR reads the row directly — no unknown surfaces, no synth needed.
         // The "Passive Skills" header is filtered out structurally (no box
-        // border); only the actual row surfaces.
-        assert_eq!(unknowns.len(), 1, "only the Downtrodden row");
-
-        // User labels it once.
-        let crop = crate::scanner::textlib::png_from_base64(&unknowns[0].1).unwrap();
-        lib.learn("Deffence_down1", &crop).unwrap();
-
+        // border).
         let (keys, unknowns, _) =
             layout.read_passive_rows(&synth, &lib, &region, &names, None, expected);
-        assert_eq!(keys, vec!["Deffence_down1"]);
-        assert!(unknowns.is_empty());
+        assert_eq!(keys, vec!["Deffence_down1"], "OCR row read");
+        assert!(unknowns.is_empty(), "{unknowns:?}");
+        let _ = &mut lib; // learned-crop precedence is covered by textlib tests
 
         let _ = std::fs::remove_dir_all(&dir);
     }

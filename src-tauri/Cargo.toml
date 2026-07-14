@@ -23,6 +23,9 @@ include_dir = "0.7.4"
 base64 = "0.22.1"
 ab_glyph = "0.2.32"
 rayon = "1.12.0"
+ocrs = "0.12.2"
+rten = "0.24.0"
+strsim = "0.11.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libwayshot = "0.8.0"
