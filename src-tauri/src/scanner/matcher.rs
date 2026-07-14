@@ -100,9 +100,16 @@ impl IconTemplates {
     /// Best-matching pal for a slot crop, with its weighted-NCC score in
     /// [-1, 1]. None when the crop has no content (empty slot).
     pub fn identify(&self, crop: &RgbaImage) -> Option<(String, f32)> {
+        self.identify_top(crop, 1).into_iter().next()
+    }
+
+    /// Top-N candidates with scores (diagnostics and debug dumps).
+    pub fn identify_top(&self, crop: &RgbaImage, n: usize) -> Vec<(String, f32)> {
         // Canonicalize the capture the same way templates were: find the
         // content (whatever differs from the slot background), crop to it.
-        let (bbox, bg) = content_bbox(crop)?;
+        let Some((bbox, bg)) = content_bbox(crop) else {
+            return Vec::new();
+        };
         let fill = image::Rgba([
             bg[0].round().clamp(0.0, 255.0) as u8,
             bg[1].round().clamp(0.0, 255.0) as u8,
@@ -117,11 +124,11 @@ impl IconTemplates {
         let mean = g.iter().sum::<f32>() / V as f32;
         let var = g.iter().map(|x| (x - mean).powi(2)).sum::<f32>() / V as f32;
         if var.sqrt() < MIN_STDDEV {
-            return None;
+            return Vec::new();
         }
 
         let g2: Vec<f32> = g.iter().map(|x| x * x).collect();
-        let mut best: Option<(&str, f32)> = None;
+        let mut scored: Vec<(&str, f32)> = Vec::with_capacity(self.entries.len());
         for t in &self.entries {
             let sg: f32 = t.w.iter().zip(&g).map(|(w, g)| w * g).sum();
             let sg2: f32 = t.w.iter().zip(&g2).map(|(w, g2)| w * g2).sum();
@@ -130,12 +137,14 @@ impl IconTemplates {
                 continue;
             }
             let num: f32 = t.wd.iter().zip(&g).map(|(wd, g)| wd * g).sum();
-            let score = num / var_g.sqrt();
-            if best.is_none() || score > best.unwrap().1 {
-                best = Some((&t.key, score));
-            }
+            scored.push((&t.key, num / var_g.sqrt()));
         }
-        best.map(|(k, s)| (k.to_string(), s))
+        scored.sort_by(|a, b| b.1.total_cmp(&a.1));
+        scored
+            .into_iter()
+            .take(n)
+            .map(|(k, s)| (k.to_string(), s))
+            .collect()
     }
 
     #[cfg(test)]

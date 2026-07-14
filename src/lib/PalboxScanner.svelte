@@ -268,7 +268,9 @@
       found.map((r) => ({
         species: r.species!,
         label: `${pal(r.species)?.name ?? r.species} (scan)${genderSymbol(r.gender) ? " " + genderSymbol(r.gender) : ""}`,
-        passives: r.passives.flatMap((p) => (p.kind === "known" ? [p.key] : [])),
+        passives: r.passives.flatMap((p) =>
+          p.kind === "known" && p.key !== "__empty__" ? [p.key] : [],
+        ),
       })),
     );
     results = null;
@@ -399,6 +401,9 @@
                 {m.name}
               </button>
             {/each}
+            <button class="pick empty-pick" onclick={() => labelUnknown(u.id, u.png, "__empty__")}>
+              Empty row
+            </button>
           {:else}
             <button onclick={() => (labeling = u.id)}>Label…</button>
           {/if}
@@ -418,6 +423,7 @@
               <span>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
               <span class="passives">
                 {r.passives
+                  .filter((pr) => !(pr.kind === "known" && pr.key === "__empty__"))
                   .map((pr) => (pr.kind === "known" ? passiveName(pr.key) : "?"))
                   .join(", ") || "no passives read"}
               </span>
@@ -635,6 +641,11 @@
   .pick {
     padding: 0.25rem 0.6rem;
     font-size: 0.85rem;
+  }
+
+  .empty-pick {
+    color: var(--text-dim);
+    border-style: dashed;
   }
 
   .results {

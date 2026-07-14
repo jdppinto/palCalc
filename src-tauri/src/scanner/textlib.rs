@@ -12,6 +12,11 @@ use std::path::PathBuf;
 use base64::Engine;
 use image::RgbaImage;
 
+/// Reserved label for "this passive row is empty" — real game backgrounds are
+/// textured, so flatness alone can't detect empty rows; the user labels the
+/// empty rendering once like any other crop.
+pub const EMPTY_LABEL: &str = "__empty__";
+
 /// Below this stddev a zone crop is an empty row.
 const MIN_STDDEV: f32 = 4.0;
 /// Same-UI re-renders of the same text score ~0.99; unrelated text far lower.

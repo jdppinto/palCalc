@@ -174,7 +174,7 @@ fn save_passive_label(
     passive_key: String,
     data: State<GameData>,
 ) -> Result<(), String> {
-    if !data.passives.contains_key(&passive_key) {
+    if passive_key != scanner::textlib::EMPTY_LABEL && !data.passives.contains_key(&passive_key) {
         return Err(format!("unknown passive key: {passive_key}"));
     }
     let crop = png_from_base64(&png_base64_data)?;
@@ -203,12 +203,16 @@ async fn scan_current_box(
             }
         };
         let textlib = TextLib::load(TextLib::default_dir());
+        let debug_dir = GridCalibration::config_path()
+            .parent()
+            .map(|p| p.join("debug"));
         scan_box(
             backend.as_mut(),
             templates,
             &textlib,
             &calib,
             threshold.unwrap_or(0.55),
+            debug_dir.as_deref(),
             |p| {
                 let _ = app.emit("scan-progress", &p);
             },

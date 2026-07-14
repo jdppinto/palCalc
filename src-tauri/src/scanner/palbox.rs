@@ -150,17 +150,27 @@ pub struct ScanProgress {
 }
 
 /// Hover-scan every slot of the currently open box. Never clicks.
+///
+/// When `debug_dir` is set, every slot crop and its top match candidates are
+/// dumped there (wiped per scan) so misdetections can be tuned against real
+/// captures offline.
 pub fn scan_box(
     backend: &mut dyn Backend,
     templates: &IconTemplates,
     textlib: &TextLib,
     calib: &GridCalibration,
     threshold: f32,
+    debug_dir: Option<&std::path::Path>,
     mut on_progress: impl FnMut(ScanProgress),
 ) -> Result<Vec<SlotResult>, String> {
     let total = calib.rows * calib.cols;
     let mut results = Vec::with_capacity(total as usize);
     let half = (calib.slot_size / 2) as i32;
+    let mut report = String::new();
+    if let Some(dir) = debug_dir {
+        let _ = std::fs::remove_dir_all(dir);
+        let _ = std::fs::create_dir_all(dir);
+    }
 
     for row in 0..calib.rows {
         for col in 0..calib.cols {
@@ -172,6 +182,11 @@ pub fn scan_box(
             std::thread::sleep(Duration::from_millis(calib.delay_ms));
             let crop =
                 backend.capture_region(cx - half, cy - half, calib.slot_size, calib.slot_size)?;
+            if let Some(dir) = debug_dir {
+                let _ = crop.save(dir.join(format!("slot_{row}_{col}.png")));
+                let top = templates.identify_top(&crop, 3);
+                report.push_str(&format!("slot {row},{col}: {top:?}\n"));
+            }
             let matched = templates
                 .identify(&crop)
                 .filter(|(_, score)| *score >= threshold);
@@ -192,8 +207,13 @@ pub fn scan_box(
                         continue;
                     };
                     let zone = backend.capture_region(zx, zy, zw, zh)?;
+                    if let Some(dir) = debug_dir {
+                        let _ = zone.save(dir.join(format!("zone_{row}_{col}_passive{i}.png")));
+                    }
                     match textlib.identify(&zone) {
                         TextMatch::Empty => {}
+                        // User-labeled empty rendering — no passive here.
+                        TextMatch::Known(key) if key == super::textlib::EMPTY_LABEL => {}
                         TextMatch::Known(key) => passives.push(PassiveRead::Known { key }),
                         TextMatch::Unknown => {
                             let png = png_base64(&zone)?;
@@ -221,6 +241,9 @@ pub fn scan_box(
                 passives,
             });
         }
+    }
+    if let Some(dir) = debug_dir {
+        let _ = std::fs::write(dir.join("report.txt"), report);
     }
     Ok(results)
 }
@@ -321,7 +344,7 @@ mod tests {
         SCAN_ABORT.store(false, Ordering::Relaxed);
         let textlib = TextLib::load(std::env::temp_dir().join("palcalc-textlib-absent"));
         let mut progress_events = 0;
-        let results = scan_box(&mut backend, &templates, &textlib, &calib, 0.5, |_| {
+        let results = scan_box(&mut backend, &templates, &textlib, &calib, 0.5, None, |_| {
             progress_events += 1;
         })
         .unwrap();
@@ -359,7 +382,7 @@ mod tests {
             ..Default::default()
         };
         let textlib = TextLib::load(std::env::temp_dir().join("palcalc-textlib-absent"));
-        let out = scan_box(&mut backend, &templates, &textlib, &calib, 0.5, |_| {});
+        let out = scan_box(&mut backend, &templates, &textlib, &calib, 0.5, None, |_| {});
         assert!(out.is_err());
         SCAN_ABORT.store(false, Ordering::Relaxed);
     }
