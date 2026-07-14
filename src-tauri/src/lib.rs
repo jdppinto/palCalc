@@ -132,6 +132,8 @@ fn get_cursor_pos() -> Result<(i32, i32), String> {
 
 #[tauri::command]
 fn save_calibration(calib: GridCalibration) -> Result<(), String> {
+    // Fresh calibration invalidates any discovered panel layout.
+    let _ = std::fs::remove_file(scanner::panel::PanelLayout::cache_path());
     calib.save()
 }
 
@@ -348,6 +350,7 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
     let (mx, my, mw, mh) = backend.focused_monitor_rect()?;
     let sx = mw as f64 / 2560.0;
     let sy = mh as f64 / 1440.0;
+    let _ = std::fs::remove_file(scanner::panel::PanelLayout::cache_path());
     let calib = GridCalibration {
         slot_tl: (mx + (934.0 * sx) as i32, my + (314.0 * sy) as i32),
         slot_br: (mx + (1469.0 * sx) as i32, my + (741.0 * sy) as i32),

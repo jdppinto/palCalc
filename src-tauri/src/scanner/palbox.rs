@@ -278,7 +278,13 @@ pub fn scan_box(
                 && l.name_band.1 + l.name_band.3 as i32 <= py + ph as i32
                 && l.name_band.0 + l.name_band.2 as i32 <= px + pw as i32 + 40
         });
-        in_monitor && in_panel
+        // A cached scale far from the panel-derived expectation means the
+        // cache was poisoned by a false discovery hit — rediscover.
+        let px_ok = calib.panel.is_none_or(|panel| {
+            let (lo, hi) = super::panel::name_px_range(panel);
+            l.px_name >= lo && l.px_name <= hi
+        });
+        in_monitor && in_panel && px_ok
     });
     let mut discovery_failures = 0u32;
     let mut row_px: Option<f32> = None;
@@ -322,7 +328,12 @@ pub fn scan_box(
                 None => PanelLayout::discovery_rect(monitor),
             };
             let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
-            match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names) {
+            let px_range = match calib.panel {
+                Some(panel) => super::panel::name_px_range(panel),
+                None => (26.0, 46.0),
+            };
+            match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names, px_range)
+            {
                 Some((l, key, score)) => {
                     name_from_discovery = Some((key, score));
                     layout = Some(l);
@@ -382,7 +393,9 @@ pub fn scan_box(
             passives = match passive_cache.get(&pkey) {
                 Some(cached) => cached.clone(),
                 None => {
-                    let (keys, found_px) = l.read_passives(synth, &pimg, passive_names, row_px);
+                    let expected = calib.panel.map(super::panel::row_px_expected);
+            let (keys, found_px) =
+                l.read_passives(synth, &pimg, passive_names, row_px, expected);
                     if row_px.is_none() {
                         row_px = found_px;
                     }
@@ -467,7 +480,12 @@ pub fn debug_read_sheet(
         };
         out.log.push(format!("discovery region: {drect:?}"));
         let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
-        match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names) {
+        let px_range = match calib.panel {
+            Some(panel) => super::panel::name_px_range(panel),
+            None => (26.0, 46.0),
+        };
+        out.log.push(format!("name px range: {px_range:?}"));
+        match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names, px_range) {
             Some((l, key, score)) => {
                 out.log.push(format!(
                     "discovery: {key} at {score:.3} px {} in {:?} -> band {:?}",
@@ -513,7 +531,8 @@ pub fn debug_read_sheet(
     let t = std::time::Instant::now();
     let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
     out.passives_png = Some(png_base64(&pimg)?);
-    let (keys, px) = l.read_passives(synth, &pimg, passive_names, None);
+    let expected = calib.panel.map(super::panel::row_px_expected);
+    let (keys, px) = l.read_passives(synth, &pimg, passive_names, None, expected);
     out.log.push(format!(
         "passives: {keys:?} (row px {px:?}) in {:?}",
         t.elapsed()

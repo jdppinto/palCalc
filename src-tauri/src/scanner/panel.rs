@@ -29,6 +29,24 @@ const PASSIVES_W: f32 = 9.5;
 const PASSIVES_H: f32 = 7.5;
 const PASSIVE_PX_RATIO: f32 = 0.763;
 
+// Text sizes relative to the panel height (reference: panel h 1115, name
+// ~38px, passive rows ~29px). The panel rect is user-calibrated ground
+// truth, so scales derived from it can't be poisoned by a bad text match —
+// a fixed 26..46 sweep once cached a 26px false hit on the XP bar.
+const NAME_PX_PER_PANEL_H: f32 = 38.0 / 1115.0;
+const ROW_PX_PER_PANEL_H: f32 = 29.0 / 1115.0;
+
+/// Expected name text size for a given panel rect, with tolerance band.
+pub fn name_px_range(panel: (i32, i32, u32, u32)) -> (f32, f32) {
+    let base = panel.3 as f32 * NAME_PX_PER_PANEL_H;
+    (base * 0.8, base * 1.2)
+}
+
+/// Expected passive-row text size for a given panel rect.
+pub fn row_px_expected(panel: (i32, i32, u32, u32)) -> f32 {
+    panel.3 as f32 * ROW_PX_PER_PANEL_H
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PanelLayout {
     /// Band holding the pal name, absolute screen coords.
@@ -73,15 +91,18 @@ impl PanelLayout {
         )
     }
 
-    /// Name search area inside a user-delimited panel rect: the top band.
+    /// Name search area inside a user-delimited panel rect: the very top —
+    /// the name row never sits lower, and a wider band let a false hit on
+    /// the XP bar win once.
     pub fn name_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
-        (panel.0, panel.1, panel.2, (panel.3 as f32 * 0.28) as u32)
+        (panel.0, panel.1, panel.2, (panel.3 as f32 * 0.15) as u32)
     }
 
-    /// Passive-rows search area inside a user-delimited panel rect: the
-    /// bottom band (reference: rows sit at ~86-100% of the panel height).
+    /// Passive-rows search area inside a user-delimited panel rect: rows sit
+    /// at ~88-100% of the panel height; starting higher pulls in the partner
+    /// skill description, which false-matches short passive names.
     pub fn passives_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
-        let top = (panel.3 as f32 * 0.70) as i32;
+        let top = (panel.3 as f32 * 0.84) as i32;
         (
             panel.0,
             panel.1 + top,
@@ -97,9 +118,10 @@ impl PanelLayout {
         region: &RgbaImage,
         region_origin: (i32, i32),
         hints: &[(String, String)],
+        px_range: (f32, f32),
     ) -> Option<(Self, String, f32)> {
         let (key, hit) = synth
-            .best_label(region, hints, true, 26.0, 46.0)
+            .best_label(region, hints, true, px_range.0, px_range.1)
             .filter(|(_, h)| h.score >= NAME_CONFIDENCE)?;
         let layout = Self {
             name_band: (
@@ -152,14 +174,15 @@ impl PanelLayout {
         region: &RgbaImage,
         passive_names: &[(String, String)],
         px_hint: Option<f32>,
+        expected_px: Option<f32>,
     ) -> (Vec<String>, Option<f32>) {
-        // The row scale inherits noise from the name-scale estimate, so
-        // sweep a band around the expected ratio until a hit locks it.
+        // Prefer the panel-derived expectation (user-calibrated ground
+        // truth); the name-scale ratio is the fallback when no panel is set.
         let (lo, hi) = match px_hint {
             Some(px) => (px - 1.0, px + 1.0),
             None => {
-                let px = self.px_name * PASSIVE_PX_RATIO;
-                (px * 0.8, px * 1.1)
+                let px = expected_px.unwrap_or(self.px_name * PASSIVE_PX_RATIO);
+                (px * 0.85, px * 1.15)
             }
         };
         let hits = synth.find_labels(region, passive_names, false, lo, hi, PASSIVE_CONFIDENCE);
@@ -216,8 +239,14 @@ mod tests {
             }
         }
         let (layout, key, score) =
-            PanelLayout::discover(&synth, &crop(&shot, drect), (drect.0, drect.1), &hints)
-                .expect("name discovered");
+            PanelLayout::discover(
+                &synth,
+                &crop(&shot, drect),
+                (drect.0, drect.1),
+                &hints,
+                name_px_range(panel),
+            )
+            .expect("name discovered");
         assert_eq!(key, "Carbunclo", "discovery matched wrong name ({score})");
 
         // Re-read from the cached band over ALL names.
@@ -242,6 +271,7 @@ mod tests {
             &crop(&shot, PanelLayout::passives_search_rect(panel)),
             &passive_names,
             None,
+            Some(row_px_expected(panel)),
         );
         let names: Vec<&str> = read.iter().map(|k| gd.passives[k].name.as_str()).collect();
         assert_eq!(names, vec!["Cheery"], "passive rows misread");
@@ -277,7 +307,7 @@ mod perf_probe {
             .collect();
         for hint in [None, Some(29.0f32)] {
             let t = std::time::Instant::now();
-            let (keys, px) = layout.read_passives(&synth, &region, &names, hint);
+            let (keys, px) = layout.read_passives(&synth, &region, &names, hint, Some(29.0));
             eprintln!(
                 "hint {hint:?}: {:?} px {px:?} in {:?}",
                 keys.iter().map(|k| gd.passives[k].name.clone()).collect::<Vec<_>>(),
