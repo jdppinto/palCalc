@@ -147,15 +147,23 @@ impl PanelLayout {
         (panel.0, panel.1, panel.2, (panel.3 as f32 * 0.15) as u32)
     }
 
-    /// Gender-symbol zone: the right sliver of the name row (reference: the
-    /// symbol sits at ~91-96% of the panel width). Classified by color only.
+    /// Gender-symbol zone: a tight box around the symbol at the right end of
+    /// the name row. Field-measured on a female Yeti (panel (1650,175,630,1115),
+    /// override (2221,198,43,40)): the symbol sits at ~90.6% of panel width and
+    /// is only ~6.8% wide — the earlier 0.86 offset / 0.13 width swept in
+    /// background pixels and diluted the pink vote to None. Vertically it hugs
+    /// the name text (px_name tall, centered in the band) rather than the loose
+    /// discovery band, keeping inert padding out of the color vote.
     pub fn gender_rect(&self, panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
         let (px, _, pw, _) = panel;
+        let h = self.px_name.round().max(1.0) as u32;
+        let y = self.name_band.1
+            + ((self.name_band.3 as f32 - self.px_name) / 2.0).round() as i32;
         (
-            px + (pw as f32 * 0.86) as i32,
-            self.name_band.1,
-            (pw as f32 * 0.13) as u32,
-            self.name_band.3,
+            px + (pw as f32 * 0.906) as i32,
+            y,
+            (pw as f32 * 0.068) as u32,
+            h,
         )
     }
 

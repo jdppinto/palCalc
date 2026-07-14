@@ -24,8 +24,8 @@
 | Screen Capture | Platform-specific | **Wayland (Hyprland):** `libwayshot` (native wlr-screencopy → raw buffer; no process spawn, no PNG round-trip), `grim` shell-out as fallback. **Windows:** `xcap` (DXGI). **X11:** `xcap` (XSHM). |
 | Compositor IPC | Own minimal UNIX-socket client | Window list/geometry, cursor position, exact cursor placement over Hyprland's IPC socket. The `hyprland` crate was dropped after field testing: it uses the pre-0.40 socket path and panics (→ app abort) on socket errors |
 | Mouse/Keyboard | Platform-specific | **Wayland:** cursor moves via Hyprland `movecursor` dispatcher (compositor-side, exact — `ydotool --absolute` is unreliable); clicks/keys via `ydotool`. **Windows/X11:** `enigo` crate. |
-| Pal ID | Icon template matching | Crop slot from screenshot → NCC-match vs 420+ icon PNGs (128×128) from `data/icons/` → map via `icon_map.json` + `breeding_data.json` (tribe key) |
-| Passive OCR | Render-text template matching | Pre-render 114 passive names with `ab_glyph` + NotoSans → NCC-match against cropped overlay region at multiple scales |
+| Pal ID | **Name-text OCR (icons demoted)** | Icon NCC-matching was demoted to an occupancy check (empty vs. occupied) after real captures — hover states distort icons badly. Species is identified by reading the **name row** of the hover panel: `ocrs` neural OCR → closed-vocabulary fuzzy-match against `breeding_data.json` names, with a synthesized-Noto-Sans NCC fallback. Icons still load (`icon_map.json` + `data/icons/`) but only gate empty slots |
+| Passive OCR | **3-layer: neural OCR → learned crops → synth fallback** | (1) `ocrs` + `rten` neural OCR (bundled `data/ocr/*.rten` models, no system deps) with closed-vocab Levenshtein correction against 114 passive names — the "Inventory Kamera" recipe; (2) user-labeled "learned crops" (`textlib.rs`) that match a passive exactly once taught; (3) synthesized `ab_glyph` NotoSans NCC as last resort. Passives read from a 2-column grid anchored on the "Passive Skills" header |
 | Graph | std `HashMap` adjacency | ~33k computed pair→child edges; BFS and beam search are custom anyway — `petgraph` adds a dependency for nothing |
 | State | Rust `serde` + JSON | Pal list persistence, scan cache |
 | Tree Viz | SVG + `d3-zoom`/`d3-selection` | Only the two micro-packages (~10 KB), not full D3 — zoom/pan on Svelte-rendered SVG |
@@ -44,27 +44,21 @@ pcalc/
 │   ├── game_data.json                 # DEPRECATED: pal list has gaps/casing issues; unique_combos ≡ special_combos.json
 │   └── extracted_data.json            # DEPRECATED: raw UE dump, fully redundant at runtime
 ├── src-tauri/                         # Tauri Rust backend
+│   ├── core/                          # `palcalc-core` crate: pure breeding logic (no Tauri/scanner deps)
+│   │   ├── src/{lib,types,data,breeding,planner}.rs
+│   │   └── tests/{breeding,planner}.rs
 │   ├── src/
-│   │   ├── main.rs                    # Tauri entry, command registration
-│   │   ├── data/
-│   │   │   ├── mod.rs
-│   │   │   ├── loader.rs             # Load & normalize all JSON data
-│   │   │   └── types.rs              # Core structs
-│   │   ├── breeding/
-│   │   │   ├── mod.rs
-│   │   │   ├── calculator.rs         # Pal1 + Pal2 → child (rank formula + special combos)
-│   │   │   ├── graph.rs             # Breeding graph construction
-│   │   │   ├── pathfinder.rs        # BFS shortest-path route finder
-│   │   │   └── optimizer.rs         # Beam-search passive route finder
+│   │   ├── main.rs / lib.rs           # Tauri entry, command registration
 │   │   └── scanner/
 │   │       ├── mod.rs
-│   │       ├── platform/            # Capture + input + window geometry behind one trait, runtime-selected
-│   │       │   ├── mod.rs           # trait Backend { window_geometry, capture_region, move_cursor, click, key }
-│   │       │   ├── wayland.rs       # libwayshot + hyprland IPC + ydotool (primary target; grim fallback)
-│   │       │   └── windows.rs       # xcap + enigo (X11 best-effort reuses the same pairing)
-│   │       ├── navigation.rs        # Auto-click palbox grid traversal
-│   │       ├── ocr.rs               # Template-matching OCR for names + passives
-│   │       └── palbox.rs            # Scan state machine, progress events, persistence
+│   │       ├── platform.rs            # Backend trait + HyprlandBackend (libwayshot + IPC socket + ydotool); Windows/X11 stubbed
+│   │       ├── palbox.rs              # Scan state machine (two-pass), GridCalibration, gender, progress, debug bundle
+│   │       ├── panel.rs               # PanelLayout: name-band discovery, passive 2-column grid reader, layout cache
+│   │       ├── ocr.rs                 # ocrs+rten neural OCR + closed-vocab Levenshtein correction
+│   │       ├── synth.rs               # ab_glyph synthesized-text NCC fallback (per-role fonts)
+│   │       ├── textlib.rs             # Learned-crop (label-once) matching
+│   │       └── matcher.rs             # Icon templates → occupancy check only
+│   ├── tests/fixtures/palbox/         # Real + synthetic capture fixtures for regression tests
 │   └── Cargo.toml
 ├── src/                               # Svelte 5 frontend
 │   ├── App.svelte
@@ -203,85 +197,114 @@ When presenting a route, show the exact passives each parent contributes. No pro
 
 ## Phase 5 — Palbox Scanner
 
-**Files:** `src-tauri/src/scanner/platform/`, `navigation.rs`, `ocr.rs`, `palbox.rs`
+> **⚠️ This phase was substantially rebuilt during development against real game
+> captures. The original plan (icon-template pal ID, render-text passive OCR,
+> `hyprland` crate, 4-step click-corner calibration, 960-slot auto-pagination)
+> was replaced. What follows describes the code as it actually stands.**
 
-### Window Selection (`platform/`)
-- **Linux/Wayland (Hyprland) — primary:** `hyprland` crate → `Clients::get()` over the IPC socket (typed window list; no `hyprctl` parsing)
-- **Windows:** enumerate via `xcap`/DXGI
-- **Linux/X11 (best-effort):** enumerate via `xcap`/X11
-- User picks Palworld from a dropdown in the UI
-- Persistent selection (saved to config)
+**Files (actual):** `src-tauri/src/scanner/{mod,platform,palbox,panel,ocr,synth,textlib,matcher}.rs`
 
-### Screen Capture (`platform/`)
-- **Linux/Wayland (Hyprland) — primary:** `libwayshot` (wlr-screencopy): capture into a raw shared-memory buffer, crop regions in-memory. No process spawn and no PNG encode/decode round-trip — matters at up to 960 slots × 1–2 captures per scan.
-  - Fallback: shell out to `grim -g "x,y wxh" -` and decode the PNG from stdout via the `image` crate
-  - wlr-screencopy covers Hyprland/Sway/wlroots; GNOME/KDE Wayland (portal/PipeWire) is out of scope for v1
-- **Windows:** `xcap` → DXGI Desktop Duplication API
-- **Linux/X11 (best-effort):** `xcap` → XSHM (X Shared Memory)
-- **Window position (Wayland):** `hyprland` crate → `Clients::get()` → filter by `initial_title` → `at` (pos) + `size` (w×h)
+The scanner reads **one currently-open palbox box** that the user visually
+delineates — there is no automated 32-box pagination. Species is identified by
+reading the hover panel's **name text**, not by icon matching. It never clicks a
+pal slot (left-click picks a pal up, right-click deploys it — a click scan would
+scramble the box).
 
-### Auto-Navigation (`navigation.rs`)
-- User clicks "Start Auto-Scan"
-- **Calibration (first-time setup):**
-  1. User clicks the top-left pal slot in the palbox grid
-  2. User clicks the bottom-right pal slot (or a known slot far from top-left)
-  3. Compute grid geometry: slot spacing = (br - tl) / (cols - 1, rows - 1). Expected layout: 6 cols × 5 rows (30-slot box) — the exact arrangement isn't documented in any authoritative source, so rows/cols are calibration inputs, not hardcoded assumptions.
-  4. Save to `~/.config/pcalc/calibration.json`
-- **Scanning is hover-based — NEVER click a pal slot.** In the Palbox UI, left-click picks the pal up (drag/move) and right-click deploys it to base/party slots — a click-based scan would scramble the user's box. Hovering shows an info panel; `F` opens the full detail view (confirmed to show work suitability, health, sanity, skills, partner skills).
-- Sequence for each slot:
-  1. Hover slot `[row, col]` (cursor move only, no buttons):
-     ```rust
-     // Wayland: compositor-side cursor placement — exact, unlike ydotool --absolute
-     Dispatch::call(DispatchType::Custom("movecursor", &format!("{} {}", x, y)))?;
-     // Windows/X11: enigo.move_mouse(x, y, Coordinate::Abs)
-     ```
-  2. Wait `scan_delay_ms` (default 300, configurable)
-  3. Capture one frame: slot icon crop (scaled to 128×128) → template match against 420+ pal icon PNGs; no match above threshold ⇒ empty slot
-  4. Read passives from the hover info panel in the same frame — **verify in-game that the hover panel lists passives**; fallback: `ydotool key` F → wait 200ms → capture detail view → OCR passives → Escape to close
-  5. Record pal name + passives or mark as empty
-- Handle pagination: 960 slots = 32 boxes × 30 slots (capacity raised to 960 in v0.3.1.0 — the old 480 figure and the "12 pages × 40" split were both wrong). Box switching: click the box tabs/arrows (safe — not a pal slot) or a keyboard shortcut if one exists (verify in-game); the tab/arrow position is an extra calibration target
-- Abort: Escape key or UI button
-- Safety: configurable delay, cursor restore on abort
+### Platform Backend (`platform.rs`)
+One runtime-selected `Backend` trait: `list_windows`, `capture_region`,
+`move_cursor`, `cursor_pos`, `focused_monitor_rect`.
+- **Linux/Wayland (Hyprland) — the only implemented backend.** `HyprlandBackend`:
+  - **Compositor IPC:** a hand-rolled UNIX-socket client (`j/<cmd>` → JSON) for
+    window list, monitor geometry, and cursor placement. The `hyprland` crate was
+    **dropped** — it uses the pre-0.40 socket path (`/tmp/hypr`) and *panics* on
+    socket errors, which aborts the app from inside a webkit callback. Socket is
+    discovered under `$XDG_RUNTIME_DIR/hypr` then `/tmp/hypr`.
+  - **Capture:** `libwayshot` (wlr-screencopy) into a raw buffer; **`grim -g` shell-out is the fallback** when wlr-screencopy init fails.
+  - **Cursor move:** Hyprland `movecursor` dispatch, auto-probing several dispatch
+    forms (classic `dispatch movecursor x y` and the Lua `hl.dsp.movecursor(...)`
+    variants for 0.55+) until one is accepted. Relative travel via **`ydotool`**
+    (uinput virtual mouse) when present — needed to generate real motion events so
+    the game registers the hover.
+- **Windows / X11:** **not implemented** — the fallback backend returns
+  `"scanner backend for this OS is not implemented yet (Windows planned)"`. (`xcap`/`enigo`
+  from the original plan were never added.)
 
-### OCR Engine (`ocr.rs`)
-- **Pal identification:** Template matching, not OCR.
-  - Each palbox slot shows a 128×128 pal icon
-  - Crop the slot region from the screenshot, scale to 128×128
-  - NCC-match (`imageproc::template_matching`, `CrossCorrelationNormalized` — the `image` crate has no template matching) against all ~420 icon PNGs from `data/icons/`. Crop is resized to template size, so each match is a single-position NCC (one dot product) — all 424 icons in well under 5ms
-  - Best match above `confidence_threshold` (default 0.7) wins
-  - Mapping chain: matched `SheepBall.png` → reverse `icon_map.json` lookup → `breeding_data.json["SheepBall"]` → pal name + key
-- **Passive skill identification:** Render-text template matching.
-  - Pre-render each of the 114 passive names (from `passive_skills_assignable.json`) at the game font (NotoSans, size ~14px) using `ab_glyph`
-  - Crop the passive text region from the hover info panel (or F-detail fallback) screenshot
-  - NCC-match rendered text templates at multiple scales (0.9, 1.0, 1.1)
-  - Top 0-4 matches above 0.6 threshold → passive names
-- Confidence threshold default 0.7 (pal icons) / 0.6 (passive text), configurable
-- If confidence < threshold: flag for manual entry in the UI
+### Calibration (`GridCalibration` in `palbox.rs`, saved to `~/.config/palcalc/calibration.json`)
+Note the config dir is `palcalc/`, not the plan's old `pcalc/`. Fields:
+- `slot_tl` / `slot_br`: screen centers of the top-left and bottom-right slots →
+  `slot_center(row,col)` interpolates the grid. `cols`/`rows` default 6×5,
+  `slot_size` default 90px, `delay_ms` default 300.
+- `panel`: the user-delineated hover-panel rectangle. **All text reads are
+  constrained inside it** — nothing else on screen is processed. Text scales
+  (name px, row px) are *derived from the panel height*, so a good panel rect
+  can't be poisoned by a stray match.
+- `zones`: optional user-drawn override rects per field (`name`, `gender`,
+  `passives`) — used by the debug tool's drag-to-override flow.
 
-### Auto-Navigation (`palbox.rs`)
-- Per-slot loop: `movecursor` hover (no click) → wait `scan_delay_ms` → capture frame → icon match slot crop + `best_text_match` passives from the hover info panel (F-detail + Escape only as fallback) → store result
-- `scan_grid()` now accepts `AppHandle` for progress, `scan_delay_ms` for configurable speed
-- Abort: `SCAN_ABORT` static `AtomicBool`, checked each iteration; frontend calls `abort_scan` command. Resets to `false` on scan start and after abort.
+### Scan flow — two passes (`scan_box` in `palbox.rs`)
+**Pass 1 — occupancy (`classify_grid`):** park the cursor off-grid, take *one*
+unhovered capture of the whole grid, and classify each slot empty vs. occupied
+(`matcher::slot_occupied`). Icons are used only for this occupancy check plus
+optional debug "candidate" logging — **not** for species ID (hover states distort
+them too much).
 
-### Palbox State (`palbox.rs`)
-- `Vec<ScannedPal> { id: PalId, name, passives: Vec<String>, level, gender }`
-- Emit progress via Tauri events: `scan-progress { current, total, current_pal }`
-- Persist to `~/.config/pcalc/palbox_cache.json` on scan completion
-- Load cache on app start (not yet wired)
+**Pass 2 — per occupied slot:** `movecursor` hover → sleep `delay_ms` → read the
+panel via `PanelLayout`:
+- **Name band discovery** (once, cached to `panel_layout.json`): OCR the name
+  search region and fuzzy-match against species names; synth-NCC fallback. The
+  name row is the anchor (bold text; anchoring on the "Passive Skills" header was
+  tried and failed at ~0.3). Cached layout is **validated on load and deleted if
+  implausible** (a fixed px sweep once cached a false hit on the XP bar).
+- **Name read:** OCR + closed-vocab correction (`NAME_CONFIDENCE = 0.45`),
+  authoritative when confident.
+- **Gender:** color-only classification of a right-sliver zone of the name row —
+  **blue ⇒ male, PINK ⇒ female**. Plain saturated red does *not* vote (an alpha
+  pal's red horned icon shares the zone).
+- **Passives:** `read_passive_rows` reads a **2-column grid** (field capture:
+  `Swift | Artisan` on one line). The "Passive Skills" header anchors the grid
+  band; rows outside it (partner-skill text above, hotbar below on overshoot) are
+  ignored. Per cell, precedence is: **learned crop** (exact, `textlib.rs`) →
+  **cell-crop OCR + dictionary** (`OCR_MIN_SIM_PASSIVE = 0.85`) → region-pass OCR →
+  **synth NCC** → else surface the crop as an *unknown* for one-click labeling.
+- **Memoization:** boxes are full of duplicates, so identical name/passive
+  captures are hashed (FNV) and read once per scan.
 
-### Frontend (`PalboxScanner.svelte`)
-- **Calibration wizard** (4 steps):
-  - Step 1: "Move mouse to top-left slot" → `get_cursor_pos` (Wayland: `hyprland` crate `CursorPosition::get()`; Windows/X11: `enigo`)
-  - Step 2: "Move mouse to bottom-right slot" → `get_cursor_pos`
-  - Step 3: App hovers first slot (info panel appears) → "Move mouse to top-left of passive text" → `get_cursor_pos`
-  - Step 4: "Move mouse to bottom-right of passive text" → `get_cursor_pos`
-  - Saves `GridCalibration` with `detail_crop` to `~/.config/pcalc/calibration.json`
-- Delay slider (100–1000ms) before scan start, passed as `scan_delay_ms`
-- Progress bar + "X / Y — current pal" via `listen('scan-progress', ...)`
-- Abort button during scan → calls `abort_scan` command
-- Live-updating grid of scanned pals (not yet filterable)
-- Per-pal: name, passives list
-- "Add All to Owned Pals" button → auto-saves to `~/.config/pcalc/owned_pals.json` via store subscription
+Abort: `SCAN_ABORT` static `AtomicBool`, checked each iteration; reset on start.
+Progress via the `on_progress` callback (`ScanProgress { current, total, species }`).
+
+### OCR engine (`ocr.rs`)
+- **`ocrs` + `rten`** neural OCR — pure Rust, **models bundled** (`data/ocr/text-detection.rten`,
+  `text-recognition.rten`, `include_bytes!`), no system dependencies. Engine
+  built once in a `OnceLock`.
+- Output is **never trusted raw**: every line is fuzzy-matched (normalized
+  Levenshtein) against the closed vocabulary — the "Inventory Kamera" recipe, so
+  OCR only needs to be roughly right. Small captures (<128px tall) are 2× upscaled first.
+
+### Synthesized-text fallback (`synth.rs`) & learned crops (`textlib.rs`)
+- `synth.rs`: renders known strings with `ab_glyph` and locates them via
+  alpha-weighted NCC. **Per-role fonts** were picked by a font-audit harness (see
+  `font_audit` test) — names use Google Noto Sans Bold, rows use the game's
+  NotoSans-Medium.
+- `textlib.rs`: **label-once** matching. Because zone crops are fixed-size, the
+  first time an unknown crop appears the user labels it; the crop is stored and
+  every later capture matches near-perfectly. Includes a reserved `-empty-` label.
+
+### Debug tooling (heavily used during development)
+- `debug_read_sheet` reads one hovered pal in isolation with a step-by-step log,
+  writing a **shareable bundle** to `~/.config/palcalc/debug-report/` (captures +
+  `report.json` with the log, calibration, and cached layout — one `cp -r` hands
+  over full context). The `gaming-debug/` dir in the repo is such a bundle.
+- The UI overlays the detected zone rects on the panel capture and lets the user
+  **drag to override** them, then re-run.
+
+### Palbox state & frontend (`PalboxScanner.svelte`)
+- `SlotResult { row, col, species, unidentified, score, gender, passives, passive_unknowns, crop_png }`.
+  `unidentified` distinguishes "occupied but no confident match" (offer a
+  correction / teach flow) from "empty".
+- Owned pals auto-save to `~/.config/palcalc/owned_pals.json` via store subscription.
+- **Not implemented vs. original plan:** no 4-step click-corner wizard, no
+  auto-pagination across boxes, no `palbox_cache.json` load-on-start,
+  no F-detail-view fallback capture.
 
 ## Phase 6 — Integration & Polish
 
@@ -307,10 +330,11 @@ What the logic rests on, ranked by how well-established it is. Anything below "c
 ## Key Design Decisions
 
 - **Data provenance**: `breeding_data.json` + `special_combos.json` are the only breeding-logic sources. `pals.json`/`breeding.json` are launch-era — the rank space was rescaled since (Lamball 1470 → 3050) and 97.9% of `breeding.json` pairs now yield a different child. `game_data.json`/`extracted_data.json` merely duplicate `special_combos.json`. The full combo table is computed at load from ranks + specials, so game updates only require refreshing `breeding_data.json`/`special_combos.json`.
-- **OCR performance**: Template matching over known glyphs (not Tesseract). All pal names and passives are known strings — pre-render templates, match via normalized cross-correlation. ~50ms/pal.
+- **OCR performance**: **Neural OCR (`ocrs`/`rten`) with closed-vocab correction is the primary reader** (bundled models, no system deps), backed by learned crops and a synthesized-glyph NCC fallback. The original "pre-render templates only, no Tesseract" plan proved too weak against the real game font — the font-audit harness (`synth.rs` per-role fonts) documents that dead end.
+- **Species identification**: **name-text OCR, not icon matching.** Icons were demoted to an empty/occupied occupancy check because hover states distort them; the panel name row is the authoritative source.
 - **Auto-navigation safety**: Configurable delay, Escape to abort, cursor restore.
 - **Passive scoring**: Deterministic heuristic (no probabilities). `+1` per desired, `-0.25` per undesired. Chosen because real inheritance odds are community-tested only and contested (see Mechanics Confidence).
 - **Beam search**: Width=1000, prune dominated paths (more steps + lower score).
 - **Tree rendering**: Svelte-rendered SVG; zoom/pan via `d3-zoom` + `d3-selection` micro-packages only, with `<foreignObject>` for rich node content.
-- **Cross-platform strategy**: one `Backend` trait (capture + input + window geometry), selected at runtime. Wayland/Hyprland first (`libwayshot` wlr-screencopy + `hyprland` IPC + `ydotool` clicks), Windows second (`xcap` DXGI + `enigo`), X11 best-effort (same crates as Windows). `grim` shell-out kept as Wayland capture fallback; GNOME/KDE portal capture out of scope for v1.
+- **Cross-platform strategy**: one `Backend` trait (capture + input + window geometry), selected at runtime. **Only the Hyprland/Wayland backend is implemented** (`libwayshot` wlr-screencopy + hand-rolled Hyprland IPC socket client + `ydotool` motion, `grim` capture fallback). The `hyprland` crate was dropped (panics on socket errors). Windows (`xcap`/`enigo`) and X11 are **not yet built** — the fallback backend errors out. GNOME/KDE portal capture out of scope for v1.
 - **Special combos with gender**: `ga`/`gb` fields tracked; gender-aware pathfinding flags gender requirements. Only 2 of 258 combos are gendered (Katress/Wixen pair). Note the encoding differs across files: `"M"`/`"F"` in `special_combos.json` vs `"NoneMale"`/`"NoneFemale"` in the redundant `game_data.json`.
