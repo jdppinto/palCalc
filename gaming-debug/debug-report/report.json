@@ -3,61 +3,55 @@
     "cols": 6,
     "delay_ms": 300,
     "panel": [
-      1650,
+      1641,
       175,
-      630,
-      1115
+      638,
+      1065
     ],
     "rows": 5,
     "slot_br": [
-      1469,
-      741
+      0,
+      0
     ],
-    "slot_size": 96,
+    "slot_size": 90,
     "slot_tl": [
-      934,
-      314
+      0,
+      0
     ],
     "zones": {
-      "gender": [
-        2221,
-        198,
-        43,
-        40
-      ],
       "name": [
-        1789,
-        201,
-        381,
+        1790,
+        202,
+        380,
         40
       ],
       "passives": [
-        1663,
-        1121,
-        599,
-        95
+        1666,
+        1122,
+        590,
+        90
       ]
     }
   },
   "kind": "sheet",
   "log": [
     "monitor: (0, 0, 2560, 1440)",
-    "panel rect: Some((1650, 175, 630, 1115))",
-    "cached layout (validated): name_band (1650, 188, 654, 59) px 40.7",
-    "name zone: (1789, 201, 381, 40) (override: true)",
-    "name read: Yeti at 1.000 in 56.943432ms",
-    "gender zone: (2221, 198, 43, 40) (override: true)",
-    "gender: Some(Female)",
-    "passives region: (1663, 1121, 599, 95) (override: true)",
-    "passives: [\"MoveSpeed_up_2\", \"MoveSpeed_up_1\", \"Nocturnal\", \"MoveSpeed_up_3\"] + 0 unknown row(s) (row px None) in 263.474393ms"
+    "panel rect: Some((1641, 175, 638, 1065))",
+    "cached layout (validated): name_band (1754, 186, 378, 72) px 42.036774",
+    "name zone: (1790, 202, 380, 40) (override: true)",
+    "name read: SoldierBee at 1.000 in 63.959602ms",
+    "gender zone: (2219, 196, 43, 38) (override: false)",
+    "gender: Some(Male)",
+    "passives region: (1666, 1122, 590, 90) (override: true)",
+    "passives: [\"CraftSpeed_up2\", \"CraftSpeed_up3\", \"MoveSpeed_up_3\", \"Nocturnal\"] + 0 unknown row(s) (row px None) in 274.588724ms"
   ],
   "panel_layout": {
     "name_band": [
-      1650,
-      188,
-      654,
-      59
+      1754,
+      186,
+      378,
+      72
     ],
-    "px_name": 40.70000076293945
+    "px_name": 42.036773681640625
   }
 }
