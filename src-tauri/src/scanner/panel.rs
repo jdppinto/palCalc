@@ -248,6 +248,18 @@ impl PanelLayout {
             let y0 = by.saturating_sub(4);
             let h = (bh + 8).min(region.height() - y0);
             let strip = image::imageops::crop_imm(region, 0, y0, region.width(), h).to_image();
+            // Passive rows are BOXED; bare text bands like the "Passive
+            // Skills" header are not rows at all. The strong border line can
+            // sit a few px below the text band (field data: the bottom border
+            // is the reliable one), so boxedness is judged on an extended
+            // window around the band.
+            let ey0 = by.saturating_sub(6);
+            let eh = (bh + 20).min(region.height() - ey0);
+            let extended =
+                image::imageops::crop_imm(region, 0, ey0, region.width(), eh).to_image();
+            if !is_boxed_row(&extended) {
+                continue;
+            }
             // Learned template first — exact renders beat synthesis.
             match textlib.identify(&strip) {
                 TextMatch::Known(label) if label == EMPTY_LABEL => continue,
@@ -323,6 +335,35 @@ impl PanelLayout {
         let px = hits.first().map(|(_, h)| h.px);
         (hits.into_iter().map(|(k, _)| k).collect(), px)
     }
+}
+
+/// A passive row renders inside a bordered box: some horizontal line spans a
+/// wide bright-or-saturated run (~45% of the region width — pale, gold, red
+/// or teal borders alike). Bare text (section headers) tops out around 10%
+/// coverage per line, so the width requirement excludes it.
+fn is_boxed_row(strip: &RgbaImage) -> bool {
+    let (w, h) = strip.dimensions();
+    if w < 40 || h < 6 {
+        return false;
+    }
+    for y in 0..h {
+        let mut edge = 0u32;
+        for x in 0..w {
+            let p = strip.get_pixel(x, y);
+            let (r, g, b) = (p[0] as i32, p[1] as i32, p[2] as i32);
+            let l = 0.299 * r as f32 + 0.587 * g as f32 + 0.114 * b as f32;
+            let sat = r.max(g).max(b) - r.min(g).min(b);
+            // Border pixels are bright (pale/gold boxes) or strongly colored
+            // (red/teal accents) — either counts.
+            if l > 90.0 || sat > 50 {
+                edge += 1;
+            }
+        }
+        if edge as f32 / w as f32 > 0.3 {
+            return true;
+        }
+    }
+    false
 }
 
 /// Small stable hash for row-crop identity in the UI.
@@ -702,13 +743,12 @@ mod learned_rows {
         let (keys, unknowns, _) =
             layout.read_passive_rows(&synth, &lib, &region, &names, None, expected);
         assert!(keys.is_empty(), "no confident synth match expected: {keys:?}");
-        // Two text bands surface: the "Passive Skills" header and the row.
-        assert_eq!(unknowns.len(), 2, "header + Downtrodden row");
+        // The "Passive Skills" header is filtered out structurally (no box
+        // border); only the actual row surfaces.
+        assert_eq!(unknowns.len(), 1, "only the Downtrodden row");
 
-        // User labels both once: header = not-a-passive, row = Downtrodden.
-        let header = crate::scanner::textlib::png_from_base64(&unknowns[0].1).unwrap();
-        lib.learn(crate::scanner::textlib::EMPTY_LABEL, &header).unwrap();
-        let crop = crate::scanner::textlib::png_from_base64(&unknowns[1].1).unwrap();
+        // User labels it once.
+        let crop = crate::scanner::textlib::png_from_base64(&unknowns[0].1).unwrap();
         lib.learn("Deffence_down1", &crop).unwrap();
 
         let (keys, unknowns, _) =
