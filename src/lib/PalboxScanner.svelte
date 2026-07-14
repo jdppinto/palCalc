@@ -12,6 +12,7 @@
     rows: number;
     slot_size: number;
     delay_ms: number;
+    panel: [number, number, number, number] | null;
   }
 
   interface ScannerStatus {
@@ -41,10 +42,13 @@
     rows: 5,
     slot_size: 90,
     delay_ms: 300,
+    panel: null,
   });
+  // Panel corner staging (top-left captured, waiting for bottom-right)
+  let panelTl = $state<[number, number] | null>(null);
   let calibSaved = $state(false);
   let countdown = $state(0);
-  let capturing = $state<0 | 1 | 2>(0);
+  let capturing = $state<0 | 1 | 2 | 3 | 4>(0);
   let scanning = $state(false);
   let progress = $state<{ current: number; total: number } | null>(null);
   let results = $state<SlotResult[] | null>(null);
@@ -87,7 +91,7 @@
     }
   }
 
-  async function captureCorner(which: 1 | 2) {
+  async function captureCorner(which: 1 | 2 | 3 | 4) {
     capturing = which;
     for (let i = 5; i > 0; i--) {
       countdown = i;
@@ -97,7 +101,16 @@
     try {
       const [x, y] = await invoke<[number, number]>("get_cursor_pos");
       if (which === 1) calib.slot_tl = [x, y];
-      else calib.slot_br = [x, y];
+      else if (which === 2) calib.slot_br = [x, y];
+      else if (which === 3) panelTl = [x, y];
+      else if (panelTl) {
+        calib.panel = [
+          Math.min(panelTl[0], x),
+          Math.min(panelTl[1], y),
+          Math.abs(x - panelTl[0]),
+          Math.abs(y - panelTl[1]),
+        ];
+      }
       calibSaved = false;
     } catch (e) {
       error = String(e);
@@ -206,6 +219,23 @@
         {capturing === 2 && countdown ? `…${countdown}` : "Capture bottom-right slot"}
       </button>
       <span class="pos">({calib.slot_br[0]}, {calib.slot_br[1]})</span>
+    </div>
+    <h4>Pal sheet (hover panel) bounds</h4>
+    <p class="dim-text">
+      Hover any pal so its info sheet shows, then capture its top-left and
+      bottom-right corners. All name/passive reading happens ONLY inside this
+      rectangle.
+    </p>
+    <div class="row">
+      <button onclick={() => captureCorner(3)} disabled={capturing !== 0}>
+        {capturing === 3 && countdown ? `…${countdown}` : "Capture sheet top-left"}
+      </button>
+      <button onclick={() => captureCorner(4)} disabled={capturing !== 0}>
+        {capturing === 4 && countdown ? `…${countdown}` : "Capture sheet bottom-right"}
+      </button>
+      <span class="pos">
+        {calib.panel ? `(${calib.panel.join(", ")})` : panelTl ? "top-left set…" : "not set"}
+      </span>
     </div>
     <div class="row">
       <label>cols <input type="number" min="1" bind:value={calib.cols} /></label>

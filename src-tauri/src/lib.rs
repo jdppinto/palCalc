@@ -264,6 +264,13 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         rows: 5,
         slot_size: ((96.0 * sx) as u32).max(40),
         delay_ms: 300,
+        // Panel bounds on the reference layout, scaled with the monitor.
+        panel: Some((
+            mx + (1650.0 * sx) as i32,
+            my + (175.0 * sy) as i32,
+            (630.0 * sx) as u32,
+            (1115.0 * sy) as u32,
+        )),
         zones: Default::default(),
     };
     calib.save()?;

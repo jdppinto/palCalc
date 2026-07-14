@@ -29,6 +29,10 @@ pub struct GridCalibration {
     pub slot_size: u32,
     /// Hover delay before capturing, ms.
     pub delay_ms: u64,
+    /// The hover-panel ("pal sheet") bounds, absolute screen rect. All text
+    /// reads are constrained inside it — nothing else on screen is processed.
+    #[serde(default)]
+    pub panel: Option<(i32, i32, u32, u32)>,
     /// User-delineated hover-panel field zones, absolute screen rects
     /// (x, y, w, h). Known keys: "gender", "passive1".."passive4", "name".
     /// The panel appears at a fixed position, so one calibration serves
@@ -46,6 +50,7 @@ impl Default for GridCalibration {
             rows: 5,
             slot_size: 90,
             delay_ms: 300,
+            panel: None,
             zones: HashMap::new(),
         }
     }
@@ -257,10 +262,17 @@ pub fn scan_box(
     // (icon hints cover the rest).
     let mut full_name_budget = 2u32;
     let mut layout = PanelLayout::load_cache().filter(|l| {
-        l.name_band.0 >= mx
+        let in_monitor = l.name_band.0 >= mx
             && l.name_band.1 >= my
             && l.name_band.0 + l.name_band.2 as i32 <= mx + mw as i32
-            && l.name_band.1 + l.name_band.3 as i32 <= my + mh as i32
+            && l.name_band.1 + l.name_band.3 as i32 <= my + mh as i32;
+        let in_panel = calib.panel.is_none_or(|(px, py, pw, ph)| {
+            l.name_band.0 >= px
+                && l.name_band.1 >= py
+                && l.name_band.1 + l.name_band.3 as i32 <= py + ph as i32
+                && l.name_band.0 + l.name_band.2 as i32 <= px + pw as i32 + 40
+        });
+        in_monitor && in_panel
     });
     let mut discovery_failures = 0u32;
     let mut row_px: Option<f32> = None;
@@ -309,7 +321,10 @@ pub fn scan_box(
         // Panel layout discovery (once; give up after repeated failures).
         let mut name_from_discovery: Option<(String, f32)> = None;
         if layout.is_none() && discovery_failures < 3 {
-            let drect = PanelLayout::discovery_rect(monitor);
+            let drect = match calib.panel {
+                Some(pr) => PanelLayout::name_search_rect(pr),
+                None => PanelLayout::discovery_rect(monitor),
+            };
             let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
             let hint_set: &[(String, String)] = if hints.is_empty() {
                 species_names
@@ -374,7 +389,10 @@ pub fn scan_box(
             }
             gender = classify_gender(&band);
 
-            let pr = l.passives_rect();
+            let pr = match calib.panel {
+                Some(panel) => PanelLayout::passives_search_rect(panel),
+                None => l.passives_rect(),
+            };
             let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
             if let Some(dir) = debug_dir {
                 let _ = pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
@@ -504,6 +522,7 @@ mod tests {
             rows: 2,
             slot_size: 110,
             delay_ms: 0,
+            panel: None,
             zones: HashMap::new(),
         };
         let mut backend = MockBackend {

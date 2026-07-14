@@ -73,6 +73,23 @@ impl PanelLayout {
         )
     }
 
+    /// Name search area inside a user-delimited panel rect: the top band.
+    pub fn name_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
+        (panel.0, panel.1, panel.2, (panel.3 as f32 * 0.28) as u32)
+    }
+
+    /// Passive-rows search area inside a user-delimited panel rect: the
+    /// bottom band (reference: rows sit at ~86-100% of the panel height).
+    pub fn passives_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
+        let top = (panel.3 as f32 * 0.70) as i32;
+        (
+            panel.0,
+            panel.1 + top,
+            panel.2,
+            panel.3 - top as u32,
+        )
+    }
+
     /// Discover the name band from a capture of `discovery_rect`, using icon
     /// candidates as hints. Returns the layout plus the matched species.
     pub fn discover(
@@ -187,7 +204,10 @@ mod tests {
             ("Carbunclo".to_string(), "Lifmunk".to_string()),
             ("SheepBall".to_string(), "Lamball".to_string()),
         ];
-        let drect = PanelLayout::discovery_rect(monitor);
+        // Exercise the user-delimited panel path (the default 1440p rect).
+        let panel = (1650, 175, 630, 1115);
+        let _ = monitor;
+        let drect = PanelLayout::name_search_rect(panel);
         {
             let region = crop(&shot, drect);
             for h in &hints {
@@ -219,7 +239,7 @@ mod tests {
             .collect();
         let (read, _) = layout.read_passives(
             &synth,
-            &crop(&shot, layout.passives_rect()),
+            &crop(&shot, PanelLayout::passives_search_rect(panel)),
             &passive_names,
             None,
         );
