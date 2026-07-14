@@ -22,7 +22,7 @@
 | Frontend | Svelte 5 | Reactive, minimal overhead, fast dev |
 | Platform Priority | Wayland → Windows → X11 | Hyprland/Wayland is the primary target, Windows second; X11 best-effort (reuses the Windows crates) |
 | Screen Capture | Platform-specific | **Wayland (Hyprland):** `libwayshot` (native wlr-screencopy → raw buffer; no process spawn, no PNG round-trip), `grim` shell-out as fallback. **Windows:** `xcap` (DXGI). **X11:** `xcap` (XSHM). |
-| Compositor IPC | `hyprland` crate | Window list/geometry, cursor position, and exact cursor placement over Hyprland's IPC socket — typed API, replaces `hyprctl` process spawns |
+| Compositor IPC | Own minimal UNIX-socket client | Window list/geometry, cursor position, exact cursor placement over Hyprland's IPC socket. The `hyprland` crate was dropped after field testing: it uses the pre-0.40 socket path and panics (→ app abort) on socket errors |
 | Mouse/Keyboard | Platform-specific | **Wayland:** cursor moves via Hyprland `movecursor` dispatcher (compositor-side, exact — `ydotool --absolute` is unreliable); clicks/keys via `ydotool`. **Windows/X11:** `enigo` crate. |
 | Pal ID | Icon template matching | Crop slot from screenshot → NCC-match vs 420+ icon PNGs (128×128) from `data/icons/` → map via `icon_map.json` + `breeding_data.json` (tribe key) |
 | Passive OCR | Render-text template matching | Pre-render 114 passive names with `ab_glyph` + NotoSans → NCC-match against cropped overlay region at multiple scales |

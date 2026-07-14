@@ -42,14 +42,56 @@ pub fn detect() -> Result<Box<dyn Backend>, String> {
 #[cfg(target_os = "linux")]
 mod linux {
     use super::{Backend, WindowInfo};
-    use hyprland::data::{Clients, CursorPosition};
-    use hyprland::dispatch::{Dispatch, DispatchType};
-    use hyprland::shared::HyprData;
     use image::RgbaImage;
     use libwayshot::region::{LogicalRegion, Position, Region, Size};
     use libwayshot::WayshotConnection;
+    use serde::Deserialize;
+    use std::io::{Read, Write};
+    use std::os::unix::net::UnixStream;
+    use std::path::PathBuf;
+
+    // Hyprland IPC is spoken directly over its UNIX socket. The hyprland crate
+    // was dropped after field testing: it still looks for the pre-0.40 socket
+    // path (/tmp/hypr) and PANICS on socket errors — inside a webkit callback
+    // that can't unwind, that aborts the entire app.
+
+    #[derive(Deserialize)]
+    struct HyprClient {
+        at: (i32, i32),
+        size: (i32, i32),
+        #[serde(default)]
+        title: String,
+        #[serde(default, rename = "initialTitle")]
+        initial_title: String,
+    }
+
+    #[derive(Deserialize)]
+    struct HyprCursor {
+        x: i64,
+        y: i64,
+    }
+
+    fn socket_path() -> Result<PathBuf, String> {
+        let sig = std::env::var("HYPRLAND_INSTANCE_SIGNATURE")
+            .map_err(|_| "HYPRLAND_INSTANCE_SIGNATURE not set — not in a Hyprland session?")?;
+        let mut candidates = Vec::new();
+        if let Ok(runtime) = std::env::var("XDG_RUNTIME_DIR") {
+            candidates.push(
+                PathBuf::from(runtime)
+                    .join("hypr")
+                    .join(&sig)
+                    .join(".socket.sock"),
+            );
+        }
+        // Pre-Hyprland-0.40 location.
+        candidates.push(PathBuf::from("/tmp/hypr").join(&sig).join(".socket.sock"));
+        candidates.into_iter().find(|p| p.exists()).ok_or_else(|| {
+            "Hyprland IPC socket not found (checked $XDG_RUNTIME_DIR/hypr and /tmp/hypr)".into()
+        })
+    }
 
     pub struct HyprlandBackend {
+        socket: PathBuf,
         /// None when wlr-screencopy init failed — capture falls back to `grim`.
         wayshot: Option<WayshotConnection>,
     }
@@ -57,8 +99,23 @@ mod linux {
     impl HyprlandBackend {
         pub fn new() -> Result<Self, String> {
             Ok(Self {
+                socket: socket_path()?,
                 wayshot: WayshotConnection::new().ok(),
             })
+        }
+
+        /// One request/response over the IPC socket ("j/<cmd>" returns JSON,
+        /// "dispatch <cmd>" returns "ok"). Hyprland closes after replying.
+        fn request(&self, msg: &str) -> Result<String, String> {
+            let mut s = UnixStream::connect(&self.socket).map_err(|e| {
+                format!("hyprland socket connect ({}): {e}", self.socket.display())
+            })?;
+            s.write_all(msg.as_bytes())
+                .map_err(|e| format!("hyprland socket write: {e}"))?;
+            let mut out = String::new();
+            s.read_to_string(&mut out)
+                .map_err(|e| format!("hyprland socket read: {e}"))?;
+            Ok(out)
         }
 
         fn capture_grim(x: i32, y: i32, w: u32, h: u32) -> Result<RgbaImage, String> {
@@ -88,17 +145,19 @@ mod linux {
         }
 
         fn list_windows(&mut self) -> Result<Vec<WindowInfo>, String> {
-            Ok(Clients::get()
-                .map_err(|e| format!("hyprland clients: {e}"))?
-                .iter()
+            let json = self.request("j/clients")?;
+            let clients: Vec<HyprClient> = serde_json::from_str(&json)
+                .map_err(|e| format!("hyprland clients parse: {e}"))?;
+            Ok(clients
+                .into_iter()
                 .map(|c| WindowInfo {
                     title: if c.title.is_empty() {
-                        c.initial_title.clone()
+                        c.initial_title
                     } else {
-                        c.title.clone()
+                        c.title
                     },
-                    x: c.at.0 as i32,
-                    y: c.at.1 as i32,
+                    x: c.at.0,
+                    y: c.at.1,
                     w: c.size.0.max(0) as u32,
                     h: c.size.1.max(0) as u32,
                 })
@@ -128,12 +187,18 @@ mod linux {
 
         fn move_cursor(&mut self, x: i32, y: i32) -> Result<(), String> {
             // Compositor-side placement — exact, unlike ydotool --absolute
-            Dispatch::call(DispatchType::Custom("movecursor", &format!("{x} {y}")))
-                .map_err(|e| format!("hyprland movecursor: {e}"))
+            let reply = self.request(&format!("dispatch movecursor {x} {y}"))?;
+            if reply.trim() == "ok" {
+                Ok(())
+            } else {
+                Err(format!("hyprland movecursor: {reply}"))
+            }
         }
 
         fn cursor_pos(&mut self) -> Result<(i32, i32), String> {
-            let p = CursorPosition::get().map_err(|e| format!("hyprland cursorpos: {e}"))?;
+            let json = self.request("j/cursorpos")?;
+            let p: HyprCursor = serde_json::from_str(&json)
+                .map_err(|e| format!("hyprland cursorpos parse: {e}"))?;
             Ok((p.x as i32, p.y as i32))
         }
     }

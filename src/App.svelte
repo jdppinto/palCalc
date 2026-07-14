@@ -84,10 +84,4 @@
     background: var(--accent-soft);
     color: var(--accent);
   }
-
-  .todo {
-    padding: 3rem;
-    text-align: center;
-    color: var(--text-dim);
-  }
 </style>
