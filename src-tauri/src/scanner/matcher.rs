@@ -64,11 +64,12 @@ pub struct IconTemplates {
 
 /// Directory of user-corrected slot crops (`<tribe>__<n>.png`) — the user's
 /// own game rendering, learned once per species via the results-grid fix
-/// button. These match at ~0.95+ and cover species whose reference art is
-/// wrong in the icon dump: the game renders STANDARD art, but the extracted
-/// set contains nonstandard art for some pals (e.g. SheepBall.png is not
-/// Lamball's real icon, and an audit showed the real art exists under no
-/// filename at all — likely dumped from a modded install).
+/// button. These match at ~0.95+ and cover any case where the stock icon
+/// isn't what the game shows: rendering differences (hover enlargement, disc
+/// clipping) that dilute stock scores, future art updates, or pals whose
+/// icons the dump simply lacks. (Field note: what first looked like "icon
+/// drift" turned out to be UNRELEASED dev pals spawned via a cheat menu —
+/// they have no icon, placeholder names, zukan -1, and aren't breedable.)
 pub fn user_templates_dir() -> std::path::PathBuf {
     let base = std::env::var_os("XDG_CONFIG_HOME")
         .map(std::path::PathBuf::from)
@@ -557,10 +558,12 @@ mod real_fixtures {
         }
     }
 
-    /// The learning loop: in-game Lamball art differs entirely from the
-    /// extracted SheepBall.png, so stock matching fails — but correcting one
-    /// capture must make its breeding-pair twin (a different capture of the
-    /// same species) identify at high confidence.
+    /// The learning loop: slot_0_0 holds a pal with no icon in the stock set
+    /// (an unreleased dev pal the tester spawned — think BlueWoolRabbit), so
+    /// stock matching can't succeed. Teaching one capture under some label
+    /// must make its twin (a different capture of the same species) identify
+    /// at high confidence. SheepBall stands in as the taught label; the
+    /// mechanism is what's under test.
     #[test]
     fn learned_template_identifies_sibling_capture() {
         let gd = GameData::load().unwrap();
@@ -571,8 +574,7 @@ mod real_fixtures {
         assert_ne!(
             stock.identify(&twin).map(|(k, _)| k),
             Some("SheepBall".to_string()),
-            "premise: stock art must NOT match (in-game art drifted); if this \
-             fails the icon set was updated and this test should be revisited"
+            "premise: this capture has no stock template to match"
         );
 
         let dir = std::env::temp_dir().join(format!("palcalc-paltpl-{}", std::process::id()));
@@ -588,4 +590,5 @@ mod real_fixtures {
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
+
 
