@@ -98,6 +98,11 @@ mod linux {
         /// config rewired `dispatch` through the Lua VM (hl.dsp namespace) and
         /// broke the classic syntax, so the form is discovered at first use.
         move_form: Option<usize>,
+        /// Whether a working ydotool (uinput virtual mouse) is present —
+        /// probed lazily. Real relative motion events are the most reliable
+        /// way to trigger a game's hover detection; compositor warps teleport
+        /// the cursor without the event stream games listen for.
+        ydotool: Option<bool>,
     }
 
     /// Candidate movecursor forms, classic first. Which one a given Hyprland
@@ -117,7 +122,61 @@ mod linux {
                 socket: socket_path()?,
                 wayshot: WayshotConnection::new().ok(),
                 move_form: None,
+                ydotool: None,
             })
+        }
+
+        fn ydotool_available(&mut self) -> bool {
+            *self.ydotool.get_or_insert_with(|| {
+                std::process::Command::new("ydotool")
+                    .args(["mousemove", "-x", "0", "-y", "0"])
+                    .output()
+                    .map(|o| o.status.success())
+                    .unwrap_or(false)
+            })
+        }
+
+        /// Real relative mouse motion via uinput, converging on the target by
+        /// re-reading the cursor position (pointer acceleration makes single
+        /// deltas land off-target).
+        fn move_relative_closed_loop(&mut self, x: i32, y: i32) -> Result<(), String> {
+            for _ in 0..6 {
+                let (cx, cy) = self.query_cursor()?;
+                let (dx, dy) = (x - cx, y - cy);
+                if dx.abs() <= 2 && dy.abs() <= 2 {
+                    return Ok(());
+                }
+                let status = std::process::Command::new("ydotool")
+                    .args(["mousemove", "-x", &dx.to_string(), "-y", &dy.to_string()])
+                    .status()
+                    .map_err(|e| format!("ydotool mousemove: {e}"))?;
+                if !status.success() {
+                    return Err("ydotool mousemove failed".into());
+                }
+                std::thread::sleep(std::time::Duration::from_millis(20));
+            }
+            // Didn't converge (aggressive accel profile?) — warp the remainder.
+            self.warp(x, y)
+        }
+
+        /// Warp in small steps along the path (plus a final wiggle inside the
+        /// target) so clients that only react to motion events still see the
+        /// cursor "travel" — a single teleport doesn't trigger game hover.
+        fn move_interpolated(&mut self, x: i32, y: i32) -> Result<(), String> {
+            let (sx, sy) = self.query_cursor().unwrap_or((x, y));
+            let dist = (((x - sx).pow(2) + (y - sy).pow(2)) as f64).sqrt();
+            let steps = (dist / 40.0).clamp(3.0, 12.0) as i32;
+            for i in 1..=steps {
+                let t = i as f64 / steps as f64;
+                self.warp(
+                    sx + ((x - sx) as f64 * t).round() as i32,
+                    sy + ((y - sy) as f64 * t).round() as i32,
+                )?;
+                std::thread::sleep(std::time::Duration::from_millis(8));
+            }
+            self.warp(x + 2, y)?;
+            std::thread::sleep(std::time::Duration::from_millis(8));
+            self.warp(x, y)
         }
 
         /// One request/response over the IPC socket ("j/<cmd>" returns JSON,
@@ -155,6 +214,45 @@ mod linux {
             Ok(image::load_from_memory(&out.stdout)
                 .map_err(|e| format!("grim png decode: {e}"))?
                 .to_rgba8())
+        }
+
+        /// Compositor-side cursor placement (teleport) via dispatch, with
+        /// dispatch-form discovery for Lua-config Hyprland builds.
+        fn warp(&mut self, x: i32, y: i32) -> Result<(), String> {
+            if let Some(i) = self.move_form {
+                let reply = self.request(&MOVE_FORMS[i](x, y))?;
+                return if reply.to_lowercase().contains("error") {
+                    Err(format!("hyprland movecursor: {reply}"))
+                } else {
+                    Ok(())
+                };
+            }
+            // First use: discover which form this Hyprland build accepts by
+            // checking whether the cursor actually arrived.
+            let mut replies = Vec::new();
+            for (i, form) in MOVE_FORMS.iter().enumerate() {
+                let msg = form(x, y);
+                let reply = self.request(&msg)?;
+                if let Ok((cx, cy)) = self.query_cursor() {
+                    if (cx - x).abs() <= 2 && (cy - y).abs() <= 2 {
+                        self.move_form = Some(i);
+                        return Ok(());
+                    }
+                }
+                replies.push(format!("`{msg}` -> {}", reply.trim()));
+            }
+            // Nothing moved the cursor: gather what the Lua API actually
+            // exposes so the error is diagnosable.
+            let dsp = self
+                .request(
+                    "eval 'local t={} for k,_ in pairs(hl.dsp) do t[#t+1]=tostring(k) end \
+                     table.sort(t) return table.concat(t, \", \")'",
+                )
+                .unwrap_or_else(|e| format!("(eval failed: {e})"));
+            Err(format!(
+                "no movecursor form accepted by this Hyprland build.\nTried:\n{}\navailable hl.dsp entries: {dsp}",
+                replies.join("\n")
+            ))
         }
     }
 
@@ -209,41 +307,16 @@ mod linux {
         }
 
         fn move_cursor(&mut self, x: i32, y: i32) -> Result<(), String> {
-            // Compositor-side placement — exact, unlike ydotool --absolute
-            if let Some(i) = self.move_form {
-                let reply = self.request(&MOVE_FORMS[i](x, y))?;
-                return if reply.to_lowercase().contains("error") {
-                    Err(format!("hyprland movecursor: {reply}"))
-                } else {
-                    Ok(())
-                };
+            // Games update hover state from motion EVENTS, not cursor
+            // position: a bare compositor warp teleports the pointer without
+            // the event stream they listen for. Prefer real uinput motion
+            // (ydotool) when present; otherwise emulate travel with
+            // interpolated warps.
+            if self.ydotool_available() {
+                self.move_relative_closed_loop(x, y)
+            } else {
+                self.move_interpolated(x, y)
             }
-            // First use: discover which form this Hyprland build accepts by
-            // checking whether the cursor actually arrived.
-            let mut replies = Vec::new();
-            for (i, form) in MOVE_FORMS.iter().enumerate() {
-                let msg = form(x, y);
-                let reply = self.request(&msg)?;
-                if let Ok((cx, cy)) = self.query_cursor() {
-                    if (cx - x).abs() <= 2 && (cy - y).abs() <= 2 {
-                        self.move_form = Some(i);
-                        return Ok(());
-                    }
-                }
-                replies.push(format!("`{msg}` -> {}", reply.trim()));
-            }
-            // Nothing moved the cursor: gather what the Lua API actually
-            // exposes so the error is diagnosable.
-            let dsp = self
-                .request(
-                    "eval 'local t={} for k,_ in pairs(hl.dsp) do t[#t+1]=tostring(k) end \
-                     table.sort(t) return table.concat(t, \", \")'",
-                )
-                .unwrap_or_else(|e| format!("(eval failed: {e})"));
-            Err(format!(
-                "no movecursor form accepted by this Hyprland build.\nTried:\n{}\navailable hl.dsp entries: {dsp}",
-                replies.join("\n")
-            ))
         }
 
         fn cursor_pos(&mut self) -> Result<(i32, i32), String> {
