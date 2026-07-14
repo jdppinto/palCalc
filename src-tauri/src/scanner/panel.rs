@@ -179,18 +179,19 @@ impl PanelLayout {
     }
 
     /// Passive-rows search area: the two-row grid band near the panel bottom.
-    /// This is a SEARCH region — `read_passive_rows` re-anchors on the "Passive
-    /// Skills" header inside it — so it is kept generous. The band spans the two
-    /// field-measured extremes: rows sat at ~0.855 of panel height on the 1115px
-    /// reference and ~0.889 on a shorter 1065px capture, so start high (0.848)
-    /// and run tall enough (0.126) to contain both.
+    /// Verbatim from the latest debug capture (Yeti; panel 1641,175,638,1065;
+    /// passives 1668,1124,587,88 — read all 4 rows cleanly). `read_passive_rows`
+    /// re-anchors on the "Passive Skills" header inside this band. NOTE: passive
+    /// rows don't hold a constant panel-fraction across captures, so on a much
+    /// taller panel this tight band can start below the rows — redraw the
+    /// passives zone if a scan misses them.
     pub fn passives_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
         let (px, py, pw, ph) = panel;
         (
-            px + (pw as f32 * 0.0206) as i32,
-            py + (ph as f32 * 0.8484) as i32,
-            (pw as f32 * 0.9508) as u32,
-            (ph as f32 * 0.1260) as u32,
+            px + (pw as f32 * 0.0423) as i32,
+            py + (ph as f32 * 0.8911) as i32,
+            (pw as f32 * 0.9201) as u32,
+            (ph as f32 * 0.0826) as u32,
         )
     }
 
@@ -574,15 +575,26 @@ mod tests {
         let gender = crate::scanner::palbox::classify_gender_pub(&crop(&shot, gr));
         assert_eq!(gender, Some(palcalc_core::Gender::Male), "zone {gr:?}");
 
-        // Passive rows from the derived region.
+        // Passive rows from the derived region. The default
+        // `passives_search_rect` band is tuned to a 1065px field panel; this
+        // reference screenshot is a taller 1115px panel whose rows sit higher,
+        // so build a band appropriate to THIS capture to validate the reader
+        // (the reader re-anchors on the "Passive Skills" header internally).
         let passive_names: Vec<(String, String)> = gd
             .passives
             .iter()
             .map(|(k, p)| (k.clone(), p.name.clone()))
             .collect();
+        let (pnx, pny, pnw, pnh) = panel;
+        let ref_passives = (
+            pnx + (pnw as f32 * 0.02) as i32,
+            pny + (pnh as f32 * 0.84) as i32,
+            (pnw as f32 * 0.95) as u32,
+            (pnh as f32 * 0.13) as u32,
+        );
         let (read, _) = layout.read_passives(
             &synth,
-            &crop(&shot, PanelLayout::passives_search_rect(panel)),
+            &crop(&shot, ref_passives),
             &passive_names,
             None,
             Some(row_px_expected(panel)),

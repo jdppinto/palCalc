@@ -184,7 +184,7 @@
   const DEFAULT_ZONE_RATIOS: Record<string, Rect> = {
     name: [0.2335, 0.0254, 0.5956, 0.0376],
     gender: [0.9063, 0.0206, 0.0683, 0.0359],
-    passives: [0.0206, 0.8484, 0.9508, 0.126],
+    passives: [0.0423, 0.8911, 0.9201, 0.0826],
   };
   function defaultZoneRect(key: string): Rect | null {
     if (!calib.panel) return null;
