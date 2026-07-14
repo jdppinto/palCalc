@@ -112,17 +112,22 @@ pub fn best_vocab_match<'a>(
     if candidates.is_empty() {
         return None;
     }
-    let mut best: Option<(&str, f64)> = None;
+    // Ties broken by LONGER vocab name: "Fuack Ignis" on screen matches both
+    // "Fuack" (via the token window) and "Fuack Ignis" at 1.0 — the
+    // subspecies must win over its base name.
+    let mut best: Option<(&str, f64, usize)> = None;
     for (key, name) in vocab {
         let n = norm(name);
         for c in &candidates {
             let sim = strsim::normalized_levenshtein(c, &n);
-            if sim >= min_sim && best.is_none_or(|(_, b)| sim > b) {
-                best = Some((key.as_str(), sim));
+            if sim >= min_sim
+                && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && n.len() > bl))
+            {
+                best = Some((key.as_str(), sim, n.len()));
             }
         }
     }
-    best
+    best.map(|(k, s, _)| (k, s))
 }
 
 /// OCR an image and return the best vocabulary match across its lines.
@@ -173,6 +178,20 @@ mod tests {
             .iter()
             .map(|(k, p)| (k.clone(), p.name.clone()))
             .collect()
+    }
+
+    /// Subspecies name must beat its base name when both match perfectly.
+    #[test]
+    fn subspecies_beats_base_name() {
+        let vocab = vec![
+            ("Blueplatypus".to_string(), "Fuack".to_string()),
+            ("BluePlatypus_Fire".to_string(), "Fuack Ignis".to_string()),
+        ];
+        let (key, sim) = best_vocab_match("Fuack Ignis", &vocab, 0.72).unwrap();
+        assert_eq!(key, "BluePlatypus_Fire", "sim {sim}");
+        // Plain base name still resolves to the base.
+        let (key, _) = best_vocab_match("Fuack", &vocab, 0.72).unwrap();
+        assert_eq!(key, "Blueplatypus");
     }
 
     /// Every accumulated field fixture, through OCR + dictionary — including
