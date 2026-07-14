@@ -203,7 +203,7 @@ fn save_pal_template(
 async fn scan_current_box(
     app: tauri::AppHandle,
     data: State<'_, GameData>,
-    threshold: Option<f32>,
+    #[allow(unused_variables)] threshold: Option<f32>,
 ) -> Result<Vec<scanner::palbox::SlotResult>, String> {
     let calib = GridCalibration::load().ok_or("not calibrated yet")?;
     let pal_icons = scanner::matcher::pal_icon_map(&data);
@@ -237,7 +237,6 @@ async fn scan_current_box(
             &species_names,
             &passive_names,
             &calib,
-            threshold.unwrap_or(0.55),
             debug_dir.as_deref(),
             |p| {
                 let _ = app.emit("scan-progress", &p);

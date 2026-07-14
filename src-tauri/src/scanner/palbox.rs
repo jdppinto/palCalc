@@ -172,7 +172,6 @@ pub fn scan_box(
     species_names: &[(String, String)],
     passive_names: &[(String, String)],
     calib: &GridCalibration,
-    threshold: f32,
     debug_dir: Option<&std::path::Path>,
     mut on_progress: impl FnMut(ScanProgress),
 ) -> Result<Vec<SlotResult>, String> {
@@ -209,9 +208,7 @@ pub fn scan_box(
         cx: i32,
         cy: i32,
         crop: image::RgbaImage,
-        species: Option<String>,
-        unidentified: bool,
-        score: f32,
+        occupied: bool,
     }
     let mut pre: Vec<Pre> = Vec::new();
     for row in 0..calib.rows {
@@ -225,28 +222,21 @@ pub fn scan_box(
                 slot,
             )
             .to_image();
-            let raw = templates.identify(&crop);
+            let occupied = super::matcher::slot_occupied(&crop);
             if let Some(dir) = debug_dir {
                 let _ = crop.save(dir.join(format!("slot_{row}_{col}.png")));
                 report.push_str(&format!(
-                    "slot {row},{col}: {:?}\n",
+                    "slot {row},{col}: occupied={occupied} icon-candidates {:?}\n",
                     templates.identify_top(&crop, 3)
                 ));
             }
-            let unidentified = raw.as_ref().is_some_and(|(_, s)| *s < threshold);
-            let (species, score) = match raw.filter(|(_, s)| *s >= threshold) {
-                Some((key, score)) => (Some(key), score),
-                None => (None, 0.0),
-            };
             pre.push(Pre {
                 row,
                 col,
                 cx,
                 cy,
                 crop,
-                species,
-                unidentified,
-                score,
+                occupied,
             });
         }
     }
@@ -258,9 +248,6 @@ pub fn scan_box(
     // once and memoized by pixel hash.
     let mut name_cache: HashMap<u64, Option<(String, f32)>> = HashMap::new();
     let mut passive_cache: HashMap<u64, Vec<String>> = HashMap::new();
-    // Full 333-name sweeps are expensive; only a couple are allowed per scan
-    // (icon hints cover the rest).
-    let mut full_name_budget = 2u32;
     let mut layout = PanelLayout::load_cache().filter(|l| {
         let in_monitor = l.name_band.0 >= mx
             && l.name_band.1 >= my
@@ -279,7 +266,7 @@ pub fn scan_box(
     let occupied: Vec<usize> = pre
         .iter()
         .enumerate()
-        .filter(|(_, p)| p.species.is_some() || p.unidentified)
+        .filter(|(_, p)| p.occupied)
         .map(|(i, _)| i)
         .collect();
     let total = occupied.len() as u32;
@@ -306,19 +293,9 @@ pub fn scan_box(
         backend.move_cursor(p.cx, p.cy)?;
         std::thread::sleep(Duration::from_millis(calib.delay_ms));
 
-        // Icon candidates double as name hints.
-        let hints: Vec<(String, String)> = templates
-            .identify_top(&p.crop, 8)
-            .into_iter()
-            .filter_map(|(k, _)| {
-                species_names
-                    .iter()
-                    .find(|(key, _)| *key == k)
-                    .map(|(k, n)| (k.clone(), n.clone()))
-            })
-            .collect();
-
         // Panel layout discovery (once; give up after repeated failures).
+        // Species identification is name-text only — the icon check proved
+        // less reliable than reading the sheet.
         let mut name_from_discovery: Option<(String, f32)> = None;
         if layout.is_none() && discovery_failures < 3 {
             let drect = match calib.panel {
@@ -326,12 +303,7 @@ pub fn scan_box(
                 None => PanelLayout::discovery_rect(monitor),
             };
             let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
-            let hint_set: &[(String, String)] = if hints.is_empty() {
-                species_names
-            } else {
-                &hints
-            };
-            match PanelLayout::discover(synth, &img, (drect.0, drect.1), hint_set) {
+            match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names) {
                 Some((l, key, score)) => {
                     name_from_discovery = Some((key, score));
                     layout = Some(l);
@@ -340,8 +312,8 @@ pub fn scan_box(
             }
         }
 
-        let mut species = p.species.clone();
-        let mut score = p.score;
+        let mut species: Option<String> = None;
+        let mut score = 0.0f32;
         let mut gender = None;
         let mut passives = Vec::new();
         if let Some(l) = &layout {
@@ -365,17 +337,7 @@ pub fn scan_box(
                 None => match name_cache.get(&band_key) {
                     Some(cached) => cached.clone(),
                     None => {
-                        // Stage 1: icon hints only; stage 2 (budgeted):
-                        // every species name.
-                        let mut r = if hints.is_empty() {
-                            None
-                        } else {
-                            l.read_name(synth, &band, &hints)
-                        };
-                        if r.is_none() && full_name_budget > 0 {
-                            full_name_budget -= 1;
-                            r = l.read_name(synth, &band, species_names);
-                        }
+                        let r = l.read_name(synth, &band, species_names);
                         name_cache.insert(band_key, r.clone());
                         r
                     }
@@ -420,7 +382,7 @@ pub fn scan_box(
         results.push(SlotResult {
             row: p.row,
             col: p.col,
-            unidentified: species.is_none() && p.unidentified,
+            unidentified: species.is_none(),
             species,
             score,
             gender,
@@ -480,8 +442,11 @@ mod tests {
         }
     }
 
+    /// With name-only identification and no panel in the mock, occupied
+    /// slots surface as unidentified (for the teach flow) and empty slots as
+    /// empty — the occupancy classification is what pass 1 owns.
     #[test]
-    fn scan_identifies_grid_of_real_icons_and_empty_slots() {
+    fn scan_classifies_occupancy_from_grid_capture() {
         let gd = GameData::load().unwrap();
         let templates =
             IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd), None).unwrap();
@@ -531,25 +496,16 @@ mod tests {
         };
         SCAN_ABORT.store(false, Ordering::Relaxed);
         let synth = TextSynth::new().unwrap();
-        let species_names: Vec<(String, String)> = gd
-            .pals
-            .iter()
-            .map(|(k, p)| (k.clone(), p.name.clone()))
-            .collect();
-        let passive_names: Vec<(String, String)> = gd
-            .passives
-            .iter()
-            .map(|(k, p)| (k.clone(), p.name.clone()))
-            .collect();
+        // No panel exists in the mock: empty candidate lists keep the
+        // (futile) discovery attempts cheap.
         let mut progress_events = 0;
         let results = scan_box(
             &mut backend,
             &templates,
             &synth,
-            &species_names,
-            &passive_names,
+            &[],
+            &[],
             &calib,
-            0.5,
             None,
             |_| {
                 progress_events += 1;
@@ -562,11 +518,11 @@ mod tests {
         for (r, rowv) in layout.iter().enumerate() {
             for (c, expected) in rowv.iter().enumerate() {
                 let res = &results[r * 3 + c];
+                assert!(res.species.is_none(), "no panel -> no species");
                 assert_eq!(
-                    res.species.as_deref(),
-                    *expected,
-                    "slot ({r},{c}) score {}",
-                    res.score
+                    res.unidentified,
+                    expected.is_some(),
+                    "slot ({r},{c}) occupancy misclassified"
                 );
             }
         }
@@ -590,7 +546,7 @@ mod tests {
             ..Default::default()
         };
         let synth = TextSynth::new().unwrap();
-        let out = scan_box(&mut backend, &templates, &synth, &[], &[], &calib, 0.5, None, |_| {});
+        let out = scan_box(&mut backend, &templates, &synth, &[], &[], &calib, None, |_| {});
         assert!(out.is_err());
         SCAN_ABORT.store(false, Ordering::Relaxed);
     }

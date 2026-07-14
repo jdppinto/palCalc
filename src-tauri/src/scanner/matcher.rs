@@ -245,6 +245,13 @@ fn luma(p: &image::Rgba<u8>) -> f32 {
     0.299 * p[0] as f32 + 0.587 * p[1] as f32 + 0.114 * p[2] as f32
 }
 
+/// Whether a slot capture holds a pal at all (disc with non-uniform
+/// interior). This is the only image-based check the scan relies on —
+/// species identification is done by reading the name text on the pal sheet.
+pub fn slot_occupied(crop: &RgbaImage) -> bool {
+    matches!(capture_patches(crop), Some((_, Some(_))))
+}
+
 /// Two-stage canonicalization of a slot capture: (disc patch, pal patch).
 /// None = no content at all; pal None = uniform disc interior (empty slot).
 fn capture_patches(crop: &RgbaImage) -> Option<(RgbaImage, Option<RgbaImage>)> {
