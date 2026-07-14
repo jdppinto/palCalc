@@ -288,38 +288,48 @@ impl PanelLayout {
             known.extend(synth_keys_hits.iter().map(|(k, _, _)| k.clone()));
             return (known, unknown, found_px);
         }
-        // One OCR pass over the whole region; each line is then gated by
-        // GEOMETRY — it only counts for the boxed row CELL it sits inside.
-        // Per-strip OCR let text near (but not in) a row leak into the read.
+        // One OCR pass over the whole region. The "Passive Skills" HEADER,
+        // which this pass reads anyway, anchors the grid area: only the two
+        // grid rows fit between the header's bottom edge and ~3.6 row
+        // heights below it. Everything outside that band — partner-skill
+        // text above, hotbar/world content below when the calibrated panel
+        // overshoots the sheet — is ignored without any border heuristics
+        // (border brightness proved unusable: the panel is translucent, so
+        // box borders fade with whatever the world renders behind them).
         let ocr_lines = ocr::read_lines_boxed(region).unwrap_or_default();
+        let header_vocab = [("header".to_string(), "Passive Skills".to_string())];
+        let header_bottom = ocr_lines
+            .iter()
+            .filter(|(t, _)| ocr::best_vocab_match(t, &header_vocab, 0.7).is_some())
+            .map(|(_, (_, ly, _, lh))| *ly + *lh as i32)
+            .min();
+        let (area_top, area_bottom) = match header_bottom {
+            Some(b) => (b as f32, b as f32 + row_px * 3.6),
+            // No header read — process the whole region (pre-anchor
+            // behavior); the 0.85 vocab floor still guards `known`.
+            None => (-1.0, region.height() as f32),
+        };
         // The synth sweep is expensive; with OCR as the primary reader it
         // only runs if some cell is left unresolved.
         let mut synth_hits: Option<Vec<(String, u32, u32)>> = None;
         let mut found_px: Option<f32> = None;
         // Passives render in a 2-COLUMN grid (field capture: Swift | Artisan
         // on one line), so each vertical band holds up to two independent
-        // boxed cells split at the region midline.
+        // cells split at the region midline.
         let half = region.width() / 2;
         let cells = [(0u32, half), (half, region.width() - half)];
         for (by, bh) in bands {
+            let band_center = by as f32 + bh as f32 / 2.0;
+            if band_center <= area_top || band_center >= area_bottom {
+                continue;
+            }
             let y0 = by.saturating_sub(4);
             let h = (bh + 8).min(region.height() - y0);
-            // Boxedness is judged on an extended window around the band: the
-            // strong border line can sit a few px below the text (field data:
-            // the bottom border is the reliable one). Bare text bands like
-            // the "Passive Skills" header have no box at all.
-            let ey0 = by.saturating_sub(12);
-            let eh = (bh + 24).min(region.height() - ey0);
             for (cx, cw) in cells {
                 if known.len() >= MAX_PASSIVES {
                     break;
                 }
                 let cell = image::imageops::crop_imm(region, cx, y0, cw, h).to_image();
-                let extended =
-                    image::imageops::crop_imm(region, cx, ey0, cw, eh).to_image();
-                if !is_boxed_row(&extended) {
-                    continue;
-                }
                 // Learned template first — exact renders beat everything.
                 match textlib.identify(&cell) {
                     TextMatch::Known(label) if label == EMPTY_LABEL => continue,
@@ -333,9 +343,12 @@ impl PanelLayout {
                 // crop FIRST: it physically can't merge text across columns.
                 // (The region pass merges "Unstable Musclehead" into one
                 // line, defeating x-gating and duplicating the right cell.)
-                if let Ok(Some((key, _))) =
-                    ocr::read_and_match(&cell, passive_names, OCR_MIN_SIM_PASSIVE)
-                {
+                let cell_lines = ocr::read_lines(&cell).unwrap_or_default();
+                let cell_match = cell_lines
+                    .iter()
+                    .filter_map(|t| ocr::best_vocab_match(t, passive_names, OCR_MIN_SIM_PASSIVE))
+                    .max_by(|a, b| a.1.total_cmp(&b.1));
+                if let Some((key, _)) = cell_match {
                     if !known.iter().any(|k| k == key) {
                         known.push(key.to_string());
                     }
@@ -343,7 +356,7 @@ impl PanelLayout {
                 }
                 // Fallback: region-pass lines whose center falls inside THIS
                 // cell (catches text the tight cell crop clips).
-                let cell_match = ocr_lines
+                let region_cell_lines: Vec<&(String, (i32, i32, u32, u32))> = ocr_lines
                     .iter()
                     .filter(|(_, (lx, ly, lw, lh))| {
                         let cy = *ly as f32 + *lh as f32 / 2.0;
@@ -353,14 +366,24 @@ impl PanelLayout {
                             && cxm >= cx as f32
                             && cxm < (cx + cw) as f32
                     })
+                    .collect();
+                let region_match = region_cell_lines
+                    .iter()
                     .filter_map(|(text, _)| {
                         ocr::best_vocab_match(text, passive_names, OCR_MIN_SIM_PASSIVE)
                     })
                     .max_by(|a, b| a.1.total_cmp(&b.1));
-                if let Some((key, _)) = cell_match {
+                if let Some((key, _)) = region_match {
                     if !known.iter().any(|k| k == key) {
                         known.push(key.to_string());
                     }
+                    continue;
+                }
+                // No OCR text at all in this cell — an EMPTY grid slot (the
+                // band spans the full region width, so a single-passive row
+                // produces a textless partner cell). Nothing to read, nothing
+                // to label.
+                if cell_lines.is_empty() && region_cell_lines.is_empty() {
                     continue;
                 }
                 // Synth hit within this cell?
@@ -444,51 +467,6 @@ impl PanelLayout {
     }
 }
 
-/// A passive row renders inside a bordered box: horizontal lines with a
-/// CONTIGUOUS bright-or-saturated run spanning >30% of the strip width —
-/// pale, gold, red or teal borders alike. Contiguity separates a border from
-/// text (glyph gaps keep text runs short even when total coverage is high),
-/// and a box must show a border in BOTH the top and bottom half of the
-/// window: the "Passive Skills" header sees the next row's TOP border below
-/// itself, but has nothing above (field data: real rows show border lines
-/// ~9px above and ~10px below their text band).
-fn is_boxed_row(strip: &RgbaImage) -> bool {
-    let (w, h) = strip.dimensions();
-    if w < 40 || h < 6 {
-        return false;
-    }
-    let mut top = false;
-    let mut bottom = false;
-    for y in 0..h {
-        let mut run = 0u32;
-        let mut best_run = 0u32;
-        for x in 0..w {
-            let p = strip.get_pixel(x, y);
-            let (r, g, b) = (p[0] as i32, p[1] as i32, p[2] as i32);
-            let l = 0.299 * r as f32 + 0.587 * g as f32 + 0.114 * b as f32;
-            let sat = r.max(g).max(b) - r.min(g).min(b);
-            // Border pixels are bright (pale/gold boxes) or strongly colored
-            // (red/teal accents) — either counts. Thresholds are low because
-            // unhighlighted white boxes render DIM borders (field data:
-            // Nimble's bottom border peaks at l~70); contiguity and the
-            // two-border requirement carry the discrimination.
-            if l > 65.0 || sat > 40 {
-                run += 1;
-                best_run = best_run.max(run);
-            } else {
-                run = 0;
-            }
-        }
-        if best_run as f32 / w as f32 > 0.3 {
-            if y < h / 2 {
-                top = true;
-            } else {
-                bottom = true;
-            }
-        }
-    }
-    top && bottom
-}
 
 /// Small stable hash for row-crop identity in the UI.
 fn fx(img: &RgbaImage) -> u64 {
@@ -703,6 +681,48 @@ mod field_fixtures {
         assert_eq!(
             keys,
             vec!["CraftSpeed_up2", "CraftSpeed_up3", "MoveSpeed_up_3", "Nocturnal"],
+            "unknowns: {}",
+            unknowns.len()
+        );
+        assert!(unknowns.is_empty(), "{} unknown cells", unknowns.len());
+    }
+
+    /// Field capture with the DEFAULT calibration overshooting the sheet:
+    /// the region slides down over translucent world background (dim box
+    /// borders) and pulls in the hotbar below. The "Passive Skills" header
+    /// anchor must exclude the junk and read all four passives.
+    #[test]
+    #[ignore = "slow; --release -- --ignored"]
+    fn field_passives_grid_c_header_anchor() {
+        let gd = GameData::load().unwrap();
+        let synth = TextSynth::new().unwrap();
+        let region = load("field_passives_grid_c.png");
+        let names: Vec<(String, String)> = gd
+            .passives
+            .iter()
+            .map(|(k, p)| (k.clone(), p.name.clone()))
+            .collect();
+        let layout = PanelLayout {
+            name_band: (1650, 188, 654, 59),
+            px_name: 40.7,
+        };
+        let panel = (1650, 175, 630, 1115);
+        let dir = std::env::temp_dir().join(format!("palcalc-gridc-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let lib = crate::scanner::textlib::TextLib::load(dir.clone());
+        let (mut keys, unknowns, _) = layout.read_passive_rows(
+            &synth,
+            &lib,
+            &region,
+            &names,
+            None,
+            Some(row_px_expected(panel)),
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+        keys.sort();
+        assert_eq!(
+            keys,
+            vec!["MoveSpeed_up_1", "Noukin", "PAL_ALLAttack_down1", "PAL_Sanity_Up_1"],
             "unknowns: {}",
             unknowns.len()
         );
