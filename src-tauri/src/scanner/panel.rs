@@ -533,3 +533,38 @@ mod font_audit {
     }
 }
 
+
+
+#[cfg(test)]
+mod field_name {
+    use super::*;
+    use palcalc_core::GameData;
+
+    /// Field capture of a Tanzee name band (audit-selected Google Bold reads
+    /// it at ~0.49; the game's own extracted Bold missed at <0.45).
+    #[test]
+    #[ignore = "slow; --release -- --ignored"]
+    fn field_name_tanzee_reads() {
+        let gd = GameData::load().unwrap();
+        let synth = TextSynth::new().unwrap();
+        let band = image::open(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/palbox/field_name_tanzee.png"),
+        )
+        .unwrap()
+        .to_rgba8();
+        let names: Vec<(String, String)> = gd
+            .pals
+            .iter()
+            .filter(|(k, _)| gd.icons.contains_key(*k))
+            .map(|(k, p)| (k.clone(), p.name.clone()))
+            .collect();
+        let layout = PanelLayout {
+            name_band: (0, 0, band.width(), band.height()),
+            px_name: 40.76,
+        };
+        let (key, score) = layout.read_name(&synth, &band, &names).expect("name read");
+        assert_eq!(key, "Monkey", "score {score}"); // Tanzee's tribe key
+        assert!(score >= NAME_CONFIDENCE);
+    }
+}
