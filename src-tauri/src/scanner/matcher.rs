@@ -64,9 +64,11 @@ pub struct IconTemplates {
 
 /// Directory of user-corrected slot crops (`<tribe>__<n>.png`) — the user's
 /// own game rendering, learned once per species via the results-grid fix
-/// button. These match at ~0.95+ and survive icon-art drift between the
-/// extracted icon set and the running game (observed in the field: in-game
-/// Lamball art differs entirely from the extracted SheepBall.png).
+/// button. These match at ~0.95+ and cover species whose reference art is
+/// wrong in the icon dump: the game renders STANDARD art, but the extracted
+/// set contains nonstandard art for some pals (e.g. SheepBall.png is not
+/// Lamball's real icon, and an audit showed the real art exists under no
+/// filename at all — likely dumped from a modded install).
 pub fn user_templates_dir() -> std::path::PathBuf {
     let base = std::env::var_os("XDG_CONFIG_HOME")
         .map(std::path::PathBuf::from)
@@ -586,3 +588,4 @@ mod real_fixtures {
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
+
