@@ -285,82 +285,101 @@ impl PanelLayout {
             // No band structure — trust whatever synth found.
             let (synth_keys_hits, found_px) =
                 self.read_passives_hits(synth, region, passive_names, px_hint, expected_px);
-            known.extend(synth_keys_hits.iter().map(|(k, _)| k.clone()));
+            known.extend(synth_keys_hits.iter().map(|(k, _, _)| k.clone()));
             return (known, unknown, found_px);
         }
         // One OCR pass over the whole region; each line is then gated by
-        // GEOMETRY — it only counts for the boxed row band it sits inside.
+        // GEOMETRY — it only counts for the boxed row CELL it sits inside.
         // Per-strip OCR let text near (but not in) a row leak into the read.
         let ocr_lines = ocr::read_lines_boxed(region).unwrap_or_default();
         // The synth sweep is expensive; with OCR as the primary reader it
-        // only runs if some row is left unresolved.
-        let mut synth_hits: Option<Vec<(String, u32)>> = None;
+        // only runs if some cell is left unresolved.
+        let mut synth_hits: Option<Vec<(String, u32, u32)>> = None;
         let mut found_px: Option<f32> = None;
+        // Passives render in a 2-COLUMN grid (field capture: Swift | Artisan
+        // on one line), so each vertical band holds up to two independent
+        // boxed cells split at the region midline.
+        let half = region.width() / 2;
+        let cells = [(0u32, half), (half, region.width() - half)];
         for (by, bh) in bands {
-            if known.len() >= MAX_PASSIVES {
-                break;
-            }
             let y0 = by.saturating_sub(4);
             let h = (bh + 8).min(region.height() - y0);
-            let strip = image::imageops::crop_imm(region, 0, y0, region.width(), h).to_image();
-            // Passive rows are BOXED; bare text bands like the "Passive
-            // Skills" header are not rows at all. The strong border line can
-            // sit a few px below the text band (field data: the bottom border
-            // is the reliable one), so boxedness is judged on an extended
-            // window around the band.
+            // Boxedness is judged on an extended window around the band: the
+            // strong border line can sit a few px below the text (field data:
+            // the bottom border is the reliable one). Bare text bands like
+            // the "Passive Skills" header have no box at all.
             let ey0 = by.saturating_sub(6);
             let eh = (bh + 20).min(region.height() - ey0);
-            let extended =
-                image::imageops::crop_imm(region, 0, ey0, region.width(), eh).to_image();
-            if !is_boxed_row(&extended) {
-                continue;
-            }
-            // Learned template first — exact renders beat everything.
-            match textlib.identify(&strip) {
-                TextMatch::Known(label) if label == EMPTY_LABEL => continue,
-                TextMatch::Known(label) => {
-                    known.push(label);
+            for (cx, cw) in cells {
+                if known.len() >= MAX_PASSIVES {
+                    break;
+                }
+                let cell = image::imageops::crop_imm(region, cx, y0, cw, h).to_image();
+                let extended =
+                    image::imageops::crop_imm(region, cx, ey0, cw, eh).to_image();
+                if !is_boxed_row(&extended) {
                     continue;
                 }
-                _ => {}
-            }
-            // OCR + dictionary (Inventory Kamera recipe): only lines whose
-            // vertical center falls inside THIS row band may match.
-            let row_match = ocr_lines
-                .iter()
-                .filter(|(_, (_, ly, _, lh))| {
-                    let cy = *ly as f32 + *lh as f32 / 2.0;
-                    cy >= y0 as f32 && cy < (y0 + h) as f32
-                })
-                .filter_map(|(text, _)| {
-                    ocr::best_vocab_match(text, passive_names, OCR_MIN_SIM_PASSIVE)
-                })
-                .max_by(|a, b| a.1.total_cmp(&b.1));
-            if let Some((key, _)) = row_match {
-                known.push(key.to_string());
-                continue;
-            }
-            // Region-pass OCR can miss faint rows the per-strip upscale
-            // catches; retry on the strip alone before falling back.
-            if let Ok(Some((key, _))) =
-                ocr::read_and_match(&strip, passive_names, OCR_MIN_SIM_PASSIVE)
-            {
-                known.push(key.to_string());
-                continue;
-            }
-            // Synth hit within this band?
-            let hits = synth_hits.get_or_insert_with(|| {
-                let (hits, px) =
-                    self.read_passives_hits(synth, region, passive_names, px_hint, expected_px);
-                found_px = px;
-                hits
-            });
-            match hits.iter().find(|(_, hy)| *hy >= y0 && *hy < y0 + h) {
-                Some((k, _)) => known.push(k.clone()),
-                None => {
-                    if let Ok(b64) = png_base64(&strip) {
-                        let id = format!("{:016x}", fx(&strip));
-                        unknown.push((id, b64));
+                // Learned template first — exact renders beat everything.
+                match textlib.identify(&cell) {
+                    TextMatch::Known(label) if label == EMPTY_LABEL => continue,
+                    TextMatch::Known(label) => {
+                        known.push(label);
+                        continue;
+                    }
+                    _ => {}
+                }
+                // OCR + dictionary (Inventory Kamera recipe): only lines
+                // whose center falls inside THIS cell may match.
+                let cell_match = ocr_lines
+                    .iter()
+                    .filter(|(_, (lx, ly, lw, lh))| {
+                        let cy = *ly as f32 + *lh as f32 / 2.0;
+                        let cxm = *lx as f32 + *lw as f32 / 2.0;
+                        cy >= y0 as f32
+                            && cy < (y0 + h) as f32
+                            && cxm >= cx as f32
+                            && cxm < (cx + cw) as f32
+                    })
+                    .filter_map(|(text, _)| {
+                        ocr::best_vocab_match(text, passive_names, OCR_MIN_SIM_PASSIVE)
+                    })
+                    .max_by(|a, b| a.1.total_cmp(&b.1));
+                if let Some((key, _)) = cell_match {
+                    known.push(key.to_string());
+                    continue;
+                }
+                // Region-pass OCR can miss faint rows the per-cell upscale
+                // catches; retry on the cell alone before falling back.
+                if let Ok(Some((key, _))) =
+                    ocr::read_and_match(&cell, passive_names, OCR_MIN_SIM_PASSIVE)
+                {
+                    known.push(key.to_string());
+                    continue;
+                }
+                // Synth hit within this cell?
+                let hits = synth_hits.get_or_insert_with(|| {
+                    let (hits, px) = self.read_passives_hits(
+                        synth,
+                        region,
+                        passive_names,
+                        px_hint,
+                        expected_px,
+                    );
+                    found_px = px;
+                    hits
+                });
+                match hits
+                    .iter()
+                    .find(|(_, hx, hy)| {
+                        *hy >= y0 && *hy < y0 + h && *hx >= cx && *hx < cx + cw
+                    }) {
+                    Some((k, _, _)) => known.push(k.clone()),
+                    None => {
+                        if let Ok(b64) = png_base64(&cell) {
+                            let id = format!("{:016x}", fx(&cell));
+                            unknown.push((id, b64));
+                        }
                     }
                 }
             }
@@ -375,7 +394,7 @@ impl PanelLayout {
         passive_names: &[(String, String)],
         px_hint: Option<f32>,
         expected_px: Option<f32>,
-    ) -> (Vec<(String, u32)>, Option<f32>) {
+    ) -> (Vec<(String, u32, u32)>, Option<f32>) {
         let (lo, hi) = match px_hint {
             Some(px) => (px - 1.0, px + 1.0),
             None => {
@@ -386,7 +405,7 @@ impl PanelLayout {
         let hits = synth.find_labels(region, passive_names, false, lo, hi, PASSIVE_CONFIDENCE, true);
         let px = hits.first().map(|(_, h)| h.px);
         (
-            hits.into_iter().map(|(k, h)| (k, h.y)).collect(),
+            hits.into_iter().map(|(k, h)| (k, h.x, h.y)).collect(),
             px,
         )
     }
@@ -419,17 +438,20 @@ impl PanelLayout {
     }
 }
 
-/// A passive row renders inside a bordered box: some horizontal line spans a
-/// wide bright-or-saturated run (~45% of the region width — pale, gold, red
-/// or teal borders alike). Bare text (section headers) tops out around 10%
-/// coverage per line, so the width requirement excludes it.
+/// A passive row renders inside a bordered box: some horizontal line has a
+/// CONTIGUOUS bright-or-saturated run spanning >30% of the strip width —
+/// pale, gold, red or teal borders alike. Contiguity is what separates a
+/// border from text: a dense description line ("This effect stacks up to 30
+/// times") tops 30% in TOTAL coverage, but glyph gaps keep its longest run
+/// far shorter, while box borders are solid lines.
 fn is_boxed_row(strip: &RgbaImage) -> bool {
     let (w, h) = strip.dimensions();
     if w < 40 || h < 6 {
         return false;
     }
     for y in 0..h {
-        let mut edge = 0u32;
+        let mut run = 0u32;
+        let mut best_run = 0u32;
         for x in 0..w {
             let p = strip.get_pixel(x, y);
             let (r, g, b) = (p[0] as i32, p[1] as i32, p[2] as i32);
@@ -438,10 +460,13 @@ fn is_boxed_row(strip: &RgbaImage) -> bool {
             // Border pixels are bright (pale/gold boxes) or strongly colored
             // (red/teal accents) — either counts.
             if l > 90.0 || sat > 50 {
-                edge += 1;
+                run += 1;
+                best_run = best_run.max(run);
+            } else {
+                run = 0;
             }
         }
-        if edge as f32 / w as f32 > 0.3 {
+        if best_run as f32 / w as f32 > 0.3 {
             return true;
         }
     }
@@ -624,6 +649,47 @@ mod field_fixtures {
                 .expect("discovery");
         eprintln!("discovered {key} at {score} band {:?}", layout.name_band);
         assert_eq!(key, "SheepBall", "score {score}");
+    }
+
+    /// Field capture: passives render in a 2-COLUMN grid — Swift | Artisan,
+    /// Remarkable Craftsmanship | Insomnia. One-match-per-band reading lost
+    /// each row's second column.
+    #[test]
+    #[ignore = "slow; --release -- --ignored"]
+    fn field_passives_grid_reads_all_four() {
+        let gd = GameData::load().unwrap();
+        let synth = TextSynth::new().unwrap();
+        let region = load("field_passives_grid.png");
+        let names: Vec<(String, String)> = gd
+            .passives
+            .iter()
+            .map(|(k, p)| (k.clone(), p.name.clone()))
+            .collect();
+        let layout = PanelLayout {
+            name_band: (1736, 183, 570, 77),
+            px_name: 40.76,
+        };
+        let panel = (1644, 180, 633, 1055);
+        let dir = std::env::temp_dir().join(format!("palcalc-grid-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let lib = crate::scanner::textlib::TextLib::load(dir.clone());
+        let (mut keys, unknowns, _) = layout.read_passive_rows(
+            &synth,
+            &lib,
+            &region,
+            &names,
+            None,
+            Some(row_px_expected(panel)),
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+        keys.sort();
+        assert_eq!(
+            keys,
+            vec!["CraftSpeed_up2", "CraftSpeed_up3", "MoveSpeed_up_3", "Nocturnal"],
+            "unknowns: {}",
+            unknowns.len()
+        );
+        assert!(unknowns.is_empty(), "{} unknown cells", unknowns.len());
     }
 
     /// Field bundle: "Fragrant Foliage" renders dark-on-white (inverted
@@ -831,5 +897,46 @@ mod learned_rows {
         let _ = &mut lib; // learned-crop precedence is covered by textlib tests
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+}
+
+#[cfg(test)]
+mod dbg_grid {
+    use super::*;
+    use palcalc_core::GameData;
+
+    #[test]
+    #[ignore]
+    fn dbg_grid_unknowns() {
+        let gd = GameData::load().unwrap();
+        let synth = TextSynth::new().unwrap();
+        let region = image::open(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/palbox/field_passives_grid.png"),
+        )
+        .unwrap()
+        .to_rgba8();
+        let names: Vec<(String, String)> = gd
+            .passives
+            .iter()
+            .map(|(k, p)| (k.clone(), p.name.clone()))
+            .collect();
+        let layout = PanelLayout { name_band: (1736, 183, 570, 77), px_name: 40.76 };
+        let panel = (1644, 180, 633, 1055);
+        let row_px = row_px_expected(panel);
+        let bands = super::super::synth::detect_text_rows(&region, row_px as u32 / 3);
+        eprintln!("row_px {row_px} bands: {bands:?}");
+        let dir = std::env::temp_dir().join("palcalc-dbg-grid");
+        let _ = std::fs::remove_dir_all(&dir);
+        let lib = crate::scanner::textlib::TextLib::load(dir.clone());
+        let (keys, unknowns, _) =
+            layout.read_passive_rows(&synth, &lib, &region, &names, None, Some(row_px));
+        eprintln!("keys {keys:?}, {} unknowns", unknowns.len());
+        for (i, (id, b64)) in unknowns.iter().enumerate() {
+            let img = crate::scanner::textlib::png_from_base64(b64).unwrap();
+            let p = format!("/tmp/claude-1000/-home-joaod-Projects/4daeafe2-14e1-4281-ae31-c3c3286d5592/scratchpad/unk_{i}_{id}.png");
+            img.save(&p).unwrap();
+            eprintln!("unknown {i}: {}x{} -> {p}", img.width(), img.height());
+        }
     }
 }
