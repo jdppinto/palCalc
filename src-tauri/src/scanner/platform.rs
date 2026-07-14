@@ -94,13 +94,29 @@ mod linux {
         socket: PathBuf,
         /// None when wlr-screencopy init failed — capture falls back to `grim`.
         wayshot: Option<WayshotConnection>,
+        /// Verified-working movecursor dispatch form. Hyprland 0.55+ with Lua
+        /// config rewired `dispatch` through the Lua VM (hl.dsp namespace) and
+        /// broke the classic syntax, so the form is discovered at first use.
+        move_form: Option<usize>,
     }
+
+    /// Candidate movecursor forms, classic first. Which one a given Hyprland
+    /// build accepts is verified by reading the cursor position back — replies
+    /// alone can't be trusted across protocol generations.
+    const MOVE_FORMS: &[fn(i32, i32) -> String] = &[
+        |x, y| format!("dispatch movecursor {x} {y}"),
+        |x, y| format!("dispatch hl.dsp.movecursor({{ x = {x}, y = {y} }})"),
+        |x, y| format!("dispatch hl.dsp.movecursor({x}, {y})"),
+        |x, y| format!("dispatch hl.dsp.movecursor(\"{x} {y}\")"),
+        |x, y| format!("dispatch hl.dsp.cursor.move({{ x = {x}, y = {y} }})"),
+    ];
 
     impl HyprlandBackend {
         pub fn new() -> Result<Self, String> {
             Ok(Self {
                 socket: socket_path()?,
                 wayshot: WayshotConnection::new().ok(),
+                move_form: None,
             })
         }
 
@@ -116,6 +132,13 @@ mod linux {
             s.read_to_string(&mut out)
                 .map_err(|e| format!("hyprland socket read: {e}"))?;
             Ok(out)
+        }
+
+        fn query_cursor(&self) -> Result<(i32, i32), String> {
+            let json = self.request("j/cursorpos")?;
+            let p: HyprCursor = serde_json::from_str(&json)
+                .map_err(|e| format!("hyprland cursorpos parse: {e}"))?;
+            Ok((p.x as i32, p.y as i32))
         }
 
         fn capture_grim(x: i32, y: i32, w: u32, h: u32) -> Result<RgbaImage, String> {
@@ -187,19 +210,44 @@ mod linux {
 
         fn move_cursor(&mut self, x: i32, y: i32) -> Result<(), String> {
             // Compositor-side placement — exact, unlike ydotool --absolute
-            let reply = self.request(&format!("dispatch movecursor {x} {y}"))?;
-            if reply.trim() == "ok" {
-                Ok(())
-            } else {
-                Err(format!("hyprland movecursor: {reply}"))
+            if let Some(i) = self.move_form {
+                let reply = self.request(&MOVE_FORMS[i](x, y))?;
+                return if reply.to_lowercase().contains("error") {
+                    Err(format!("hyprland movecursor: {reply}"))
+                } else {
+                    Ok(())
+                };
             }
+            // First use: discover which form this Hyprland build accepts by
+            // checking whether the cursor actually arrived.
+            let mut replies = Vec::new();
+            for (i, form) in MOVE_FORMS.iter().enumerate() {
+                let msg = form(x, y);
+                let reply = self.request(&msg)?;
+                if let Ok((cx, cy)) = self.query_cursor() {
+                    if (cx - x).abs() <= 2 && (cy - y).abs() <= 2 {
+                        self.move_form = Some(i);
+                        return Ok(());
+                    }
+                }
+                replies.push(format!("`{msg}` -> {}", reply.trim()));
+            }
+            // Nothing moved the cursor: gather what the Lua API actually
+            // exposes so the error is diagnosable.
+            let dsp = self
+                .request(
+                    "eval 'local t={} for k,_ in pairs(hl.dsp) do t[#t+1]=tostring(k) end \
+                     table.sort(t) return table.concat(t, \", \")'",
+                )
+                .unwrap_or_else(|e| format!("(eval failed: {e})"));
+            Err(format!(
+                "no movecursor form accepted by this Hyprland build.\nTried:\n{}\navailable hl.dsp entries: {dsp}",
+                replies.join("\n")
+            ))
         }
 
         fn cursor_pos(&mut self) -> Result<(i32, i32), String> {
-            let json = self.request("j/cursorpos")?;
-            let p: HyprCursor = serde_json::from_str(&json)
-                .map_err(|e| format!("hyprland cursorpos parse: {e}"))?;
-            Ok((p.x as i32, p.y as i32))
+            self.query_cursor()
         }
     }
 }

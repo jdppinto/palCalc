@@ -1,3 +1,0 @@
-error shows up on ui after clicking scan current box
-
-hyprland movecursor: error: [string "return hl.dispatch(movecursor 935 306)"]:1: ')' expected near '935' → Note: dispatch in lua is a shorthand for hl.dispatch(...), your syntax might need to be updated.
