@@ -450,7 +450,7 @@ mod font_audit {
     #[ignore = "manual audit tool"]
     fn font_audit() {
         let fonts_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../gaming-debug/fonts");
+            .join("../data/fonts");
         let mut fonts: Vec<std::path::PathBuf> = std::fs::read_dir(&fonts_dir)
             .map(|r| {
                 r.flatten()
@@ -512,3 +512,4 @@ mod font_audit {
         }
     }
 }
+

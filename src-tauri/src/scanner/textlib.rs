@@ -273,6 +273,52 @@ pub mod font_validation {
         best
     }
 
+    /// f64-corrected variant (the f32 one suffers cancellation).
+    pub fn best_match_f64(crop: &RgbaImage, tpl: &[f32], tw: u32, th: u32) -> f32 {
+        let (cw, ch) = crop.dimensions();
+        if tw > cw || th > ch {
+            return -1.0;
+        }
+        let luma: Vec<f32> = crop
+            .pixels()
+            .map(|p| 0.299 * p[0] as f32 + 0.587 * p[1] as f32 + 0.114 * p[2] as f32)
+            .collect();
+        let wsum: f64 = tpl.iter().map(|&w| w as f64).sum();
+        if wsum < 4.0 {
+            return -1.0;
+        }
+        let tmean: f64 = tpl.iter().map(|&w| w as f64 * 255.0 * w as f64).sum::<f64>() / wsum;
+        let tvar: f64 = tpl
+            .iter()
+            .map(|&w| w as f64 * (255.0 * w as f64 - tmean).powi(2))
+            .sum();
+        let mut best = -1.0f32;
+        for oy in 0..=(ch - th) {
+            for ox in (0..=(cw - tw)).step_by(2) {
+                let (mut sg, mut sg2, mut num) = (0.0f64, 0.0f64, 0.0f64);
+                for ty in 0..th {
+                    for tx in 0..tw {
+                        let wgt = tpl[(ty * tw + tx) as usize] as f64;
+                        if wgt == 0.0 {
+                            continue;
+                        }
+                        let l = luma[((oy + ty) * cw + ox + tx) as usize] as f64;
+                        sg += wgt * l;
+                        sg2 += wgt * l * l;
+                        num += wgt * (255.0 * wgt - tmean) * l;
+                    }
+                }
+                let gvar = sg2 - sg * sg / wsum;
+                if gvar <= 1e-9 || (gvar / wsum).sqrt() < 5.0 || tvar <= 0.0 {
+                    continue;
+                }
+                let score = (num / (gvar.sqrt() * tvar.sqrt())) as f32;
+                best = best.max(score.abs());
+            }
+        }
+        best
+    }
+
     #[test]
     #[ignore = "superseded by panel integration test; slow in debug"]
     fn validate_noto_sans_against_real_passive_crops() {

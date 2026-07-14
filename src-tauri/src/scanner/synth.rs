@@ -8,8 +8,13 @@ use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
 use rayon::prelude::*;
 use image::RgbaImage;
 
-static REGULAR: &[u8] = include_bytes!("../../../data/fonts/NotoSans-Regular.ttf");
-static BOLD: &[u8] = include_bytes!("../../../data/fonts/NotoSans-Bold.ttf");
+// Per-role fonts chosen by the font-audit table over field fixtures:
+// rows (regular role): the game's own NotoSans-Medium (0.65 on "Artisan" vs
+// 0.62 Google Regular); names (bold role): Google's Noto Sans Bold (0.52 and
+// 0.59 on the two name fixtures — beating the game's extracted Bold at
+// 0.42/0.49 and Oxanium-Bold's inconsistent 0.54/0.35).
+static REGULAR: &[u8] = include_bytes!("../../../data/fonts/NotoSans-Medium.ttf");
+static BOLD: &[u8] = include_bytes!("../../../data/fonts/NotoSansGoogle-Bold.ttf");
 
 #[derive(Debug, Clone, Copy)]
 pub struct TextHit {
