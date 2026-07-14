@@ -51,6 +51,17 @@ impl TextSynth {
         })
     }
 
+    /// Build from arbitrary font bytes (font-audit tooling). Leaks the
+    /// buffers — fine for test/audit processes.
+    pub fn from_font_data(regular: Vec<u8>, bold: Vec<u8>) -> Result<Self, String> {
+        let r: &'static [u8] = Box::leak(regular.into_boxed_slice());
+        let b: &'static [u8] = Box::leak(bold.into_boxed_slice());
+        Ok(Self {
+            regular: FontRef::try_from_slice(r).map_err(|e| e.to_string())?,
+            bold: FontRef::try_from_slice(b).map_err(|e| e.to_string())?,
+        })
+    }
+
     fn font(&self, bold: bool) -> &FontRef<'static> {
         if bold {
             &self.bold
@@ -135,6 +146,8 @@ impl TextSynth {
     /// All candidate labels present in `img` at roughly the given pixel size,
     /// deduplicated by row (overlapping hits keep the best score), sorted by
     /// vertical position.
+    /// `abs_score`: match text of either polarity — passive rows can render
+    /// dark-on-light (inverted NCC) as well as light-on-dark.
     pub fn find_labels(
         &self,
         img: &RgbaImage,
@@ -143,6 +156,7 @@ impl TextSynth {
         px_lo: f32,
         px_hi: f32,
         min_score: f32,
+        abs_score: bool,
     ) -> Vec<(String, TextHit)> {
         let full = luma_of(img);
         let font = self.font(bold);
@@ -153,11 +167,11 @@ impl TextSynth {
         // windows). Empty profile falls back to the full sweep.
         let rows = text_rows(&full, px_lo as u32 / 3);
 
-        let mut hits = label_pass(font, &full, candidates, &rows, px_lo, px_hi, min_score);
+        let mut hits = label_pass(font, &full, candidates, &rows, px_lo, px_hi, min_score, abs_score);
         // The row profile is a heuristic; if it guided the sweep to nothing,
         // fall back to the exhaustive pass rather than reporting no rows.
         if hits.is_empty() && !rows.is_empty() {
-            hits = label_pass(font, &full, candidates, &[], px_lo, px_hi, min_score);
+            hits = label_pass(font, &full, candidates, &[], px_lo, px_hi, min_score, abs_score);
         }
         hits.sort_by_key(|(_, h)| h.y);
         // Row dedup: hits whose vertical spans overlap are the same row —
@@ -180,6 +194,8 @@ impl TextSynth {
 
 /// One matching pass of every candidate over the image, optionally
 /// constrained to detected text rows (empty slice = exhaustive sweep).
+/// `abs_score` matches either text polarity (dark-on-light or light-on-dark).
+#[allow(clippy::too_many_arguments)]
 fn label_pass(
     font: &FontRef,
     full: &Luma,
@@ -188,7 +204,9 @@ fn label_pass(
     px_lo: f32,
     px_hi: f32,
     min_score: f32,
+    abs_score: bool,
 ) -> Vec<(String, TextHit)> {
+    let val = move |s: f32| if abs_score { s.abs() } else { s };
     candidates
         .par_iter()
         .filter_map(|(key, label)| {
@@ -197,15 +215,17 @@ fn label_pass(
             while px <= px_hi + 0.01 {
                 let tpl = render(font, label, px);
                 let coarse: Vec<(f32, u32, u32)> = if rows.is_empty() {
-                    sweep_topk(full, &tpl, 2, 3)
+                    sweep_topk_by(full, &tpl, 2, 3, val)
                 } else {
                     rows.iter()
-                        .filter_map(|&ry| sweep_at_row(full, &tpl, ry, 2))
+                        .filter_map(|&ry| sweep_at_row_by(full, &tpl, ry, 2, val))
                         .collect()
                 };
                 for (_, cx, cy) in coarse {
-                    if let Some(hit) = refine(font, label, full, cx, cy, px) {
-                        if cand_best.is_none() || hit.score > cand_best.unwrap().score {
+                    if let Some(hit) = refine_by(font, label, full, cx, cy, px, val) {
+                        if cand_best.is_none()
+                            || val(hit.score) > val(cand_best.unwrap().score)
+                        {
                             cand_best = Some(hit);
                         }
                     }
@@ -213,6 +233,10 @@ fn label_pass(
                 px += 2.0;
             }
             cand_best
+                .map(|mut h| {
+                    h.score = val(h.score);
+                    h
+                })
                 .filter(|h| h.score >= min_score)
                 .map(|h| (key.clone(), h))
         })
@@ -314,6 +338,111 @@ fn sweep_topk(img: &Luma, tpl: &Tpl, step: usize, k: usize) -> Vec<(f32, u32, u3
     kept
 }
 
+/// Generalized variants comparing by a score transform (identity or abs).
+fn sweep_topk_by(
+    img: &Luma,
+    tpl: &Tpl,
+    step: usize,
+    k: usize,
+    val: impl Fn(f32) -> f32 + Copy,
+) -> Vec<(f32, u32, u32)> {
+    if tpl.w > img.w || tpl.h > img.h || tpl.wsum < 2.0 || tpl.tvar <= 0.0 {
+        return Vec::new();
+    }
+    let mut all: Vec<(f32, u32, u32)> = Vec::new();
+    for oy in (0..=(img.h - tpl.h)).step_by(step) {
+        for ox in (0..=(img.w - tpl.w)).step_by(step) {
+            let s = score_at(img, tpl, ox, oy);
+            if val(s) > 0.2 {
+                all.push((s, ox, oy));
+            }
+        }
+    }
+    all.sort_by(|a, b| val(b.0).total_cmp(&val(a.0)));
+    let mut kept: Vec<(f32, u32, u32)> = Vec::new();
+    for (s, x, y) in all {
+        if kept.len() >= k {
+            break;
+        }
+        let clash = kept.iter().any(|&(_, kx, ky)| {
+            (x as i64 - kx as i64).unsigned_abs() < (tpl.w / 2).max(1) as u64
+                && (y as i64 - ky as i64).unsigned_abs() < (tpl.h / 2).max(1) as u64
+        });
+        if !clash {
+            kept.push((s, x, y));
+        }
+    }
+    kept
+}
+
+fn sweep_at_row_by(
+    img: &Luma,
+    tpl: &Tpl,
+    row_y: u32,
+    step: usize,
+    val: impl Fn(f32) -> f32,
+) -> Option<(f32, u32, u32)> {
+    if tpl.w > img.w || tpl.h > img.h || tpl.wsum < 2.0 || tpl.tvar <= 0.0 {
+        return None;
+    }
+    // Rows detected from contrast profiles can start at a box border above
+    // the text, so search a window extending half a template below the band.
+    let y_lo = row_y.saturating_sub(6);
+    let y_hi = (row_y + tpl.h / 2 + 4).min(img.h - tpl.h);
+    let mut best: Option<(f32, u32, u32)> = None;
+    for oy in y_lo..=y_hi {
+        for ox in (0..=(img.w - tpl.w)).step_by(step) {
+            let s = score_at(img, tpl, ox, oy);
+            if best.is_none() || val(s) > val(best.unwrap().0) {
+                best = Some((s, ox, oy));
+            }
+        }
+    }
+    best
+}
+
+fn refine_by(
+    font: &FontRef,
+    text: &str,
+    full: &Luma,
+    cx: u32,
+    cy: u32,
+    cpx: f32,
+    val: impl Fn(f32) -> f32,
+) -> Option<TextHit> {
+    let mut best: Option<TextHit> = None;
+    for dpx in [-1.0f32, 0.0, 1.0] {
+        let px = cpx + dpx;
+        if px < 6.0 {
+            continue;
+        }
+        let tpl = render(font, text, px);
+        if tpl.w > full.w || tpl.h > full.h || tpl.tvar <= 0.0 {
+            continue;
+        }
+        let x0 = cx.saturating_sub(4).min(full.w - tpl.w);
+        let y0 = cy.saturating_sub(4).min(full.h - tpl.h);
+        let x1 = (cx + 4).min(full.w - tpl.w);
+        let y1 = (cy + 4).min(full.h - tpl.h);
+        for oy in y0..=y1 {
+            for ox in x0..=x1 {
+                let s = score_at(full, &tpl, ox, oy);
+                if best.is_none() || val(s) > val(best.as_ref().unwrap().score) {
+                    best = Some(TextHit {
+                        score: s,
+                        x: ox,
+                        y: oy,
+                        w: tpl.w,
+                        h: tpl.h,
+                        px,
+                    });
+                }
+            }
+        }
+    }
+    best
+}
+
 /// Vertical positions (top y) of text-bearing rows: bands where per-row
 /// luma contrast rises above the background level.
 fn text_rows(img: &Luma, min_band: u32) -> Vec<u32> {
@@ -361,7 +490,7 @@ fn sweep_at_row(img: &Luma, tpl: &Tpl, row_y: u32, step: usize) -> Option<(f32, 
     // The band start marks the glyph tops; the template has ~2px padding
     // above the ascent, so the window top sits slightly above the band.
     let y_lo = row_y.saturating_sub(6);
-    let y_hi = (row_y + 4).min(img.h - tpl.h);
+    let y_hi = (row_y + tpl.h / 2 + 4).min(img.h - tpl.h);
     let mut best: Option<(f32, u32, u32)> = None;
     for oy in y_lo..=y_hi {
         for ox in (0..=(img.w - tpl.w)).step_by(step) {
@@ -410,8 +539,10 @@ fn score_at(img: &Luma, tpl: &Tpl, ox: u32, oy: u32) -> f32 {
         }
     }
     let gvar = sg2 - sg * sg / tpl.wsum;
-    if gvar <= 1e-9 {
-        return -1.0;
+    // Minimum contrast under the glyph mask: a near-uniform window fits any
+    // template "perfectly" (observed: |NCC| = 1.000 on a blank box area).
+    if gvar <= 1e-9 || (gvar / tpl.wsum).sqrt() < 5.0 {
+        return 0.0;
     }
     (num / (gvar.sqrt() * tpl.tvar.sqrt())) as f32
 }
