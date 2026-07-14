@@ -308,8 +308,8 @@ impl PanelLayout {
             // strong border line can sit a few px below the text (field data:
             // the bottom border is the reliable one). Bare text bands like
             // the "Passive Skills" header have no box at all.
-            let ey0 = by.saturating_sub(6);
-            let eh = (bh + 20).min(region.height() - ey0);
+            let ey0 = by.saturating_sub(12);
+            let eh = (bh + 24).min(region.height() - ey0);
             for (cx, cw) in cells {
                 if known.len() >= MAX_PASSIVES {
                     break;
@@ -329,8 +329,20 @@ impl PanelLayout {
                     }
                     _ => {}
                 }
-                // OCR + dictionary (Inventory Kamera recipe): only lines
-                // whose center falls inside THIS cell may match.
+                // OCR + dictionary (Inventory Kamera recipe) on the cell
+                // crop FIRST: it physically can't merge text across columns.
+                // (The region pass merges "Unstable Musclehead" into one
+                // line, defeating x-gating and duplicating the right cell.)
+                if let Ok(Some((key, _))) =
+                    ocr::read_and_match(&cell, passive_names, OCR_MIN_SIM_PASSIVE)
+                {
+                    if !known.iter().any(|k| k == key) {
+                        known.push(key.to_string());
+                    }
+                    continue;
+                }
+                // Fallback: region-pass lines whose center falls inside THIS
+                // cell (catches text the tight cell crop clips).
                 let cell_match = ocr_lines
                     .iter()
                     .filter(|(_, (lx, ly, lw, lh))| {
@@ -346,15 +358,9 @@ impl PanelLayout {
                     })
                     .max_by(|a, b| a.1.total_cmp(&b.1));
                 if let Some((key, _)) = cell_match {
-                    known.push(key.to_string());
-                    continue;
-                }
-                // Region-pass OCR can miss faint rows the per-cell upscale
-                // catches; retry on the cell alone before falling back.
-                if let Ok(Some((key, _))) =
-                    ocr::read_and_match(&cell, passive_names, OCR_MIN_SIM_PASSIVE)
-                {
-                    known.push(key.to_string());
+                    if !known.iter().any(|k| k == key) {
+                        known.push(key.to_string());
+                    }
                     continue;
                 }
                 // Synth hit within this cell?
@@ -438,17 +444,21 @@ impl PanelLayout {
     }
 }
 
-/// A passive row renders inside a bordered box: some horizontal line has a
+/// A passive row renders inside a bordered box: horizontal lines with a
 /// CONTIGUOUS bright-or-saturated run spanning >30% of the strip width —
-/// pale, gold, red or teal borders alike. Contiguity is what separates a
-/// border from text: a dense description line ("This effect stacks up to 30
-/// times") tops 30% in TOTAL coverage, but glyph gaps keep its longest run
-/// far shorter, while box borders are solid lines.
+/// pale, gold, red or teal borders alike. Contiguity separates a border from
+/// text (glyph gaps keep text runs short even when total coverage is high),
+/// and a box must show a border in BOTH the top and bottom half of the
+/// window: the "Passive Skills" header sees the next row's TOP border below
+/// itself, but has nothing above (field data: real rows show border lines
+/// ~9px above and ~10px below their text band).
 fn is_boxed_row(strip: &RgbaImage) -> bool {
     let (w, h) = strip.dimensions();
     if w < 40 || h < 6 {
         return false;
     }
+    let mut top = false;
+    let mut bottom = false;
     for y in 0..h {
         let mut run = 0u32;
         let mut best_run = 0u32;
@@ -458,8 +468,11 @@ fn is_boxed_row(strip: &RgbaImage) -> bool {
             let l = 0.299 * r as f32 + 0.587 * g as f32 + 0.114 * b as f32;
             let sat = r.max(g).max(b) - r.min(g).min(b);
             // Border pixels are bright (pale/gold boxes) or strongly colored
-            // (red/teal accents) — either counts.
-            if l > 90.0 || sat > 50 {
+            // (red/teal accents) — either counts. Thresholds are low because
+            // unhighlighted white boxes render DIM borders (field data:
+            // Nimble's bottom border peaks at l~70); contiguity and the
+            // two-border requirement carry the discrimination.
+            if l > 65.0 || sat > 40 {
                 run += 1;
                 best_run = best_run.max(run);
             } else {
@@ -467,10 +480,14 @@ fn is_boxed_row(strip: &RgbaImage) -> bool {
             }
         }
         if best_run as f32 / w as f32 > 0.3 {
-            return true;
+            if y < h / 2 {
+                top = true;
+            } else {
+                bottom = true;
+            }
         }
     }
-    false
+    top && bottom
 }
 
 /// Small stable hash for row-crop identity in the UI.
@@ -692,6 +709,47 @@ mod field_fixtures {
         assert!(unknowns.is_empty(), "{} unknown cells", unknowns.len());
     }
 
+    /// Field capture where the region-pass OCR merged the two columns into
+    /// one line ("Unstable Musclehead"), duplicating the right cell's match.
+    /// Cell-crop-first OCR keeps the columns separate.
+    #[test]
+    #[ignore = "slow; --release -- --ignored"]
+    fn field_passives_grid_b_reads_all_four() {
+        let gd = GameData::load().unwrap();
+        let synth = TextSynth::new().unwrap();
+        let region = load("field_passives_grid_b.png");
+        let names: Vec<(String, String)> = gd
+            .passives
+            .iter()
+            .map(|(k, p)| (k.clone(), p.name.clone()))
+            .collect();
+        let layout = PanelLayout {
+            name_band: (1736, 183, 570, 77),
+            px_name: 40.76,
+        };
+        let panel = (1644, 180, 633, 1055);
+        let dir = std::env::temp_dir().join(format!("palcalc-gridb-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let lib = crate::scanner::textlib::TextLib::load(dir.clone());
+        let (mut keys, unknowns, _) = layout.read_passive_rows(
+            &synth,
+            &lib,
+            &region,
+            &names,
+            None,
+            Some(row_px_expected(panel)),
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+        keys.sort();
+        assert_eq!(
+            keys,
+            vec!["MoveSpeed_up_1", "Noukin", "PAL_ALLAttack_down1", "PAL_Sanity_Up_1"],
+            "unknowns: {}",
+            unknowns.len()
+        );
+        assert!(unknowns.is_empty(), "{} unknown cells", unknowns.len());
+    }
+
     /// Field bundle: "Fragrant Foliage" renders dark-on-white (inverted
     /// polarity) and was read as no passives.
     #[test]
@@ -899,4 +957,3 @@ mod learned_rows {
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
-
