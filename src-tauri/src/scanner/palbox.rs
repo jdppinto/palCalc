@@ -777,7 +777,9 @@ mod tests {
         for y in 10..30 {
             for x in 10..30 {
                 male.put_pixel(x, y, Rgba([70, 130, 235, 255]));
-                female.put_pixel(x, y, Rgba([235, 120, 90, 255]));
+                // PINK (blue well above green) — plain red is an alpha icon,
+                // not a gender.
+                female.put_pixel(x, y, Rgba([235, 110, 170, 255]));
             }
         }
         assert_eq!(classify_gender(&male), Some(Gender::Male));
