@@ -69,6 +69,39 @@ impl PanelLayout {
         serde_json::from_str(&std::fs::read_to_string(Self::cache_path()).ok()?).ok()
     }
 
+    /// Load the cached layout only if it's plausible for the current
+    /// calibration; an implausible cache (e.g. poisoned by a false discovery
+    /// hit) is DELETED so no other code path can trip on it.
+    pub fn load_validated(
+        panel: Option<(i32, i32, u32, u32)>,
+        monitor: (i32, i32, u32, u32),
+    ) -> Option<Self> {
+        let l = Self::load_cache()?;
+        let (mx, my, mw, mh) = monitor;
+        let in_monitor = l.name_band.0 >= mx
+            && l.name_band.1 >= my
+            && l.name_band.0 + l.name_band.2 as i32 <= mx + mw as i32
+            && l.name_band.1 + l.name_band.3 as i32 <= my + mh as i32;
+        let in_panel = panel.is_none_or(|(px, py, pw, ph)| {
+            // The band must sit in the panel's top region where the name is.
+            let name_zone_bottom = py + (ph as f32 * 0.18) as i32;
+            l.name_band.0 >= px
+                && l.name_band.1 >= py
+                && l.name_band.1 + l.name_band.3 as i32 <= name_zone_bottom
+                && l.name_band.0 + l.name_band.2 as i32 <= px + pw as i32 + 40
+        });
+        let px_ok = panel.is_none_or(|p| {
+            let (lo, hi) = name_px_range(p);
+            l.px_name >= lo && l.px_name <= hi
+        });
+        if in_monitor && in_panel && px_ok {
+            Some(l)
+        } else {
+            let _ = std::fs::remove_file(Self::cache_path());
+            None
+        }
+    }
+
     pub fn save_cache(&self) {
         if let Some(dir) = Self::cache_path().parent() {
             let _ = std::fs::create_dir_all(dir);

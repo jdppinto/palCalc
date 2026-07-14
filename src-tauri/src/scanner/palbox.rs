@@ -463,13 +463,13 @@ pub fn debug_read_sheet(
     out.log.push(format!("monitor: {monitor:?}"));
     out.log.push(format!("panel rect: {:?}", calib.panel));
 
-    let mut layout = PanelLayout::load_cache();
+    let mut layout = PanelLayout::load_validated(calib.panel, monitor);
     out.log.push(format!(
-        "cached layout: {}",
+        "cached layout (validated): {}",
         layout
             .as_ref()
             .map(|l| format!("name_band {:?} px {}", l.name_band, l.px_name))
-            .unwrap_or_else(|| "none".into())
+            .unwrap_or_else(|| "none (absent or rejected+deleted)".into())
     ));
 
     if layout.is_none() {
