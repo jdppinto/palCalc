@@ -249,6 +249,13 @@ pub fn scan_box(
     // ---- Pass 2: hover occupied slots, read the panel ----
     let monitor = backend.focused_monitor_rect()?;
     let (mx, my, mw, mh) = monitor;
+    // Boxes are full of duplicate pals: identical panel captures are read
+    // once and memoized by pixel hash.
+    let mut name_cache: HashMap<u64, Option<(String, f32)>> = HashMap::new();
+    let mut passive_cache: HashMap<u64, Vec<String>> = HashMap::new();
+    // Full 333-name sweeps are expensive; only a couple are allowed per scan
+    // (icon hints cover the rest).
+    let mut full_name_budget = 2u32;
     let mut layout = PanelLayout::load_cache().filter(|l| {
         l.name_band.0 >= mx
             && l.name_band.1 >= my
@@ -334,17 +341,30 @@ pub fn scan_box(
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
             }
+            let band_key = img_hash(&band);
             let name_read = match name_from_discovery.take() {
-                Some(r) => Some(r),
-                None => {
-                    // Stage 1: icon hints only; stage 2: every species name.
-                    let staged = if hints.is_empty() {
-                        None
-                    } else {
-                        l.read_name(synth, &band, &hints)
-                    };
-                    staged.or_else(|| l.read_name(synth, &band, species_names))
+                Some(r) => {
+                    name_cache.insert(band_key, Some(r.clone()));
+                    Some(r)
                 }
+                None => match name_cache.get(&band_key) {
+                    Some(cached) => cached.clone(),
+                    None => {
+                        // Stage 1: icon hints only; stage 2 (budgeted):
+                        // every species name.
+                        let mut r = if hints.is_empty() {
+                            None
+                        } else {
+                            l.read_name(synth, &band, &hints)
+                        };
+                        if r.is_none() && full_name_budget > 0 {
+                            full_name_budget -= 1;
+                            r = l.read_name(synth, &band, species_names);
+                        }
+                        name_cache.insert(band_key, r.clone());
+                        r
+                    }
+                },
             };
             if let Some((key, s)) = name_read {
                 if s >= NAME_CONFIDENCE {
@@ -359,11 +379,18 @@ pub fn scan_box(
             if let Some(dir) = debug_dir {
                 let _ = pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
             }
-            let (keys, found_px) = l.read_passives(synth, &pimg, passive_names, row_px);
-            if row_px.is_none() {
-                row_px = found_px;
-            }
-            passives = keys;
+            let pkey = img_hash(&pimg);
+            passives = match passive_cache.get(&pkey) {
+                Some(cached) => cached.clone(),
+                None => {
+                    let (keys, found_px) = l.read_passives(synth, &pimg, passive_names, row_px);
+                    if row_px.is_none() {
+                        row_px = found_px;
+                    }
+                    passive_cache.insert(pkey, keys.clone());
+                    keys
+                }
+            };
         }
 
         done += 1;
@@ -388,6 +415,16 @@ pub fn scan_box(
     }
     results.sort_by_key(|r| (r.row, r.col));
     Ok(results)
+}
+
+/// Cheap FNV-style pixel hash for per-scan capture memoization.
+fn img_hash(img: &image::RgbaImage) -> u64 {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for &b in img.as_raw() {
+        h ^= b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    h
 }
 
 #[cfg(test)]

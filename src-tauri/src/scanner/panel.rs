@@ -25,8 +25,8 @@ pub const PASSIVE_CONFIDENCE: f32 = 0.40;
 // (1690, 1130) px 29).
 const PASSIVES_DX: f32 = -4.0;
 const PASSIVES_DY: f32 = 22.0;
-const PASSIVES_W: f32 = 13.0;
-const PASSIVES_H: f32 = 9.5;
+const PASSIVES_W: f32 = 9.5;
+const PASSIVES_H: f32 = 7.5;
 const PASSIVE_PX_RATIO: f32 = 0.763;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -225,5 +225,44 @@ mod tests {
         );
         let names: Vec<&str> = read.iter().map(|k| gd.passives[k].name.as_str()).collect();
         assert_eq!(names, vec!["Cheery"], "passive rows misread");
+    }
+}
+
+#[cfg(test)]
+mod perf_probe {
+    use super::*;
+    use palcalc_core::GameData;
+
+    #[test]
+    #[ignore]
+    fn time_passive_read() {
+        let gd = GameData::load().unwrap();
+        let synth = TextSynth::new().unwrap();
+        let shot = image::open(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/palbox/full-palbox.png"),
+        )
+        .unwrap()
+        .to_rgba8();
+        let layout = PanelLayout {
+            name_band: (1734, 176, 588, 102),
+            px_name: 42.0,
+        };
+        let r = layout.passives_rect();
+        let region = image::imageops::crop_imm(&shot, r.0 as u32, r.1 as u32, r.2, r.3).to_image();
+        let names: Vec<(String, String)> = gd
+            .passives
+            .iter()
+            .map(|(k, p)| (k.clone(), p.name.clone()))
+            .collect();
+        for hint in [None, Some(29.0f32)] {
+            let t = std::time::Instant::now();
+            let (keys, px) = layout.read_passives(&synth, &region, &names, hint);
+            eprintln!(
+                "hint {hint:?}: {:?} px {px:?} in {:?}",
+                keys.iter().map(|k| gd.passives[k].name.clone()).collect::<Vec<_>>(),
+                t.elapsed()
+            );
+        }
     }
 }
