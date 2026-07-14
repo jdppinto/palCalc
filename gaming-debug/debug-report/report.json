@@ -25,11 +25,11 @@
     "monitor: (0, 0, 2560, 1440)",
     "panel rect: Some((1644, 180, 633, 1055))",
     "cached layout (validated): name_band (1736, 183, 570, 77) px 40.76413",
-    "name read: ThunderDragonMan at 1.000 in 73.230081ms",
+    "name read: Blueplatypus at 1.000 in 79.936735ms",
     "gender zone: (2188, 183, 82, 77)",
     "gender: Some(Male)",
     "passives region: (1644, 1066, 633, 169)",
-    "passives: [\"CraftSpeed_up2\", \"Nocturnal\"] + 1 unknown row(s) (row px Some(28.323544)) in 5.304997649s"
+    "passives: [\"PAL_ALLAttack_down1\", \"MoveSpeed_up_1\", \"PAL_Sanity_Up_1\", \"Noukin\"] + 0 unknown row(s) (row px None) in 175.729135ms"
   ],
   "panel_layout": {
     "name_band": [
