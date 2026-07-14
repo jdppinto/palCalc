@@ -74,6 +74,19 @@ impl GridCalibration {
         )
     }
 
+    /// A user-drawn zone override for `key` ("name" / "gender" / "passives"),
+    /// or the computed default. The bool reports whether an override applied.
+    pub fn zone_or(
+        &self,
+        key: &str,
+        default: (i32, i32, u32, u32),
+    ) -> ((i32, i32, u32, u32), bool) {
+        match self.zones.get(key) {
+            Some(r) => (*r, true),
+            None => (default, false),
+        }
+    }
+
     pub fn config_path() -> std::path::PathBuf {
         let base = std::env::var_os("XDG_CONFIG_HOME")
             .map(std::path::PathBuf::from)
@@ -346,12 +359,8 @@ pub fn scan_box(
         if let Some(l) = &layout {
             // Name: authoritative when confident. Try the cheap staged reads
             // unless discovery already produced it this iteration.
-            let band = backend.capture_region(
-                l.name_band.0,
-                l.name_band.1,
-                l.name_band.2,
-                l.name_band.3,
-            )?;
+            let (nb, _) = calib.zone_or("name", l.name_band);
+            let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
             }
@@ -378,17 +387,20 @@ pub fn scan_box(
             }
             gender = match calib.panel {
                 Some(panel) => {
-                    let gr = l.gender_rect(panel);
+                    let (gr, _) = calib.zone_or("gender", l.gender_rect(panel));
                     let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
                     classify_gender(&gimg)
                 }
                 None => classify_gender(&band),
             };
 
-            let pr = match calib.panel {
-                Some(panel) => PanelLayout::passives_search_rect(panel),
-                None => l.passives_rect(),
-            };
+            let (pr, _) = calib.zone_or(
+                "passives",
+                match calib.panel {
+                    Some(panel) => PanelLayout::passives_search_rect(panel),
+                    None => l.passives_rect(),
+                },
+            );
             let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
             if let Some(dir) = debug_dir {
                 let _ = pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
@@ -486,6 +498,13 @@ pub struct SheetDebug {
     pub passive_unknowns: Vec<(String, String)>,
     pub gender: Option<Gender>,
     pub report_path: String,
+    /// Full panel capture (only when a panel rect is calibrated) — the UI
+    /// draws the zone rects over it and lets the user drag replacements.
+    pub panel_png: Option<String>,
+    pub panel_rect: Option<(i32, i32, u32, u32)>,
+    /// (zone key, absolute screen rect, user-overridden?) for every zone the
+    /// read actually used.
+    pub zones_used: Vec<(String, (i32, i32, u32, u32), bool)>,
 }
 
 /// Read the currently displayed pal sheet in isolation.
@@ -507,6 +526,9 @@ pub fn debug_read_sheet(
         passive_unknowns: Vec::new(),
         gender: None,
         report_path: report_dir.display().to_string(),
+        panel_png: None,
+        panel_rect: None,
+        zones_used: Vec::new(),
     };
     let monitor = backend.focused_monitor_rect()?;
     out.log.push(format!("monitor: {monitor:?}"));
@@ -557,8 +579,20 @@ pub fn debug_read_sheet(
         return Ok(out);
     };
 
+    // Full panel capture: the UI overlays the zone rects on it and lets the
+    // user drag replacements ("run again" then uses the overrides).
+    if let Some(panel) = calib.panel {
+        let pimg = backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
+        let _ = pimg.save(report_dir.join("panel.png"));
+        out.panel_png = Some(png_base64(&pimg)?);
+        out.panel_rect = Some(panel);
+    }
+
     let t = std::time::Instant::now();
-    let band = backend.capture_region(l.name_band.0, l.name_band.1, l.name_band.2, l.name_band.3)?;
+    let (nb, n_ovr) = calib.zone_or("name", l.name_band);
+    out.zones_used.push(("name".into(), nb, n_ovr));
+    out.log.push(format!("name zone: {nb:?} (override: {n_ovr})"));
+    let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
     let _ = band.save(report_dir.join("name_band.png"));
     out.name_band_png = Some(png_base64(&band)?);
     match l.read_name(synth, &band, species_names) {
@@ -574,8 +608,9 @@ pub fn debug_read_sheet(
     }
     out.gender = match calib.panel {
         Some(panel) => {
-            let gr = l.gender_rect(panel);
-            out.log.push(format!("gender zone: {gr:?}"));
+            let (gr, g_ovr) = calib.zone_or("gender", l.gender_rect(panel));
+            out.zones_used.push(("gender".into(), gr, g_ovr));
+            out.log.push(format!("gender zone: {gr:?} (override: {g_ovr})"));
             let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
             let _ = gimg.save(report_dir.join("gender_zone.png"));
             classify_gender(&gimg)
@@ -584,11 +619,15 @@ pub fn debug_read_sheet(
     };
     out.log.push(format!("gender: {:?}", out.gender));
 
-    let pr = match calib.panel {
-        Some(panel) => PanelLayout::passives_search_rect(panel),
-        None => l.passives_rect(),
-    };
-    out.log.push(format!("passives region: {pr:?}"));
+    let (pr, p_ovr) = calib.zone_or(
+        "passives",
+        match calib.panel {
+            Some(panel) => PanelLayout::passives_search_rect(panel),
+            None => l.passives_rect(),
+        },
+    );
+    out.zones_used.push(("passives".into(), pr, p_ovr));
+    out.log.push(format!("passives region: {pr:?} (override: {p_ovr})"));
     let t = std::time::Instant::now();
     let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
     let _ = pimg.save(report_dir.join("passives_region.png"));

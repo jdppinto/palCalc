@@ -137,6 +137,22 @@ fn save_calibration(calib: GridCalibration) -> Result<(), String> {
     calib.save()
 }
 
+/// Set or clear a user-drawn zone override ("name" / "gender" / "passives"),
+/// absolute screen coords. Pass rect: null to revert to the computed zone.
+#[tauri::command]
+fn save_zone(key: String, rect: Option<(i32, i32, u32, u32)>) -> Result<(), String> {
+    let mut calib = GridCalibration::load().ok_or("no calibration saved yet")?;
+    match rect {
+        Some(r) => {
+            calib.zones.insert(key, r);
+        }
+        None => {
+            calib.zones.remove(&key);
+        }
+    }
+    calib.save()
+}
+
 #[tauri::command]
 fn abort_scan() {
     SCAN_ABORT.store(true, Ordering::Relaxed);
@@ -398,6 +414,7 @@ pub fn run() {
             scanner_windows,
             get_cursor_pos,
             save_calibration,
+            save_zone,
             abort_scan,
             scan_current_box,
             capture_screen,

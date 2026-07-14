@@ -110,6 +110,9 @@
     name_score: number;
     passives: string[];
     gender: Gender | null;
+    panel_png: string | null;
+    panel_rect: [number, number, number, number] | null;
+    zones_used: [string, [number, number, number, number], boolean][];
   }
   let debugLog = $state<string[]>([]);
   let debugReportPath = $state<string | null>(null);
@@ -141,6 +144,76 @@
     } finally {
       debugRunning = false;
     }
+  }
+
+  // Zone override editor: drag a rect on the panel capture, assign it to an
+  // aspect, save, then re-run the sheet test to see reads with the override.
+  const ZONE_COLORS: Record<string, string> = {
+    name: "#4aa3ff",
+    gender: "#ff6bd6",
+    passives: "#ffd34a",
+  };
+  let zoneAspect = $state<"name" | "gender" | "passives">("gender");
+  let zoneSel = $state<{ x: number; y: number; w: number; h: number } | null>(null);
+  let zoneDrag: { x: number; y: number } | null = null;
+  let panelImgEl = $state<HTMLImageElement | null>(null);
+
+  function editorPos(e: MouseEvent): { x: number; y: number } {
+    const el = e.currentTarget as HTMLElement;
+    const b = el.getBoundingClientRect();
+    return { x: e.clientX - b.left, y: e.clientY - b.top };
+  }
+  function zoneDown(e: MouseEvent) {
+    e.preventDefault();
+    zoneDrag = editorPos(e);
+    zoneSel = null;
+  }
+  function zoneMove(e: MouseEvent) {
+    if (!zoneDrag) return;
+    const p = editorPos(e);
+    zoneSel = {
+      x: Math.min(zoneDrag.x, p.x),
+      y: Math.min(zoneDrag.y, p.y),
+      w: Math.abs(p.x - zoneDrag.x),
+      h: Math.abs(p.y - zoneDrag.y),
+    };
+  }
+  function zoneUp() {
+    zoneDrag = null;
+    if (zoneSel && (zoneSel.w < 4 || zoneSel.h < 4)) zoneSel = null;
+  }
+  async function saveZone() {
+    if (!zoneSel || !debugSheet?.panel_rect || !panelImgEl) return;
+    const [px, py, pw, ph] = debugSheet.panel_rect;
+    const sx = pw / panelImgEl.clientWidth;
+    const sy = ph / panelImgEl.clientHeight;
+    const rect: [number, number, number, number] = [
+      Math.round(px + zoneSel.x * sx),
+      Math.round(py + zoneSel.y * sy),
+      Math.max(1, Math.round(zoneSel.w * sx)),
+      Math.max(1, Math.round(zoneSel.h * sy)),
+    ];
+    try {
+      await invoke("save_zone", { key: zoneAspect, rect });
+      debugLog = [...debugLog, `zone '${zoneAspect}' override saved (${rect.join(", ")}) — run the sheet test again`];
+      zoneSel = null;
+    } catch (e) {
+      debugLog = [...debugLog, `ERROR saving zone: ${e}`];
+    }
+  }
+  async function clearZone(key: string) {
+    try {
+      await invoke("save_zone", { key, rect: null });
+      debugLog = [...debugLog, `zone '${key}' override cleared — run the sheet test again`];
+    } catch (e) {
+      debugLog = [...debugLog, `ERROR clearing zone: ${e}`];
+    }
+  }
+  function zonePct(rect: [number, number, number, number]): string {
+    const pr = debugSheet?.panel_rect;
+    if (!pr) return "";
+    const [px, py, pw, ph] = pr;
+    return `left:${((rect[0] - px) / pw) * 100}%;top:${((rect[1] - py) / ph) * 100}%;width:${(rect[2] / pw) * 100}%;height:${(rect[3] / ph) * 100}%;`;
   }
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -401,6 +474,54 @@
         {#if debugSheet.passives_png}
           <p class="dim-text">passives region capture:</p>
           <img class="debug-img" src={"data:image/png;base64," + debugSheet.passives_png} alt="passives region" />
+        {/if}
+        {#if debugSheet.panel_png && debugSheet.panel_rect}
+          <p class="dim-text">
+            panel capture with the zones the read used — drag on the image to
+            propose a better <strong style={`color:${ZONE_COLORS[zoneAspect]}`}>{zoneAspect}</strong>
+            zone, save it, then run the sheet test again:
+          </p>
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <div
+            class="zone-editor"
+            onmousedown={zoneDown}
+            onmousemove={zoneMove}
+            onmouseup={zoneUp}
+            onmouseleave={zoneUp}
+          >
+            <img
+              bind:this={panelImgEl}
+              src={"data:image/png;base64," + debugSheet.panel_png}
+              alt="panel"
+              draggable="false"
+            />
+            {#each debugSheet.zones_used as [key, rect, ovr] (key)}
+              <div
+                class="zone-box"
+                style={`${zonePct(rect)}border-color:${ZONE_COLORS[key] ?? "#fff"};`}
+                title={`${key}${ovr ? " (override)" : ""}`}
+              >
+                <span style={`background:${ZONE_COLORS[key] ?? "#fff"}`}>{key}{ovr ? " ✎" : ""}</span>
+              </div>
+            {/each}
+            {#if zoneSel}
+              <div
+                class="zone-sel"
+                style={`left:${zoneSel.x}px;top:${zoneSel.y}px;width:${zoneSel.w}px;height:${zoneSel.h}px;border-color:${ZONE_COLORS[zoneAspect]};`}
+              ></div>
+            {/if}
+          </div>
+          <div class="row">
+            <select bind:value={zoneAspect}>
+              <option value="name">name</option>
+              <option value="gender">gender</option>
+              <option value="passives">passives</option>
+            </select>
+            <button onclick={saveZone} disabled={!zoneSel}>Save {zoneAspect} zone</button>
+            {#each debugSheet.zones_used.filter((z) => z[2]) as [key] (key)}
+              <button onclick={() => clearZone(key)}>Clear {key} override</button>
+            {/each}
+          </div>
         {/if}
       </div>
     {/if}
@@ -702,6 +823,44 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     background: #000;
+  }
+
+  .zone-editor {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    cursor: crosshair;
+    user-select: none;
+  }
+  .zone-editor img {
+    display: block;
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #000;
+    pointer-events: none;
+  }
+  .zone-box {
+    position: absolute;
+    border: 2px solid;
+    pointer-events: none;
+    box-sizing: border-box;
+  }
+  .zone-box span {
+    position: absolute;
+    top: -1.1rem;
+    left: 0;
+    font-size: 0.65rem;
+    color: #000;
+    padding: 0 0.25rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .zone-sel {
+    position: absolute;
+    border: 2px dashed;
+    pointer-events: none;
+    box-sizing: border-box;
   }
 
   .label-panel {
