@@ -119,6 +119,12 @@ pub struct SlotResult {
     pub crop_png: String,
 }
 
+/// Test-visible wrapper.
+#[cfg(test)]
+pub fn classify_gender_pub(img: &image::RgbaImage) -> Option<Gender> {
+    classify_gender(img)
+}
+
 /// Classify the gender symbol by dominant saturated color.
 fn classify_gender(img: &image::RgbaImage) -> Option<Gender> {
     let (mut blue, mut warm, mut colored) = (0u32, 0u32, 0u32);
@@ -379,7 +385,14 @@ pub fn scan_box(
                     score = s;
                 }
             }
-            gender = classify_gender(&band);
+            gender = match calib.panel {
+                Some(panel) => {
+                    let gr = l.gender_rect(panel);
+                    let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
+                    classify_gender(&gimg)
+                }
+                None => classify_gender(&band),
+            };
 
             let pr = match calib.panel {
                 Some(panel) => PanelLayout::passives_search_rect(panel),
@@ -559,7 +572,16 @@ pub fn debug_read_sheet(
             .log
             .push(format!("name read: NO confident match in {:?}", t.elapsed())),
     }
-    out.gender = classify_gender(&band);
+    out.gender = match calib.panel {
+        Some(panel) => {
+            let gr = l.gender_rect(panel);
+            out.log.push(format!("gender zone: {gr:?}"));
+            let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
+            let _ = gimg.save(report_dir.join("gender_zone.png"));
+            classify_gender(&gimg)
+        }
+        None => classify_gender(&band),
+    };
     out.log.push(format!("gender: {:?}", out.gender));
 
     let pr = match calib.panel {

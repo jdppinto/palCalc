@@ -134,6 +134,18 @@ impl PanelLayout {
         (panel.0, panel.1, panel.2, (panel.3 as f32 * 0.15) as u32)
     }
 
+    /// Gender-symbol zone: the right sliver of the name row (reference: the
+    /// symbol sits at ~91-96% of the panel width). Classified by color only.
+    pub fn gender_rect(&self, panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
+        let (px, _, pw, _) = panel;
+        (
+            px + (pw as f32 * 0.86) as i32,
+            self.name_band.1,
+            (pw as f32 * 0.13) as u32,
+            self.name_band.3,
+        )
+    }
+
     /// Passive-rows search area inside a user-delimited panel rect: rows sit
     /// at ~88-100% of the panel height; starting higher pulls in the partner
     /// skill description, which false-matches short passive names.
@@ -160,11 +172,14 @@ impl PanelLayout {
             .best_label(region, hints, true, px_range.0, px_range.1)
             .filter(|(_, h)| h.score >= NAME_CONFIDENCE)?;
         let layout = Self {
+            // Tight around the name text only: longest names run ~13 chars
+            // (~7 name-px) — the gender symbol and everything right of the
+            // name live outside the band.
             name_band: (
-                region_origin.0 + hit.x as i32 - (hit.px * 1.5) as i32,
-                region_origin.1 + hit.y as i32 - (hit.h as f32 * 0.4) as i32,
-                (hit.px * 14.0) as u32,
-                (hit.h as f32 * 1.8) as u32,
+                region_origin.0 + hit.x as i32 - (hit.px * 1.0) as i32,
+                region_origin.1 + hit.y as i32 - (hit.h as f32 * 0.3) as i32,
+                (hit.px * 9.0) as u32,
+                (hit.h as f32 * 1.6) as u32,
             ),
             px_name: hit.px,
         };
@@ -296,6 +311,11 @@ mod tests {
             .read_name(&synth, &crop(&shot, layout.name_band), &all_names)
             .expect("band read");
         assert_eq!(key, "Carbunclo", "band read wrong name ({score})");
+
+        // Gender zone: the screenshot's Lifmunk shows the male symbol.
+        let gr = layout.gender_rect(panel);
+        let gender = crate::scanner::palbox::classify_gender_pub(&crop(&shot, gr));
+        assert_eq!(gender, Some(palcalc_core::Gender::Male), "zone {gr:?}");
 
         // Passive rows from the derived region.
         let passive_names: Vec<(String, String)> = gd
