@@ -9,3 +9,4 @@
 pub mod matcher;
 pub mod palbox;
 pub mod platform;
+pub mod textlib;

@@ -8,6 +8,7 @@ use tauri::{Emitter, State};
 use scanner::matcher::IconTemplates;
 use scanner::palbox::{scan_box, GridCalibration, SCAN_ABORT};
 use scanner::platform::{self, WindowInfo};
+use scanner::textlib::{png_base64, png_from_base64, TextLib};
 
 #[derive(Serialize)]
 struct PalEntry {
@@ -138,6 +139,48 @@ fn abort_scan() {
     SCAN_ABORT.store(true, Ordering::Relaxed);
 }
 
+#[derive(Serialize)]
+struct FrozenFrame {
+    data_url: String,
+    x: i32,
+    y: i32,
+    w: u32,
+    h: u32,
+}
+
+/// Capture the focused monitor for the zone-calibration editor.
+#[tauri::command]
+async fn capture_screen() -> Result<FrozenFrame, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        let mut backend = platform::detect()?;
+        let (x, y, w, h) = backend.focused_monitor_rect()?;
+        let img = backend.capture_region(x, y, w, h)?;
+        Ok(FrozenFrame {
+            data_url: format!("data:image/png;base64,{}", png_base64(&img)?),
+            x,
+            y,
+            w,
+            h,
+        })
+    })
+    .await
+    .map_err(|e| format!("capture task panicked: {e}"))?
+}
+
+/// Store a user-labeled passive crop in the label-once template library.
+#[tauri::command]
+fn save_passive_label(
+    png_base64_data: String,
+    passive_key: String,
+    data: State<GameData>,
+) -> Result<(), String> {
+    if !data.passives.contains_key(&passive_key) {
+        return Err(format!("unknown passive key: {passive_key}"));
+    }
+    let crop = png_from_base64(&png_base64_data)?;
+    TextLib::load(TextLib::default_dir()).learn(&passive_key, &crop)
+}
+
 /// Scan the currently open palbox page. Emits `scan-progress` events and
 /// returns the slot results. Runs on a blocking thread so the UI stays live.
 #[tauri::command]
@@ -159,9 +202,11 @@ async fn scan_current_box(
                 TEMPLATES.get_or_init(|| t)
             }
         };
+        let textlib = TextLib::load(TextLib::default_dir());
         scan_box(
             backend.as_mut(),
             templates,
+            &textlib,
             &calib,
             threshold.unwrap_or(0.55),
             |p| {
@@ -187,7 +232,9 @@ pub fn run() {
             get_cursor_pos,
             save_calibration,
             abort_scan,
-            scan_current_box
+            scan_current_box,
+            capture_screen,
+            save_passive_label
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

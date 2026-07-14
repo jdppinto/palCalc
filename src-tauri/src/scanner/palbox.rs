@@ -1,12 +1,15 @@
 //! Scan orchestration: hover each slot of the open box, capture, identify.
 
+use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
+use palcalc_core::Gender;
 use serde::{Deserialize, Serialize};
 
 use super::matcher::IconTemplates;
 use super::platform::Backend;
+use super::textlib::{png_base64, TextLib, TextMatch};
 
 /// Global abort flag, flipped by the `abort_scan` command.
 pub static SCAN_ABORT: AtomicBool = AtomicBool::new(false);
@@ -24,6 +27,12 @@ pub struct GridCalibration {
     pub slot_size: u32,
     /// Hover delay before capturing, ms.
     pub delay_ms: u64,
+    /// User-delineated hover-panel field zones, absolute screen rects
+    /// (x, y, w, h). Known keys: "gender", "passive1".."passive4", "name".
+    /// The panel appears at a fixed position, so one calibration serves
+    /// every slot.
+    #[serde(default)]
+    pub zones: HashMap<String, (i32, i32, u32, u32)>,
 }
 
 impl Default for GridCalibration {
@@ -35,6 +44,7 @@ impl Default for GridCalibration {
             rows: 5,
             slot_size: 90,
             delay_ms: 300,
+            zones: HashMap::new(),
         }
     }
 }
@@ -82,6 +92,15 @@ impl GridCalibration {
     }
 }
 
+/// A passive-zone read: matched against the label-once template library, or
+/// returned to the UI as an image for the user to label.
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum PassiveRead {
+    Known { key: String },
+    Unknown { id: String, png_base64: String },
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct SlotResult {
     pub row: u32,
@@ -89,6 +108,38 @@ pub struct SlotResult {
     /// None = empty slot or below-threshold match.
     pub species: Option<String>,
     pub score: f32,
+    /// From the "gender" zone by symbol color (blue ♂ / warm ♀).
+    pub gender: Option<Gender>,
+    pub passives: Vec<PassiveRead>,
+}
+
+/// Classify the gender symbol by dominant saturated color.
+fn classify_gender(img: &image::RgbaImage) -> Option<Gender> {
+    let (mut blue, mut warm, mut colored) = (0u32, 0u32, 0u32);
+    for p in img.pixels() {
+        let (r, g, b) = (p[0] as i32, p[1] as i32, p[2] as i32);
+        let max = r.max(g).max(b);
+        let sat = max - r.min(g).min(b);
+        if max < 60 || sat < 40 {
+            continue;
+        }
+        colored += 1;
+        if b > r + 25 && b > g + 15 {
+            blue += 1;
+        } else if r > b + 25 {
+            warm += 1;
+        }
+    }
+    if colored < 10 {
+        return None;
+    }
+    if blue > warm * 2 {
+        Some(Gender::Male)
+    } else if warm > blue * 2 {
+        Some(Gender::Female)
+    } else {
+        None
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -102,6 +153,7 @@ pub struct ScanProgress {
 pub fn scan_box(
     backend: &mut dyn Backend,
     templates: &IconTemplates,
+    textlib: &TextLib,
     calib: &GridCalibration,
     threshold: f32,
     mut on_progress: impl FnMut(ScanProgress),
@@ -127,6 +179,34 @@ pub fn scan_box(
                 Some((key, score)) => (Some(key), score),
                 None => (None, 0.0),
             };
+
+            // Hover-panel zones only mean something when a pal is present.
+            let mut gender = None;
+            let mut passives = Vec::new();
+            if species.is_some() {
+                if let Some(&(zx, zy, zw, zh)) = calib.zones.get("gender") {
+                    gender = classify_gender(&backend.capture_region(zx, zy, zw, zh)?);
+                }
+                for i in 1..=4 {
+                    let Some(&(zx, zy, zw, zh)) = calib.zones.get(&format!("passive{i}")) else {
+                        continue;
+                    };
+                    let zone = backend.capture_region(zx, zy, zw, zh)?;
+                    match textlib.identify(&zone) {
+                        TextMatch::Empty => {}
+                        TextMatch::Known(key) => passives.push(PassiveRead::Known { key }),
+                        TextMatch::Unknown => {
+                            let png = png_base64(&zone)?;
+                            let id = format!("{:016x}", fxhash(png.as_bytes()));
+                            passives.push(PassiveRead::Unknown {
+                                id,
+                                png_base64: png,
+                            });
+                        }
+                    }
+                }
+            }
+
             on_progress(ScanProgress {
                 current: row * calib.cols + col + 1,
                 total,
@@ -137,10 +217,22 @@ pub fn scan_box(
                 col,
                 species,
                 score,
+                gender,
+                passives,
             });
         }
     }
     Ok(results)
+}
+
+/// Small stable hash for deduplicating unknown crops in the UI.
+fn fxhash(bytes: &[u8]) -> u64 {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for &b in bytes {
+        h ^= b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    h
 }
 
 #[cfg(test)]
@@ -172,6 +264,9 @@ mod tests {
         }
         fn cursor_pos(&mut self) -> Result<(i32, i32), String> {
             Ok(self.cursor)
+        }
+        fn focused_monitor_rect(&mut self) -> Result<(i32, i32, u32, u32), String> {
+            Ok((0, 0, self.screen.width(), self.screen.height()))
         }
     }
 
@@ -217,14 +312,16 @@ mod tests {
             rows: 2,
             slot_size: 110,
             delay_ms: 0,
+            zones: HashMap::new(),
         };
         let mut backend = MockBackend {
             screen,
             cursor: (0, 0),
         };
         SCAN_ABORT.store(false, Ordering::Relaxed);
+        let textlib = TextLib::load(std::env::temp_dir().join("palcalc-textlib-absent"));
         let mut progress_events = 0;
-        let results = scan_box(&mut backend, &templates, &calib, 0.5, |_| {
+        let results = scan_box(&mut backend, &templates, &textlib, &calib, 0.5, |_| {
             progress_events += 1;
         })
         .unwrap();
@@ -261,8 +358,26 @@ mod tests {
             delay_ms: 0,
             ..Default::default()
         };
-        let out = scan_box(&mut backend, &templates, &calib, 0.5, |_| {});
+        let textlib = TextLib::load(std::env::temp_dir().join("palcalc-textlib-absent"));
+        let out = scan_box(&mut backend, &templates, &textlib, &calib, 0.5, |_| {});
         assert!(out.is_err());
         SCAN_ABORT.store(false, Ordering::Relaxed);
+    }
+
+    #[test]
+    fn gender_symbol_classifies_by_color() {
+        use image::Rgba;
+        let mut male = image::RgbaImage::from_pixel(40, 40, Rgba([30, 32, 40, 255]));
+        let mut female = male.clone();
+        let neutral = male.clone();
+        for y in 10..30 {
+            for x in 10..30 {
+                male.put_pixel(x, y, Rgba([70, 130, 235, 255]));
+                female.put_pixel(x, y, Rgba([235, 120, 90, 255]));
+            }
+        }
+        assert_eq!(classify_gender(&male), Some(Gender::Male));
+        assert_eq!(classify_gender(&female), Some(Gender::Female));
+        assert_eq!(classify_gender(&neutral), None);
     }
 }

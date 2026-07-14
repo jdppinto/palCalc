@@ -19,6 +19,9 @@ pub trait Backend: Send {
     /// Cursor placement only — the scan flow hovers, it never clicks slots.
     fn move_cursor(&mut self, x: i32, y: i32) -> Result<(), String>;
     fn cursor_pos(&mut self) -> Result<(i32, i32), String>;
+    /// Geometry of the currently focused monitor (x, y, w, h) — the canvas
+    /// for freeze-frame zone calibration.
+    fn focused_monitor_rect(&mut self) -> Result<(i32, i32, u32, u32), String>;
 }
 
 pub fn detect() -> Result<Box<dyn Backend>, String> {
@@ -69,6 +72,16 @@ mod linux {
     struct HyprCursor {
         x: i64,
         y: i64,
+    }
+
+    #[derive(Deserialize)]
+    struct HyprMonitor {
+        x: i32,
+        y: i32,
+        width: u32,
+        height: u32,
+        #[serde(default)]
+        focused: bool,
     }
 
     fn socket_path() -> Result<PathBuf, String> {
@@ -345,6 +358,18 @@ mod linux {
 
         fn cursor_pos(&mut self) -> Result<(i32, i32), String> {
             self.query_cursor()
+        }
+
+        fn focused_monitor_rect(&mut self) -> Result<(i32, i32, u32, u32), String> {
+            let json = self.request("j/monitors")?;
+            let monitors: Vec<HyprMonitor> = serde_json::from_str(&json)
+                .map_err(|e| format!("hyprland monitors parse: {e}"))?;
+            monitors
+                .iter()
+                .find(|m| m.focused)
+                .or(monitors.first())
+                .map(|m| (m.x, m.y, m.width, m.height))
+                .ok_or_else(|| "no monitors reported by Hyprland".into())
         }
     }
 }
