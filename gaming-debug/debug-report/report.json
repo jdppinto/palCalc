@@ -25,11 +25,11 @@
     "monitor: (0, 0, 2560, 1440)",
     "panel rect: Some((1644, 180, 633, 1055))",
     "cached layout (validated): name_band (1736, 183, 570, 77) px 40.76413",
-    "name read: SheepBall at 0.523 in 639.061599ms",
+    "name read: Carbunclo at 0.658 in 792.996617ms",
     "gender zone: (2188, 183, 82, 77)",
     "gender: Some(Male)",
     "passives region: (1644, 1066, 633, 169)",
-    "passives: [] (row px None) in 4.890664478s"
+    "passives: [\"ElementResist_Ice_1_PAL\"] + 1 unknown row(s) (row px Some(28.323544)) in 1.823983824s"
   ],
   "panel_layout": {
     "name_band": [
