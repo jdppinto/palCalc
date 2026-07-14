@@ -164,8 +164,9 @@
     name: "#4aa3ff",
     gender: "#ff6bd6",
     passives: "#ffd34a",
+    panel: "#4ade80",
   };
-  let zoneAspect = $state<"name" | "gender" | "passives">("gender");
+  let zoneAspect = $state<"name" | "gender" | "passives" | "panel">("gender");
   let zoneSel = $state<{ x: number; y: number; w: number; h: number } | null>(null);
   let zoneDrag: { x: number; y: number } | null = null;
   let panelImgEl = $state<HTMLImageElement | null>(null);
@@ -223,29 +224,48 @@
   }
 
   // Convert the current drag selection (display px on `imgEl`) into an absolute
-  // screen rect within origin frame `(ox,oy,ow,oh)`, and persist it.
-  async function commitZone(
-    origin: Rect | null,
-    imgEl: HTMLImageElement | null,
-    log: (m: string) => void,
-  ) {
-    if (!zoneSel || !origin || !imgEl) return;
+  // screen rect within origin frame `(ox,oy,ow,oh)`.
+  function selToScreenRect(
+    origin: Rect,
+    imgEl: HTMLImageElement,
+  ): Rect | null {
+    if (!zoneSel) return null;
     const [ox, oy, ow, oh] = origin;
     const sx = ow / imgEl.clientWidth;
     const sy = oh / imgEl.clientHeight;
-    const rect: Rect = [
+    return [
       Math.round(ox + zoneSel.x * sx),
       Math.round(oy + zoneSel.y * sy),
       Math.max(1, Math.round(zoneSel.w * sx)),
       Math.max(1, Math.round(zoneSel.h * sy)),
     ];
+  }
+
+  // Persist the drawn selection. The pal-sheet PANEL is stored in calib.panel
+  // (via save_calibration); every other aspect is a reading-zone override
+  // stored via save_zone.
+  async function commitZone(
+    origin: Rect | null,
+    imgEl: HTMLImageElement | null,
+    log: (m: string) => void,
+  ) {
+    if (!origin || !imgEl) return;
+    const rect = selToScreenRect(origin, imgEl);
+    if (!rect) return;
     try {
-      await invoke("save_zone", { key: zoneAspect, rect });
-      calib.zones = { ...calib.zones, [zoneAspect]: rect };
-      log(`zone '${zoneAspect}' saved (${rect.join(", ")})`);
+      if (zoneAspect === "panel") {
+        calib.panel = rect;
+        await invoke("save_calibration", { calib });
+        calibSaved = true;
+        log(`panel bounds set (${rect.join(", ")})`);
+      } else {
+        await invoke("save_zone", { key: zoneAspect, rect });
+        calib.zones = { ...calib.zones, [zoneAspect]: rect };
+        log(`zone '${zoneAspect}' saved (${rect.join(", ")})`);
+      }
       zoneSel = null;
     } catch (e) {
-      log(`ERROR saving zone: ${e}`);
+      log(`ERROR saving ${zoneAspect}: ${e}`);
     }
   }
 
@@ -494,16 +514,18 @@
 
     <h4>Reading zones (precise, zoomable)</h4>
     <p class="dim-text">
-      Set the pal-sheet bounds above first. Then hover a pal in-game, capture the
-      screen, zoom in, and drag a tight box over the
+      Hover a pal in-game, capture the screen, zoom in, and drag a tight box.
+      Pick <strong>panel</strong> to set the whole pal-sheet bounds, or
       <strong style={`color:${ZONE_COLORS[zoneAspect]}`}>{zoneAspect}</strong>
-      area. Dashed boxes show the auto defaults; solid boxes are your overrides.
+      for a single reading zone. Dashed boxes show the auto defaults; solid
+      boxes are your overrides.
     </p>
     <div class="row">
       <button onclick={captureFrame} disabled={frameCapturing || !status?.backend}>
         {frameCapturing && countdown ? `…${countdown}` : "Capture screen for zones"}
       </button>
       <select bind:value={zoneAspect}>
+        <option value="panel">panel (sheet bounds)</option>
         <option value="name">name</option>
         <option value="gender">gender</option>
         <option value="passives">passives</option>
@@ -515,7 +537,7 @@
         </label>
         <button onclick={() => (zoom = 1)}>Fit</button>
         <button class="save" onclick={saveFrameZone} disabled={!zoneSel}>
-          Save {zoneAspect} zone
+          Save {zoneAspect === "panel" ? "panel bounds" : `${zoneAspect} zone`}
         </button>
       {/if}
     </div>
@@ -543,6 +565,15 @@
             alt="screen"
             draggable="false"
           />
+          {#if calib.panel}
+            <div
+              class="zone-box"
+              style={`${rectPct(calib.panel, [frame.x, frame.y, frame.w, frame.h])}border-color:${ZONE_COLORS.panel};`}
+              title="panel (sheet bounds)"
+            >
+              <span style={`background:${ZONE_COLORS.panel}`}>panel</span>
+            </div>
+          {/if}
           {#each ["name", "gender", "passives"] as key}
             {@const def = defaultZoneRect(key)}
             {#if def && !calib.zones[key]}
