@@ -111,6 +111,9 @@ pub struct SlotResult {
     /// From the "gender" zone by symbol color (blue ♂ / warm ♀).
     pub gender: Option<Gender>,
     pub passives: Vec<PassiveRead>,
+    /// The raw slot capture — lets the UI submit a species correction, which
+    /// becomes a learned template of the user's own game rendering.
+    pub crop_png: String,
 }
 
 /// Classify the gender symbol by dominant saturated color.
@@ -239,6 +242,7 @@ pub fn scan_box(
                 score,
                 gender,
                 passives,
+                crop_png: png_base64(&crop)?,
             });
         }
     }
@@ -297,7 +301,7 @@ mod tests {
     fn scan_identifies_grid_of_real_icons_and_empty_slots() {
         let gd = GameData::load().unwrap();
         let templates =
-            IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd)).unwrap();
+            IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd), None).unwrap();
 
         // 3×2 grid: five pals and one deliberately empty slot.
         let layout: [[Option<&str>; 3]; 2] = [
@@ -368,7 +372,7 @@ mod tests {
     fn abort_stops_scan() {
         let gd = GameData::load().unwrap();
         let templates =
-            IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd)).unwrap();
+            IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd), None).unwrap();
         let mut backend = MockBackend {
             screen: RgbaImage::from_pixel(400, 400, image::Rgba([0, 0, 0, 255])),
             cursor: (0, 0),

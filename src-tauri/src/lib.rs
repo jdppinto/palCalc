@@ -181,6 +181,35 @@ fn save_passive_label(
     TextLib::load(TextLib::default_dir()).learn(&passive_key, &crop)
 }
 
+/// Store a species-corrected slot crop as a learned icon template — the
+/// user's own game rendering, which survives icon-art drift.
+#[tauri::command]
+fn save_pal_template(
+    png_base64_data: String,
+    species: String,
+    data: State<GameData>,
+) -> Result<(), String> {
+    if !data.pals.contains_key(&species) {
+        return Err(format!("unknown species key: {species}"));
+    }
+    let crop = png_from_base64(&png_base64_data)?;
+    let dir = scanner::matcher::user_templates_dir();
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let n = std::fs::read_dir(&dir)
+        .map(|r| {
+            r.flatten()
+                .filter(|e| {
+                    e.file_name()
+                        .to_string_lossy()
+                        .starts_with(&format!("{species}__"))
+                })
+                .count()
+        })
+        .unwrap_or(0);
+    crop.save(dir.join(format!("{species}__{n}.png")))
+        .map_err(|e| e.to_string())
+}
+
 /// Scan the currently open palbox page. Emits `scan-progress` events and
 /// returns the slot results. Runs on a blocking thread so the UI stays live.
 #[tauri::command]
@@ -189,26 +218,23 @@ async fn scan_current_box(
     data: State<'_, GameData>,
     threshold: Option<f32>,
 ) -> Result<Vec<scanner::palbox::SlotResult>, String> {
-    static TEMPLATES: std::sync::OnceLock<IconTemplates> = std::sync::OnceLock::new();
     let calib = GridCalibration::load().ok_or("not calibrated yet")?;
     let pal_icons = scanner::matcher::pal_icon_map(&data);
     SCAN_ABORT.store(false, Ordering::Relaxed);
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
-        let templates = match TEMPLATES.get() {
-            Some(t) => t,
-            None => {
-                let t = IconTemplates::load(&pal_icons)?;
-                TEMPLATES.get_or_init(|| t)
-            }
-        };
+        // Rebuilt per scan so freshly learned templates apply immediately.
+        let templates = IconTemplates::load(
+            &pal_icons,
+            Some(&scanner::matcher::user_templates_dir()),
+        )?;
         let textlib = TextLib::load(TextLib::default_dir());
         let debug_dir = GridCalibration::config_path()
             .parent()
             .map(|p| p.join("debug"));
         scan_box(
             backend.as_mut(),
-            templates,
+            &templates,
             &textlib,
             &calib,
             threshold.unwrap_or(0.55),
@@ -238,7 +264,8 @@ pub fn run() {
             abort_scan,
             scan_current_box,
             capture_screen,
-            save_passive_label
+            save_passive_label,
+            save_pal_template
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

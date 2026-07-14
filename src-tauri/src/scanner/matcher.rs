@@ -38,15 +38,77 @@ struct Template {
     wsum: f32,
 }
 
+impl Template {
+    /// Template from an opaque canonicalized patch (a user-learned slot crop):
+    /// uniform weights, so weighted NCC degenerates to plain NCC.
+    fn from_opaque_patch(key: &str, patch: &RgbaImage) -> Option<Self> {
+        let small = image::imageops::resize(patch, T_SIZE, T_SIZE, FilterType::Triangle);
+        let g = rgb_vec(&small);
+        let mean = g.iter().sum::<f32>() / V as f32;
+        let norm = g.iter().map(|x| (x - mean).powi(2)).sum::<f32>().sqrt();
+        if norm < f32::EPSILON {
+            return None;
+        }
+        Some(Self {
+            key: key.to_string(),
+            w: vec![1.0; V],
+            wd: g.iter().map(|x| (x - mean) / norm).collect(),
+            wsum: V as f32,
+        })
+    }
+}
+
 pub struct IconTemplates {
     entries: Vec<Template>,
 }
 
+/// Directory of user-corrected slot crops (`<tribe>__<n>.png`) — the user's
+/// own game rendering, learned once per species via the results-grid fix
+/// button. These match at ~0.95+ and survive icon-art drift between the
+/// extracted icon set and the running game (observed in the field: in-game
+/// Lamball art differs entirely from the extracted SheepBall.png).
+pub fn user_templates_dir() -> std::path::PathBuf {
+    let base = std::env::var_os("XDG_CONFIG_HOME")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| {
+            std::path::PathBuf::from(std::env::var_os("HOME").unwrap_or_default()).join(".config")
+        });
+    base.join("palcalc").join("pal_templates")
+}
+
 impl IconTemplates {
-    /// Build templates for the given tribe→filename map. Pass a map filtered
-    /// to real pals (e.g. `GameData::pals` keys).
-    pub fn load(icon_map: &HashMap<String, String>) -> Result<Self, String> {
+    /// Build templates for the given tribe→filename map (filtered to real
+    /// pals), plus any user-learned slot crops from `user_dir`.
+    pub fn load(
+        icon_map: &HashMap<String, String>,
+        user_dir: Option<&std::path::Path>,
+    ) -> Result<Self, String> {
         let mut entries = Vec::with_capacity(icon_map.len());
+        if let Some(dir) = user_dir {
+            if let Ok(read) = std::fs::read_dir(dir) {
+                for e in read.flatten() {
+                    let name = e.file_name().to_string_lossy().into_owned();
+                    let Some(key) = name.strip_suffix(".png").and_then(|s| s.split("__").next())
+                    else {
+                        continue;
+                    };
+                    if !icon_map.contains_key(key) {
+                        continue;
+                    }
+                    let Ok(img) = image::open(e.path()) else {
+                        continue;
+                    };
+                    // Canonicalize the stored slot crop exactly like a live
+                    // capture, then build an unweighted template from it.
+                    if let Some((disc, pal)) = capture_patches(&img.to_rgba8()) {
+                        let patch = pal.unwrap_or(disc);
+                        if let Some(t) = Template::from_opaque_patch(key, &patch) {
+                            entries.push(t);
+                        }
+                    }
+                }
+            }
+        }
         for (tribe, file) in icon_map {
             let Some(f) = ICONS.get_file(file) else {
                 return Err(format!("embedded icon missing: {file}"));
@@ -104,47 +166,70 @@ impl IconTemplates {
     }
 
     /// Top-N candidates with scores (diagnostics and debug dumps).
+    ///
+    /// Real palbox slots draw the pal inside a bright circular disc, and an
+    /// empty slot is the bare disc (verified from field captures — it NCC-
+    /// matched the round blue Slime icon at 0.94). Canonicalization is
+    /// therefore two-stage: find the disc against the dark surround, then
+    /// find the pal against the disc's own color sampled inside the ring. A
+    /// uniform interior = empty slot. Both the disc patch and the pal patch
+    /// are scored and the best wins — non-disc captures (tests, other UI
+    /// styles) match via the former, real slots via the latter.
     pub fn identify_top(&self, crop: &RgbaImage, n: usize) -> Vec<(String, f32)> {
-        // Canonicalize the capture the same way templates were: find the
-        // content (whatever differs from the slot background), crop to it.
-        let Some((bbox, bg)) = content_bbox(crop) else {
+        let Some((disc, pal_patch)) = capture_patches(crop) else {
             return Vec::new();
         };
-        let fill = image::Rgba([
-            bg[0].round().clamp(0.0, 255.0) as u8,
-            bg[1].round().clamp(0.0, 255.0) as u8,
-            bg[2].round().clamp(0.0, 255.0) as u8,
-            255,
-        ]);
-        let content = square_crop_filled(crop, bbox, fill);
-        let small = image::imageops::resize(&content, T_SIZE, T_SIZE, FilterType::Triangle);
-        let g: Vec<f32> = rgb_vec(&small);
+        let Some(pal_patch) = pal_patch else {
+            return Vec::new(); // uniform disc interior — empty slot
+        };
 
-        // Empty-slot double check on the content statistics.
-        let mean = g.iter().sum::<f32>() / V as f32;
-        let var = g.iter().map(|x| (x - mean).powi(2)).sum::<f32>() / V as f32;
-        if var.sqrt() < MIN_STDDEV {
-            return Vec::new();
-        }
-
-        let g2: Vec<f32> = g.iter().map(|x| x * x).collect();
-        let mut scored: Vec<(&str, f32)> = Vec::with_capacity(self.entries.len());
-        for t in &self.entries {
-            let sg: f32 = t.w.iter().zip(&g).map(|(w, g)| w * g).sum();
-            let sg2: f32 = t.w.iter().zip(&g2).map(|(w, g2)| w * g2).sum();
-            let var_g = sg2 - sg * sg / t.wsum;
-            if var_g <= f32::EPSILON {
-                continue;
+        let mut best: Vec<f32> = vec![f32::MIN; self.entries.len()];
+        for patch in [&disc, &pal_patch] {
+            if let Some(scores) = self.score_patch(patch) {
+                for (b, s) in best.iter_mut().zip(scores) {
+                    *b = b.max(s);
+                }
             }
-            let num: f32 = t.wd.iter().zip(&g).map(|(wd, g)| wd * g).sum();
-            scored.push((&t.key, num / var_g.sqrt()));
         }
+        let mut scored: Vec<(usize, f32)> = best
+            .into_iter()
+            .enumerate()
+            .filter(|(_, s)| *s > f32::MIN)
+            .collect();
         scored.sort_by(|a, b| b.1.total_cmp(&a.1));
         scored
             .into_iter()
             .take(n)
-            .map(|(k, s)| (k.to_string(), s))
+            .map(|(i, s)| (self.entries[i].key.clone(), s))
             .collect()
+    }
+
+    /// Per-entry weighted-NCC scores for one canonicalized patch; None when
+    /// the patch is flat.
+    fn score_patch(&self, patch: &RgbaImage) -> Option<Vec<f32>> {
+        let small = image::imageops::resize(patch, T_SIZE, T_SIZE, FilterType::Triangle);
+        let g: Vec<f32> = rgb_vec(&small);
+        let mean = g.iter().sum::<f32>() / V as f32;
+        let var = g.iter().map(|x| (x - mean).powi(2)).sum::<f32>() / V as f32;
+        if var.sqrt() < MIN_STDDEV {
+            return None;
+        }
+        let g2: Vec<f32> = g.iter().map(|x| x * x).collect();
+        Some(
+            self.entries
+                .iter()
+                .map(|t| {
+                    let sg: f32 = t.w.iter().zip(&g).map(|(w, g)| w * g).sum();
+                    let sg2: f32 = t.w.iter().zip(&g2).map(|(w, g2)| w * g2).sum();
+                    let var_g = sg2 - sg * sg / t.wsum;
+                    if var_g <= f32::EPSILON {
+                        return f32::MIN;
+                    }
+                    let num: f32 = t.wd.iter().zip(&g).map(|(wd, g)| wd * g).sum();
+                    num / var_g.sqrt()
+                })
+                .collect(),
+        )
     }
 
     #[cfg(test)]
@@ -155,6 +240,72 @@ impl IconTemplates {
 
 fn luma(p: &image::Rgba<u8>) -> f32 {
     0.299 * p[0] as f32 + 0.587 * p[1] as f32 + 0.114 * p[2] as f32
+}
+
+/// Two-stage canonicalization of a slot capture: (disc patch, pal patch).
+/// None = no content at all; pal None = uniform disc interior (empty slot).
+fn capture_patches(crop: &RgbaImage) -> Option<(RgbaImage, Option<RgbaImage>)> {
+    let (bbox1, bg1) = content_bbox(crop)?;
+    let disc = square_crop_filled(crop, bbox1, rgba_fill(bg1));
+
+    let margin = (disc.width() as f32 * 0.12).round() as u32;
+    let iw = disc.width().saturating_sub(margin * 2);
+    if iw < 8 {
+        return None;
+    }
+    let interior = image::imageops::crop_imm(&disc, margin, margin, iw, iw).to_image();
+    let pal = pal_bbox(&interior)
+        .map(|(bbox2, bg2)| square_crop_filled(&interior, bbox2, rgba_fill(bg2)));
+    Some((disc, pal))
+}
+
+fn rgba_fill(bg: [f32; 3]) -> image::Rgba<u8> {
+    image::Rgba([
+        bg[0].round().clamp(0.0, 255.0) as u8,
+        bg[1].round().clamp(0.0, 255.0) as u8,
+        bg[2].round().clamp(0.0, 255.0) as u8,
+        255,
+    ])
+}
+
+/// Pal bbox inside the slot-disc interior. The disc's background color is
+/// sampled from the four interior corners (pals are roughly inscribed, so
+/// corners stay disc-colored); content is whatever differs from it. None for
+/// a uniform interior — an empty slot.
+fn pal_bbox(img: &RgbaImage) -> Option<((u32, u32, u32, u32), [f32; 3])> {
+    let (w, h) = img.dimensions();
+    if w < 12 || h < 12 {
+        return None;
+    }
+    let ps = (w / 8).clamp(3, 10);
+    let mut samples: [Vec<f32>; 3] = Default::default();
+    for (cx, cy) in [(0, 0), (w - ps, 0), (0, h - ps), (w - ps, h - ps)] {
+        for y in cy..cy + ps {
+            for x in cx..cx + ps {
+                let p = img.get_pixel(x, y);
+                for c in 0..3 {
+                    samples[c].push(p[c] as f32);
+                }
+            }
+        }
+    }
+    let mut bg = [0.0f32; 3];
+    for c in 0..3 {
+        samples[c].sort_by(f32::total_cmp);
+        bg[c] = samples[c][samples[c].len() / 2];
+    }
+    let bbox = bbox_of(img, |p| {
+        p[3] > 25
+            && (0..3)
+                .map(|c| (p[c] as f32 - bg[c]).abs())
+                .fold(0.0f32, f32::max)
+                > 18.0
+    })?;
+    let (x0, y0, x1, y1) = bbox;
+    if (x1 - x0) < w / 5 || (y1 - y0) < h / 5 {
+        return None;
+    }
+    Some((bbox, bg))
 }
 
 /// Interleaved RGB values as one vector of length 3·pixels.
@@ -284,7 +435,7 @@ mod tests {
 
     fn templates() -> (GameData, IconTemplates) {
         let gd = GameData::load().unwrap();
-        let t = IconTemplates::load(&pal_icon_map(&gd)).unwrap();
+        let t = IconTemplates::load(&pal_icon_map(&gd), None).unwrap();
         (gd, t)
     }
 
@@ -354,5 +505,84 @@ mod tests {
         let (found, score) = t.identify(&tile).expect("non-flat");
         assert_eq!(found, "SheepBall", "score {score}");
         assert!(score > 0.6, "score too weak: {score}");
+    }
+}
+
+#[cfg(test)]
+mod real_fixtures {
+    use super::*;
+    use palcalc_core::GameData;
+
+    fn fixture(name: &str) -> RgbaImage {
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/palbox");
+        image::open(dir.join(name)).unwrap().to_rgba8()
+    }
+
+    /// Real gaming-machine captures: empty slots are bare blue discs (they
+    /// used to NCC-match the round blue Slime icon at 0.94).
+    #[test]
+    fn real_empty_slots_are_empty() {
+        let gd = GameData::load().unwrap();
+        let t = IconTemplates::load(&pal_icon_map(&gd), None).unwrap();
+        // Ground truth from the capture set: rows 0-1 and slots 2,0 / 2,1
+        // are occupied; everything from 2,2 on is a bare disc.
+        let empties = (2..6).map(|c| (2, c)).chain(
+            (3..5).flat_map(|r| (0..6).map(move |c| (r, c))),
+        );
+        for (r, c) in empties {
+            let img = fixture(&format!("slot_{r}_{c}.png"));
+            assert!(
+                t.identify(&img).is_none(),
+                "slot {r},{c} should be empty, got {:?}",
+                t.identify(&img)
+            );
+        }
+        // And the two occupied slots in row 2 must NOT read as empty.
+        for c in [0, 1] {
+            assert!(t.identify(&fixture(&format!("slot_2_{c}.png"))).is_some());
+        }
+    }
+
+    /// Species whose extracted icon art matches the in-game rendering
+    /// identify from stock templates alone.
+    #[test]
+    fn real_slots_with_matching_art_identify_from_stock_icons() {
+        let gd = GameData::load().unwrap();
+        let t = IconTemplates::load(&pal_icon_map(&gd), None).unwrap();
+        for (slot, expected) in [("slot_0_4.png", "CowPal"), ("slot_0_5.png", "ChickenPal")] {
+            let (key, score) = t.identify(&fixture(slot)).unwrap();
+            assert_eq!(key, expected, "{slot} (score {score})");
+        }
+    }
+
+    /// The learning loop: in-game Lamball art differs entirely from the
+    /// extracted SheepBall.png, so stock matching fails — but correcting one
+    /// capture must make its breeding-pair twin (a different capture of the
+    /// same species) identify at high confidence.
+    #[test]
+    fn learned_template_identifies_sibling_capture() {
+        let gd = GameData::load().unwrap();
+        let map = pal_icon_map(&gd);
+        let stock = IconTemplates::load(&map, None).unwrap();
+        let lamball = fixture("slot_0_0.png");
+        let twin = fixture("slot_1_0.png");
+        assert_ne!(
+            stock.identify(&twin).map(|(k, _)| k),
+            Some("SheepBall".to_string()),
+            "premise: stock art must NOT match (in-game art drifted); if this \
+             fails the icon set was updated and this test should be revisited"
+        );
+
+        let dir = std::env::temp_dir().join(format!("palcalc-paltpl-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        lamball.save(dir.join("SheepBall__0.png")).unwrap();
+
+        let learned = IconTemplates::load(&map, Some(&dir)).unwrap();
+        let (key, score) = learned.identify(&twin).unwrap();
+        assert_eq!(key, "SheepBall");
+        assert!(score > 0.8, "sibling capture should match strongly, got {score}");
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

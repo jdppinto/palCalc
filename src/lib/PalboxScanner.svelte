@@ -34,6 +34,7 @@
     score: number;
     gender: Gender | null;
     passives: PassiveRead[];
+    crop_png: string;
   }
 
   interface FrozenFrame {
@@ -82,6 +83,10 @@
   // Label queue for unknown passive crops
   let labelQuery = $state("");
   let labeling = $state<string | null>(null); // unknown id being labeled
+
+  // Species correction: teaches the matcher this game's own rendering
+  let fixing = $state<number | null>(null); // index into results
+  let fixQuery = $state("");
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -263,6 +268,30 @@
     return g === "Male" ? "♂" : g === "Female" ? "♀" : "";
   }
 
+  const fixMatches = $derived(
+    pals
+      .filter((p) => p.name.toLowerCase().includes(fixQuery.trim().toLowerCase()))
+      .slice(0, 8),
+  );
+
+  async function fixSpecies(index: number, speciesKey: string) {
+    const r = results?.[index];
+    if (!r) return;
+    try {
+      await invoke("save_pal_template", {
+        pngBase64Data: r.crop_png,
+        species: speciesKey,
+      });
+      results = results!.map((s, i) =>
+        i === index ? { ...s, species: speciesKey, score: 1.0 } : s,
+      );
+      fixing = null;
+      fixQuery = "";
+    } catch (e) {
+      error = String(e);
+    }
+  }
+
   function addAll() {
     addManyOwned(
       found.map((r) => ({
@@ -413,24 +442,44 @@
   {/if}
 
   {#if results}
+    <p class="dim-text">
+      Wrong species? Click ✎ and pick the right pal — the app learns your
+      game's rendering and matches it exactly from then on.
+    </p>
     <div class="results">
-      {#each results as r (r.row * 100 + r.col)}
+      {#each results as r, i (r.row * 100 + r.col)}
         <div class="slot" class:empty={!r.species}>
-          {#if r.species}
-            {@const p = pal(r.species)}
-            {#if p?.icon}<img src={"/icons/" + p.icon} alt="" />{/if}
-            <div class="slot-info">
-              <span>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
-              <span class="passives">
-                {r.passives
-                  .filter((pr) => !(pr.kind === "known" && pr.key === "__empty__"))
-                  .map((pr) => (pr.kind === "known" ? passiveName(pr.key) : "?"))
-                  .join(", ") || "no passives read"}
-              </span>
+          {#if fixing === i}
+            <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="slot" />
+            <div class="fix-box">
+              <input placeholder="Correct pal…" bind:value={fixQuery} />
+              <div class="fix-options">
+                {#each fixMatches as m (m.key)}
+                  <button class="pick" onclick={() => fixSpecies(i, m.key)}>{m.name}</button>
+                {/each}
+              </div>
             </div>
-            <span class="score">{r.score.toFixed(2)}</span>
+            <button class="fix" onclick={() => (fixing = null)}>✕</button>
           {:else}
-            <span class="dim">empty</span>
+            {#if r.species}
+              {@const p = pal(r.species)}
+              {#if p?.icon}<img src={"/icons/" + p.icon} alt="" />{/if}
+              <div class="slot-info">
+                <span>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
+                <span class="passives">
+                  {r.passives
+                    .filter((pr) => !(pr.kind === "known" && pr.key === "__empty__"))
+                    .map((pr) => (pr.kind === "known" ? passiveName(pr.key) : "?"))
+                    .join(", ") || "no passives read"}
+                </span>
+              </div>
+              <span class="score">{r.score.toFixed(2)}</span>
+            {:else}
+              <span class="dim">empty</span>
+            {/if}
+            <button class="fix" title="Correct species" onclick={() => { fixing = i; fixQuery = ""; }}>
+              ✎
+            </button>
           {/if}
         </div>
       {/each}
@@ -688,6 +737,44 @@
     margin-left: auto;
     color: var(--text-dim);
     font-size: 0.75rem;
+  }
+
+  .fix {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.8rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+  }
+
+  .fix:hover {
+    color: var(--accent);
+  }
+
+  .slot .crop {
+    width: 44px;
+    height: 44px;
+  }
+
+  .fix-box {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .fix-box input {
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+  }
+
+  .fix-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
   }
 
   .dim {
