@@ -5,6 +5,8 @@
   import { addManyOwned } from "./owned.svelte";
   import type { Gender, PalEntry, PassiveEntry } from "./types";
 
+  type Rect = [number, number, number, number];
+
   interface Calib {
     slot_tl: [number, number];
     slot_br: [number, number];
@@ -12,7 +14,16 @@
     rows: number;
     slot_size: number;
     delay_ms: number;
-    panel: [number, number, number, number] | null;
+    panel: Rect | null;
+    zones: Record<string, Rect>;
+  }
+
+  interface FrozenFrame {
+    data_url: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
   }
 
   interface ScannerStatus {
@@ -44,6 +55,7 @@
     slot_size: 90,
     delay_ms: 300,
     panel: null,
+    zones: {},
   });
   // Panel corner staging (top-left captured, waiting for bottom-right)
   let panelTl = $state<[number, number] | null>(null);
@@ -158,6 +170,33 @@
   let zoneDrag: { x: number; y: number } | null = null;
   let panelImgEl = $state<HTMLImageElement | null>(null);
 
+  // Full-screen zone editor in the main calibration flow: capture the screen,
+  // zoom in, draw a rect, assign it to an aspect. Reuses the same drag state
+  // and save path as the debug editor; only the coordinate origin differs.
+  let frame = $state<FrozenFrame | null>(null);
+  let frameImgEl = $state<HTMLImageElement | null>(null);
+  let frameCapturing = $state(false);
+  let zoom = $state(1);
+
+  // Default zone ratios — MUST match panel.rs (name_rect / gender_rect /
+  // passives_search_rect). Shown as dashed guides so a fresh user has a target.
+  const DEFAULT_ZONE_RATIOS: Record<string, Rect> = {
+    name: [0.2206, 0.0233, 0.6048, 0.0359],
+    gender: [0.9063, 0.0206, 0.0683, 0.0359],
+    passives: [0.0206, 0.8484, 0.9508, 0.0852],
+  };
+  function defaultZoneRect(key: string): Rect | null {
+    if (!calib.panel) return null;
+    const [px, py, pw, ph] = calib.panel;
+    const [rx, ry, rw, rh] = DEFAULT_ZONE_RATIOS[key];
+    return [
+      Math.round(px + rx * pw),
+      Math.round(py + ry * ph),
+      Math.round(rw * pw),
+      Math.round(rh * ph),
+    ];
+  }
+
   function editorPos(e: MouseEvent): { x: number; y: number } {
     const el = e.currentTarget as HTMLElement;
     const b = el.getBoundingClientRect();
@@ -182,38 +221,85 @@
     zoneDrag = null;
     if (zoneSel && (zoneSel.w < 4 || zoneSel.h < 4)) zoneSel = null;
   }
-  async function saveZone() {
-    if (!zoneSel || !debugSheet?.panel_rect || !panelImgEl) return;
-    const [px, py, pw, ph] = debugSheet.panel_rect;
-    const sx = pw / panelImgEl.clientWidth;
-    const sy = ph / panelImgEl.clientHeight;
-    const rect: [number, number, number, number] = [
-      Math.round(px + zoneSel.x * sx),
-      Math.round(py + zoneSel.y * sy),
+
+  // Convert the current drag selection (display px on `imgEl`) into an absolute
+  // screen rect within origin frame `(ox,oy,ow,oh)`, and persist it.
+  async function commitZone(
+    origin: Rect | null,
+    imgEl: HTMLImageElement | null,
+    log: (m: string) => void,
+  ) {
+    if (!zoneSel || !origin || !imgEl) return;
+    const [ox, oy, ow, oh] = origin;
+    const sx = ow / imgEl.clientWidth;
+    const sy = oh / imgEl.clientHeight;
+    const rect: Rect = [
+      Math.round(ox + zoneSel.x * sx),
+      Math.round(oy + zoneSel.y * sy),
       Math.max(1, Math.round(zoneSel.w * sx)),
       Math.max(1, Math.round(zoneSel.h * sy)),
     ];
     try {
       await invoke("save_zone", { key: zoneAspect, rect });
-      debugLog = [...debugLog, `zone '${zoneAspect}' override saved (${rect.join(", ")}) — run the sheet test again`];
+      calib.zones = { ...calib.zones, [zoneAspect]: rect };
+      log(`zone '${zoneAspect}' saved (${rect.join(", ")})`);
       zoneSel = null;
     } catch (e) {
-      debugLog = [...debugLog, `ERROR saving zone: ${e}`];
+      log(`ERROR saving zone: ${e}`);
     }
   }
-  async function clearZone(key: string) {
+
+  async function saveZone() {
+    await commitZone(debugSheet?.panel_rect ?? null, panelImgEl, (m) => {
+      debugLog = [...debugLog, `${m} — run the sheet test again`];
+    });
+  }
+
+  // Percent-position a screen rect inside an origin rect for overlay boxes.
+  function rectPct(rect: Rect, origin: Rect | null): string {
+    if (!origin) return "";
+    const [ox, oy, ow, oh] = origin;
+    return `left:${((rect[0] - ox) / ow) * 100}%;top:${((rect[1] - oy) / oh) * 100}%;width:${(rect[2] / ow) * 100}%;height:${(rect[3] / oh) * 100}%;`;
+  }
+  function zonePct(rect: Rect): string {
+    return rectPct(rect, debugSheet?.panel_rect ?? null);
+  }
+
+  async function captureFrame() {
+    frameCapturing = true;
+    error = null;
+    for (let i = 3; i > 0; i--) {
+      countdown = i;
+      await sleep(1000);
+    }
+    countdown = 0;
+    try {
+      frame = await invoke<FrozenFrame>("capture_screen");
+      zoom = 1;
+      zoneSel = null;
+    } catch (e) {
+      error = String(e);
+    } finally {
+      frameCapturing = false;
+    }
+  }
+
+  async function saveFrameZone() {
+    if (!frame) return;
+    await commitZone([frame.x, frame.y, frame.w, frame.h], frameImgEl, (m) => {
+      error = null;
+      debugLog = [...debugLog, m];
+    });
+  }
+
+  async function clearZoneMain(key: string) {
     try {
       await invoke("save_zone", { key, rect: null });
-      debugLog = [...debugLog, `zone '${key}' override cleared — run the sheet test again`];
+      const { [key]: _drop, ...rest } = calib.zones;
+      calib.zones = rest;
     } catch (e) {
-      debugLog = [...debugLog, `ERROR clearing zone: ${e}`];
+      error = String(e);
     }
-  }
-  function zonePct(rect: [number, number, number, number]): string {
-    const pr = debugSheet?.panel_rect;
-    if (!pr) return "";
-    const [px, py, pw, ph] = pr;
-    return `left:${((rect[0] - px) / pw) * 100}%;top:${((rect[1] - py) / ph) * 100}%;width:${(rect[2] / pw) * 100}%;height:${(rect[3] / ph) * 100}%;`;
   }
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -405,6 +491,88 @@
       </label>
       <button class="save" onclick={saveCalib}>Save calibration</button>
     </div>
+
+    <h4>Reading zones (precise, zoomable)</h4>
+    <p class="dim-text">
+      Set the pal-sheet bounds above first. Then hover a pal in-game, capture the
+      screen, zoom in, and drag a tight box over the
+      <strong style={`color:${ZONE_COLORS[zoneAspect]}`}>{zoneAspect}</strong>
+      area. Dashed boxes show the auto defaults; solid boxes are your overrides.
+    </p>
+    <div class="row">
+      <button onclick={captureFrame} disabled={frameCapturing || !status?.backend}>
+        {frameCapturing && countdown ? `…${countdown}` : "Capture screen for zones"}
+      </button>
+      <select bind:value={zoneAspect}>
+        <option value="name">name</option>
+        <option value="gender">gender</option>
+        <option value="passives">passives</option>
+      </select>
+      {#if frame}
+        <label>
+          zoom {zoom.toFixed(1)}×
+          <input type="range" min="1" max="8" step="0.5" bind:value={zoom} />
+        </label>
+        <button onclick={() => (zoom = 1)}>Fit</button>
+        <button class="save" onclick={saveFrameZone} disabled={!zoneSel}>
+          Save {zoneAspect} zone
+        </button>
+      {/if}
+    </div>
+    {#if frame}
+      <div class="row">
+        {#each ["name", "gender", "passives"] as key}
+          {#if calib.zones[key]}
+            <button onclick={() => clearZoneMain(key)}>Clear {key} override</button>
+          {/if}
+        {/each}
+      </div>
+      <div class="zoom-viewport">
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
+          class="zoom-stage"
+          style={`width:${zoom * 100}%`}
+          onmousedown={zoneDown}
+          onmousemove={zoneMove}
+          onmouseup={zoneUp}
+          onmouseleave={zoneUp}
+        >
+          <img
+            bind:this={frameImgEl}
+            src={frame.data_url}
+            alt="screen"
+            draggable="false"
+          />
+          {#each ["name", "gender", "passives"] as key}
+            {@const def = defaultZoneRect(key)}
+            {#if def && !calib.zones[key]}
+              <div
+                class="zone-box dashed"
+                style={`${rectPct(def, [frame.x, frame.y, frame.w, frame.h])}border-color:${ZONE_COLORS[key]};`}
+                title={`${key} (default)`}
+              >
+                <span style={`background:${ZONE_COLORS[key]}`}>{key}</span>
+              </div>
+            {/if}
+            {#if calib.zones[key]}
+              <div
+                class="zone-box"
+                style={`${rectPct(calib.zones[key], [frame.x, frame.y, frame.w, frame.h])}border-color:${ZONE_COLORS[key]};`}
+                title={`${key} (override)`}
+              >
+                <span style={`background:${ZONE_COLORS[key]}`}>{key} ✎</span>
+              </div>
+            {/if}
+          {/each}
+          {#if zoneSel}
+            <div
+              class="zone-sel"
+              style={`left:${zoneSel.x}px;top:${zoneSel.y}px;width:${zoneSel.w}px;height:${zoneSel.h}px;border-color:${ZONE_COLORS[zoneAspect]};`}
+            ></div>
+          {/if}
+        </div>
+      </div>
+    {/if}
   </details>
 
   <div class="row scan-row">
@@ -519,7 +687,7 @@
             </select>
             <button onclick={saveZone} disabled={!zoneSel}>Save {zoneAspect} zone</button>
             {#each debugSheet.zones_used.filter((z) => z[2]) as [key] (key)}
-              <button onclick={() => clearZone(key)}>Clear {key} override</button>
+              <button onclick={() => clearZoneMain(key)}>Clear {key} override</button>
             {/each}
           </div>
         {/if}
@@ -861,6 +1029,31 @@
     border: 2px dashed;
     pointer-events: none;
     box-sizing: border-box;
+  }
+
+  /* Zoomable full-screen zone editor */
+  .zoom-viewport {
+    overflow: auto;
+    max-height: 70vh;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #000;
+    margin-top: 0.5rem;
+  }
+  .zoom-stage {
+    position: relative;
+    cursor: crosshair;
+    user-select: none;
+    min-width: 100%;
+  }
+  .zoom-stage img {
+    display: block;
+    width: 100%;
+    pointer-events: none;
+  }
+  .zone-box.dashed {
+    border-style: dashed;
+    opacity: 0.7;
   }
 
   .label-panel {
