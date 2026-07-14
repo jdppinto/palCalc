@@ -136,27 +136,51 @@ mod linux {
             })
         }
 
-        /// Real relative mouse motion via uinput, converging on the target by
-        /// re-reading the cursor position (pointer acceleration makes single
-        /// deltas land off-target).
+        /// Real relative mouse motion via uinput. Deltas are sent as SMALL
+        /// chunks at a mouse-like pace: pointer acceleration is ~1:1 for slow
+        /// motion, so chunks land where they claim — one big delta gets
+        /// amplified, overshoots, and the corrections oscillate across the
+        /// target (observed in-game as the hover flickering between the
+        /// neighboring slots). Never "fixed" with a warp: warps are invisible
+        /// to the game, which is the whole reason ydotool is here.
         fn move_relative_closed_loop(&mut self, x: i32, y: i32) -> Result<(), String> {
-            for _ in 0..6 {
+            const TOLERANCE: i32 = 4;
+            const CHUNK_PX: f64 = 16.0;
+            for _ in 0..5 {
                 let (cx, cy) = self.query_cursor()?;
                 let (dx, dy) = (x - cx, y - cy);
-                if dx.abs() <= 2 && dy.abs() <= 2 {
+                if dx.abs() <= TOLERANCE && dy.abs() <= TOLERANCE {
                     return Ok(());
                 }
-                let status = std::process::Command::new("ydotool")
-                    .args(["mousemove", "-x", &dx.to_string(), "-y", &dy.to_string()])
-                    .status()
-                    .map_err(|e| format!("ydotool mousemove: {e}"))?;
-                if !status.success() {
-                    return Err("ydotool mousemove failed".into());
+                let dist = ((dx * dx + dy * dy) as f64).sqrt();
+                let steps = (dist / CHUNK_PX).ceil().max(1.0) as i32;
+                let (mut sent_x, mut sent_y) = (0, 0);
+                for i in 1..=steps {
+                    let tx = (dx as f64 * i as f64 / steps as f64).round() as i32;
+                    let ty = (dy as f64 * i as f64 / steps as f64).round() as i32;
+                    let (mx, my) = (tx - sent_x, ty - sent_y);
+                    (sent_x, sent_y) = (tx, ty);
+                    if mx == 0 && my == 0 {
+                        continue;
+                    }
+                    let status = std::process::Command::new("ydotool")
+                        .args(["mousemove", "-x", &mx.to_string(), "-y", &my.to_string()])
+                        .status()
+                        .map_err(|e| format!("ydotool mousemove: {e}"))?;
+                    if !status.success() {
+                        return Err("ydotool mousemove failed".into());
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(10));
                 }
-                std::thread::sleep(std::time::Duration::from_millis(20));
+                // Let the events propagate before measuring, or the correction
+                // works from stale coordinates.
+                std::thread::sleep(std::time::Duration::from_millis(40));
             }
-            // Didn't converge (aggressive accel profile?) — warp the remainder.
-            self.warp(x, y)
+            Err(
+                "cursor did not settle on the target slot — pointer acceleration may be \
+                 too aggressive; consider a flat accel profile in Hyprland input config"
+                    .into(),
+            )
         }
 
         /// Warp in small steps along the path (plus a final wiggle inside the
