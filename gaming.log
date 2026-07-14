@@ -1,0 +1,121 @@
+   Compiling muda v0.19.3
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 33.11s
+     Running `target/debug/palcalc`
+02:21:14 [vite-plugin-svelte] src/App.svelte:88:2 Unused CSS selector ".todo"
+https://svelte.dev/e/css_unused_selector
+
+thread 'main' (321392) panicked at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hyprland-0.3.13/src/data/regular.rs:31:19:
+A error occured while parsing the output from the hypr socket: IoError(Os { code: 2, kind: NotFound, message: "No such file or directory" })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'main' (321392) panicked at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/panicking.rs:225:5:
+panic in a function that cannot unwind
+stack backtrace:
+   0:     0x5558ad340688 - std[bcb96dfbba0ab899]::backtrace_rs::backtrace::libunwind::trace
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/../../backtrace/src/backtrace/libunwind.rs:117:9
+   1:     0x5558ad340688 - std[bcb96dfbba0ab899]::backtrace_rs::backtrace::trace_unsynchronized::<std[bcb96dfbba0ab899]::sys::backtrace::_print_fmt::{closure#1}>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/../../backtrace/src/backtrace/mod.rs:66:14
+   2:     0x5558ad340688 - std[bcb96dfbba0ab899]::sys::backtrace::_print_fmt
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/sys/backtrace.rs:74:9
+   3:     0x5558ad340688 - <<std[bcb96dfbba0ab899]::sys::backtrace::BacktraceLock>::print::DisplayBacktrace as core[940e698046960fd5]::fmt::Display>::fmt
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/sys/backtrace.rs:44:26
+   4:     0x5558ad357b5a - <core[940e698046960fd5]::fmt::rt::Argument>::fmt
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/fmt/rt.rs:152:76
+   5:     0x5558ad357b5a - core[940e698046960fd5]::fmt::write
+   6:     0x5558ad345722 - std[bcb96dfbba0ab899]::io::default_write_fmt::<std[bcb96dfbba0ab899]::sys::stdio::unix::Stderr>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/io/mod.rs:622:11
+   7:     0x5558ad345722 - <std[bcb96dfbba0ab899]::sys::stdio::unix::Stderr as std[bcb96dfbba0ab899]::io::Write>::write_fmt
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/io/mod.rs:1977:13
+   8:     0x5558ad31e446 - <std[bcb96dfbba0ab899]::sys::backtrace::BacktraceLock>::print
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/sys/backtrace.rs:47:9
+   9:     0x5558ad31e446 - std[bcb96dfbba0ab899]::panicking::default_hook::{closure#0}
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:292:27
+  10:     0x5558ad338121 - std[bcb96dfbba0ab899]::panicking::default_hook
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:319:9
+  11:     0x5558ad33839b - std[bcb96dfbba0ab899]::panicking::panic_with_hook
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:825:13
+  12:     0x5558ad31e534 - std[bcb96dfbba0ab899]::panicking::panic_handler::{closure#0}
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:691:13
+  13:     0x5558ad3156b9 - std[bcb96dfbba0ab899]::sys::backtrace::__rust_end_short_backtrace::<std[bcb96dfbba0ab899]::panicking::panic_handler::{closure#0}, !>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/sys/backtrace.rs:182:18
+  14:     0x5558ad31f39d - __rustc[6c289b9f9c454d21]::rust_begin_unwind
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:689:5
+  15:     0x5558ad35813d - core[940e698046960fd5]::panicking::panic_nounwind_fmt::runtime
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/panicking.rs:122:22
+  16:     0x5558ad35813d - core[940e698046960fd5]::panicking::panic_nounwind_fmt
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/intrinsics/mod.rs:2450:9
+  17:     0x5558ad3580bb - core[940e698046960fd5]::panicking::panic_nounwind
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/panicking.rs:225:5
+  18:     0x5558ad358247 - core[940e698046960fd5]::panicking::panic_cannot_unwind
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/panicking.rs:337:5
+  19:     0x5558acd3f789 - webkit2gtk[83376ae73a4c7fc1]::auto::web_context::WebContextExt::register_uri_scheme::callback_func::<<wry[337fe16bc4345d05]::web_context::WebContext as wry[337fe16bc4345d05]::webkitgtk::web_context::WebContextExt>::register_uri_scheme<alloc[2ea6bcb46fca0c42]::boxed::Box<dyn for<'a> core[940e698046960fd5]::ops::function::Fn<(&'a str, http[5692793da62549a0]::request::Request<alloc[2ea6bcb46fca0c42]::vec::Vec<u8>>, wry[337fe16bc4345d05]::RequestAsyncResponder), Output = ()>>>::{closure#0}>
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/webkit2gtk-2.0.2/src/auto/web_context.rs:534:5
+  20:     0x7f0d48e1b959 - <unknown>
+  21:     0x7f0d48d9fae4 - <unknown>
+  22:     0x7f0d48d5faa5 - <unknown>
+  23:     0x7f0d487096da - <unknown>
+  24:     0x7f0d486e043a - <unknown>
+  25:     0x7f0d48c57702 - <unknown>
+  26:     0x7f0d4873ee24 - <unknown>
+  27:     0x7f0d48c4a1a9 - <unknown>
+  28:     0x7f0d48c4cc82 - <unknown>
+  29:     0x7f0d464902af - <unknown>
+  30:     0x7f0d4649052f - <unknown>
+  31:     0x7f0d4cdb7bd5 - <unknown>
+  32:     0x7f0d4cdb90e8 - <unknown>
+  33:     0x7f0d4cdb9232 - g_main_context_iteration
+  34:     0x7f0d46c28cb7 - gtk_main_iteration_do
+  35:     0x5558ace8a099 - gtk[61ea779a69d3a565]::auto::functions::main_iteration_do
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gtk-0.18.2/src/auto/functions.rs:392:24
+  36:     0x5558ac8232da - <tao[76ddbe91b871cf22]::platform_impl::platform::event_loop::EventLoop<tauri_runtime_wry[20863bfa01576be3]::Message<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run_return::<tauri_runtime_wry[20863bfa01576be3]::make_event_handler<tauri[a8d6ea832d35efeb]::EventLoopMessage, <tauri[a8d6ea832d35efeb]::app::App>::make_run_event_loop_callback<<tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::{closure#0}>::{closure#0}>::{closure#0}>::{closure#0}
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tao-0.35.3/src/platform_impl/linux/event_loop.rs:1154:11
+  37:     0x5558acb0b4c8 - <glib[f738c2273d5e660]::auto::main_context::MainContext>::with_thread_default::<i32, <tao[76ddbe91b871cf22]::platform_impl::platform::event_loop::EventLoop<tauri_runtime_wry[20863bfa01576be3]::Message<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run_return<tauri_runtime_wry[20863bfa01576be3]::make_event_handler<tauri[a8d6ea832d35efeb]::EventLoopMessage, <tauri[a8d6ea832d35efeb]::app::App>::make_run_event_loop_callback<<tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::{closure#0}>::{closure#0}>::{closure#0}>::{closure#0}>
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/glib-0.18.5/src/main_context.rs:154:12
+  38:     0x5558ac822cfa - <tao[76ddbe91b871cf22]::platform_impl::platform::event_loop::EventLoop<tauri_runtime_wry[20863bfa01576be3]::Message<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run_return::<tauri_runtime_wry[20863bfa01576be3]::make_event_handler<tauri[a8d6ea832d35efeb]::EventLoopMessage, <tauri[a8d6ea832d35efeb]::app::App>::make_run_event_loop_callback<<tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::{closure#0}>::{closure#0}>::{closure#0}>
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tao-0.35.3/src/platform_impl/linux/event_loop.rs:1044:8
+  39:     0x5558ac822d87 - <tao[76ddbe91b871cf22]::platform_impl::platform::event_loop::EventLoop<tauri_runtime_wry[20863bfa01576be3]::Message<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::<tauri_runtime_wry[20863bfa01576be3]::make_event_handler<tauri[a8d6ea832d35efeb]::EventLoopMessage, <tauri[a8d6ea832d35efeb]::app::App>::make_run_event_loop_callback<<tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::{closure#0}>::{closure#0}>::{closure#0}>
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tao-0.35.3/src/platform_impl/linux/event_loop.rs:997:26
+  40:     0x5558acbd21c5 - <tao[76ddbe91b871cf22]::event_loop::EventLoop<tauri_runtime_wry[20863bfa01576be3]::Message<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::<tauri_runtime_wry[20863bfa01576be3]::make_event_handler<tauri[a8d6ea832d35efeb]::EventLoopMessage, <tauri[a8d6ea832d35efeb]::app::App>::make_run_event_loop_callback<<tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::{closure#0}>::{closure#0}>::{closure#0}>
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tao-0.35.3/src/event_loop.rs:224:21
+  41:     0x5558ac95ed36 - <tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage> as tauri_runtime[89e12699b44b401a]::Runtime<tauri[a8d6ea832d35efeb]::EventLoopMessage>>::run::<<tauri[a8d6ea832d35efeb]::app::App>::make_run_event_loop_callback<<tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::{closure#0}>::{closure#0}>
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-wry-2.11.4/src/lib.rs:3241:21
+  42:     0x5558acb024b8 - <tauri[a8d6ea832d35efeb]::app::App>::run::<<tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run::{closure#0}>
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-2.11.5/src/app.rs:1373:8
+  43:     0x5558acb07c68 - <tauri[a8d6ea832d35efeb]::app::Builder<tauri_runtime_wry[20863bfa01576be3]::Wry<tauri[a8d6ea832d35efeb]::EventLoopMessage>>>::run
+                               at /home/gehh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-2.11.5/src/app.rs:2450:26
+  44:     0x5558ac7d487c - palcalc_lib[4244d8558adac1b9]::run
+                               at /home/gehh/Projects/palCalc/src-tauri/src/lib.rs:192:10
+  45:     0x5558ac7d3b67 - palcalc[e60828cb07593532]::main
+                               at /home/gehh/Projects/palCalc/src-tauri/src/main.rs:4:5
+  46:     0x5558ac7d3b1b - <fn() as core[940e698046960fd5]::ops::function::FnOnce<()>>::call_once
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/ops/function.rs:250:5
+  47:     0x5558ac7d3ade - std[bcb96dfbba0ab899]::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/sys/backtrace.rs:166:18
+  48:     0x5558ac7d3be1 - std[bcb96dfbba0ab899]::rt::lang_start::<()>::{closure#0}
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/rt.rs:206:18
+  49:     0x5558ad336f57 - <&dyn core[940e698046960fd5]::ops::function::Fn<(), Output = i32> + core[940e698046960fd5]::marker::Sync + core[940e698046960fd5]::panic::unwind_safe::RefUnwindSafe as core[940e698046960fd5]::ops::function::FnOnce<()>>::call_once
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/ops/function.rs:287:21
+  50:     0x5558ad336f57 - std[bcb96dfbba0ab899]::panicking::catch_unwind::do_call::<&dyn core[940e698046960fd5]::ops::function::Fn<(), Output = i32> + core[940e698046960fd5]::marker::Sync + core[940e698046960fd5]::panic::unwind_safe::RefUnwindSafe, i32>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:581:40
+  51:     0x5558ad336f57 - std[bcb96dfbba0ab899]::panicking::catch_unwind::<i32, &dyn core[940e698046960fd5]::ops::function::Fn<(), Output = i32> + core[940e698046960fd5]::marker::Sync + core[940e698046960fd5]::panic::unwind_safe::RefUnwindSafe>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:544:19
+  52:     0x5558ad336f57 - std[bcb96dfbba0ab899]::panic::catch_unwind::<&dyn core[940e698046960fd5]::ops::function::Fn<(), Output = i32> + core[940e698046960fd5]::marker::Sync + core[940e698046960fd5]::panic::unwind_safe::RefUnwindSafe, i32>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panic.rs:359:14
+  53:     0x5558ad336f57 - std[bcb96dfbba0ab899]::rt::lang_start_internal::{closure#0}
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/rt.rs:175:24
+  54:     0x5558ad336f57 - std[bcb96dfbba0ab899]::panicking::catch_unwind::do_call::<std[bcb96dfbba0ab899]::rt::lang_start_internal::{closure#0}, isize>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:581:40
+  55:     0x5558ad336f57 - std[bcb96dfbba0ab899]::panicking::catch_unwind::<isize, std[bcb96dfbba0ab899]::rt::lang_start_internal::{closure#0}>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panicking.rs:544:19
+  56:     0x5558ad336f57 - std[bcb96dfbba0ab899]::panic::catch_unwind::<std[bcb96dfbba0ab899]::rt::lang_start_internal::{closure#0}, isize>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/panic.rs:359:14
+  57:     0x5558ad336f57 - std[bcb96dfbba0ab899]::rt::lang_start_internal
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/rt.rs:171:5
+  58:     0x5558ac7d3bc7 - std[bcb96dfbba0ab899]::rt::lang_start::<()>
+                               at /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/rt.rs:205:5
+  59:     0x5558ac7d3b8e - main
+  60:     0x7f0d43c27c4e - <unknown>
+  61:     0x7f0d43c27d8b - __libc_start_main
+  62:     0x5558ac7d39d5 - _start
+  63:                0x0 - <unknown>
+thread caused non-unwinding panic. aborting.
