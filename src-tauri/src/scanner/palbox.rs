@@ -429,6 +429,39 @@ pub fn scan_box(
     Ok(results)
 }
 
+/// The shareable debug bundle directory: every debug run wipes and refills
+/// it with captures plus a report.json carrying the log, the calibration and
+/// the cached layout — one `cp -r` hands the whole context over.
+pub fn debug_report_dir() -> std::path::PathBuf {
+    GridCalibration::config_path()
+        .parent()
+        .map(|p| p.join("debug-report"))
+        .unwrap_or_else(|| std::path::PathBuf::from("debug-report"))
+}
+
+pub fn reset_report_dir() -> Result<std::path::PathBuf, String> {
+    let dir = debug_report_dir();
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir)
+}
+
+pub fn write_report_meta(kind: &str, log: &[String]) -> Result<String, String> {
+    let dir = debug_report_dir();
+    let meta = serde_json::json!({
+        "kind": kind,
+        "log": log,
+        "calibration": GridCalibration::load(),
+        "panel_layout": PanelLayout::load_cache(),
+    });
+    std::fs::write(
+        dir.join("report.json"),
+        serde_json::to_string_pretty(&meta).map_err(|e| e.to_string())?,
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(dir.display().to_string())
+}
+
 /// Everything one isolated sheet read produces, with a step-by-step log —
 /// backs the UI debug button (user hovers a pal, presses, waits 2s).
 #[derive(Debug, Clone, Serialize)]
@@ -440,6 +473,7 @@ pub struct SheetDebug {
     pub name_score: f32,
     pub passives: Vec<String>,
     pub gender: Option<Gender>,
+    pub report_path: String,
 }
 
 /// Read the currently displayed pal sheet in isolation.
@@ -450,6 +484,7 @@ pub fn debug_read_sheet(
     passive_names: &[(String, String)],
     calib: &GridCalibration,
 ) -> Result<SheetDebug, String> {
+    let report_dir = reset_report_dir()?;
     let mut out = SheetDebug {
         log: Vec::new(),
         name_band_png: None,
@@ -458,6 +493,7 @@ pub fn debug_read_sheet(
         name_score: 0.0,
         passives: Vec::new(),
         gender: None,
+        report_path: report_dir.display().to_string(),
     };
     let monitor = backend.focused_monitor_rect()?;
     out.log.push(format!("monitor: {monitor:?}"));
@@ -480,6 +516,7 @@ pub fn debug_read_sheet(
         };
         out.log.push(format!("discovery region: {drect:?}"));
         let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
+        let _ = img.save(report_dir.join("discovery_region.png"));
         let px_range = match calib.panel {
             Some(panel) => super::panel::name_px_range(panel),
             None => (26.0, 46.0),
@@ -503,11 +540,13 @@ pub fn debug_read_sheet(
 
     let Some(l) = layout else {
         out.log.push("no layout — cannot read sheet".into());
+        let _ = write_report_meta("sheet", &out.log);
         return Ok(out);
     };
 
     let t = std::time::Instant::now();
     let band = backend.capture_region(l.name_band.0, l.name_band.1, l.name_band.2, l.name_band.3)?;
+    let _ = band.save(report_dir.join("name_band.png"));
     out.name_band_png = Some(png_base64(&band)?);
     match l.read_name(synth, &band, species_names) {
         Some((key, score)) => {
@@ -530,6 +569,7 @@ pub fn debug_read_sheet(
     out.log.push(format!("passives region: {pr:?}"));
     let t = std::time::Instant::now();
     let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
+    let _ = pimg.save(report_dir.join("passives_region.png"));
     out.passives_png = Some(png_base64(&pimg)?);
     let expected = calib.panel.map(super::panel::row_px_expected);
     let (keys, px) = l.read_passives(synth, &pimg, passive_names, None, expected);
@@ -538,6 +578,7 @@ pub fn debug_read_sheet(
         t.elapsed()
     ));
     out.passives = keys;
+    let _ = write_report_meta("sheet", &out.log);
     Ok(out)
 }
 

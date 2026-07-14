@@ -70,6 +70,7 @@
     gender: Gender | null;
   }
   let debugLog = $state<string[]>([]);
+  let debugReportPath = $state<string | null>(null);
   let debugSlots = $state<DebugSlot[] | null>(null);
   let debugSheet = $state<SheetDebug | null>(null);
   let debugRunning = $state(false);
@@ -81,13 +82,17 @@
     debugSheet = null;
     try {
       if (kind === "grid") {
-        const r = await invoke<{ log: string[]; slots: DebugSlot[] }>("debug_grid_capture");
+        const r = await invoke<{ log: string[]; slots: DebugSlot[]; report_path: string }>(
+          "debug_grid_capture",
+        );
         debugLog = r.log;
         debugSlots = r.slots;
+        debugReportPath = r.report_path;
       } else {
-        const r = await invoke<SheetDebug>("debug_sheet_read");
+        const r = await invoke<SheetDebug & { report_path: string }>("debug_sheet_read");
         debugLog = r.log;
         debugSheet = r;
+        debugReportPath = r.report_path;
       }
     } catch (e) {
       debugLog = [...debugLog, `ERROR: ${e}`];
@@ -318,6 +323,15 @@
         Test sheet read (2s) — hover a pal first
       </button>
     </div>
+    {#if debugReportPath}
+      <p class="dim-text">
+        Shareable bundle written to <code>{debugReportPath}</code> — pass it on
+        with:<br />
+        <code>cp -r {debugReportPath} ~/Projects/palCalc/gaming-debug && cd
+        ~/Projects/palCalc && git add gaming-debug && git commit -m debug &&
+        git push</code>
+      </p>
+    {/if}
     {#if debugLog.length > 0}
       <pre class="debug-log">{debugLog.join("\n")}</pre>
     {/if}

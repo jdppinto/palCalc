@@ -253,6 +253,7 @@ async fn scan_current_box(
 struct DebugGridResult {
     log: Vec<String>,
     slots: Vec<DebugSlot>,
+    report_path: String,
 }
 
 #[derive(Serialize)]
@@ -274,22 +275,19 @@ async fn debug_grid_capture(data: State<'_, GameData>) -> Result<DebugGridResult
         let mut backend = platform::detect()?;
         let templates =
             IconTemplates::load(&pal_icons, Some(&scanner::matcher::user_templates_dir()))?;
-        let debug_dir = GridCalibration::config_path()
-            .parent()
-            .map(|p| p.join("debug"));
-        if let Some(d) = &debug_dir {
-            let _ = std::fs::create_dir_all(d);
-        }
+        let report_dir = scanner::palbox::reset_report_dir()?;
         let mut report = String::new();
         let pre = scanner::palbox::classify_grid(
             backend.as_mut(),
             &calib,
-            debug_dir.as_deref(),
+            Some(&report_dir),
             &mut report,
             Some(&templates),
         )?;
+        let log: Vec<String> = report.lines().map(String::from).collect();
+        let report_path = scanner::palbox::write_report_meta("grid", &log)?;
         Ok(DebugGridResult {
-            log: report.lines().map(String::from).collect(),
+            log,
             slots: pre
                 .into_iter()
                 .map(|p| {
@@ -301,6 +299,7 @@ async fn debug_grid_capture(data: State<'_, GameData>) -> Result<DebugGridResult
                     })
                 })
                 .collect::<Result<Vec<_>, String>>()?,
+            report_path,
         })
     })
     .await
