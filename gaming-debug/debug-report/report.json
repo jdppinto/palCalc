@@ -10,26 +10,32 @@
     ],
     "rows": 5,
     "slot_br": [
-      0,
-      0
+      1469,
+      741
     ],
-    "slot_size": 90,
+    "slot_size": 96,
     "slot_tl": [
-      0,
-      0
+      934,
+      314
     ],
     "zones": {
+      "gender": [
+        2219,
+        196,
+        43,
+        38
+      ],
       "name": [
-        1790,
+        1789,
         202,
-        380,
+        379,
         40
       ],
       "passives": [
-        1666,
-        1122,
-        590,
-        90
+        1668,
+        1124,
+        587,
+        88
       ]
     }
   },
@@ -37,21 +43,21 @@
   "log": [
     "monitor: (0, 0, 2560, 1440)",
     "panel rect: Some((1641, 175, 638, 1065))",
-    "cached layout (validated): name_band (1754, 186, 378, 72) px 42.036774",
-    "name zone: (1790, 202, 380, 40) (override: true)",
-    "name read: SoldierBee at 1.000 in 63.959602ms",
-    "gender zone: (2219, 196, 43, 38) (override: false)",
-    "gender: Some(Male)",
-    "passives region: (1666, 1122, 590, 90) (override: true)",
-    "passives: [\"CraftSpeed_up2\", \"CraftSpeed_up3\", \"MoveSpeed_up_3\", \"Nocturnal\"] + 0 unknown row(s) (row px None) in 274.588724ms"
+    "cached layout (validated): name_band (1644, 189, 655, 56) px 38.5",
+    "name zone: (1789, 202, 379, 40) (override: true)",
+    "name read: Yeti at 1.000 in 76.344968ms",
+    "gender zone: (2219, 196, 43, 38) (override: true)",
+    "gender: Some(Female)",
+    "passives region: (1668, 1124, 587, 88) (override: true)",
+    "passives: [\"Nushi\", \"PAL_FullStomach_Up_1\", \"Noukin\", \"Deffence_up1\"] + 0 unknown row(s) (row px None) in 369.605604ms"
   ],
   "panel_layout": {
     "name_band": [
-      1754,
-      186,
-      378,
-      72
+      1644,
+      189,
+      655,
+      56
     ],
-    "px_name": 42.036773681640625
+    "px_name": 38.5
   }
 }
