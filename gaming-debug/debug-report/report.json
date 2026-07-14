@@ -25,10 +25,11 @@
     "monitor: (0, 0, 2560, 1440)",
     "panel rect: Some((1644, 180, 633, 1055))",
     "cached layout (validated): name_band (1736, 183, 570, 77) px 40.76413",
-    "name read: NO confident match in 712.03026ms",
-    "gender: None",
+    "name read: SheepBall at 0.523 in 639.061599ms",
+    "gender zone: (2188, 183, 82, 77)",
+    "gender: Some(Male)",
     "passives region: (1644, 1066, 633, 169)",
-    "passives: [\"MoveSpeed_up_2\"] (row px Some(28.323544)) in 2.022591779s"
+    "passives: [] (row px None) in 4.890664478s"
   ],
   "panel_layout": {
     "name_band": [
