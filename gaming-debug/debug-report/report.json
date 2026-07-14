@@ -1,0 +1,45 @@
+{
+  "calibration": {
+    "cols": 6,
+    "delay_ms": 100,
+    "panel": [
+      1644,
+      180,
+      633,
+      1055
+    ],
+    "rows": 5,
+    "slot_br": [
+      1467,
+      749
+    ],
+    "slot_size": 82,
+    "slot_tl": [
+      933,
+      319
+    ],
+    "zones": {}
+  },
+  "kind": "sheet",
+  "log": [
+    "monitor: (0, 0, 2560, 1440)",
+    "panel rect: Some((1644, 180, 633, 1055))",
+    "cached layout (validated): none (absent or rejected+deleted)",
+    "discovery region: (1644, 180, 633, 158)",
+    "name px range: (28.764128, 43.14619)",
+    "discovery: LeafPrincess at 0.456 px 34.76413 in 5.561475174s -> band (1861, 238, 486, 66)",
+    "name read: LeafPrincess at 0.455 in 366.008845ms",
+    "gender: None",
+    "passives region: (1644, 1066, 633, 169)",
+    "passives: [] (row px None) in 3.402931218s"
+  ],
+  "panel_layout": {
+    "name_band": [
+      1861,
+      238,
+      486,
+      66
+    ],
+    "px_name": 34.764129638671875
+  }
+}
