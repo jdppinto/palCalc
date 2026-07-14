@@ -9,7 +9,7 @@ use scanner::matcher::IconTemplates;
 use scanner::palbox::{scan_box, GridCalibration, SCAN_ABORT};
 use scanner::platform::{self, WindowInfo};
 use scanner::synth::TextSynth;
-use scanner::textlib::{png_base64, png_from_base64};
+use scanner::textlib::{png_base64, png_from_base64, TextLib, EMPTY_LABEL};
 
 #[derive(Serialize)]
 struct PalEntry {
@@ -168,6 +168,21 @@ async fn capture_screen() -> Result<FrozenFrame, String> {
     })
     .await
     .map_err(|e| format!("capture task panicked: {e}"))?
+}
+
+/// Label an unknown passive row crop: stored in the learned library, exact
+/// matches from then on. EMPTY_LABEL marks decorative/empty rows.
+#[tauri::command]
+fn save_passive_label(
+    png_base64_data: String,
+    passive_key: String,
+    data: State<GameData>,
+) -> Result<(), String> {
+    if passive_key != EMPTY_LABEL && !data.passives.contains_key(&passive_key) {
+        return Err(format!("unknown passive key: {passive_key}"));
+    }
+    let crop = png_from_base64(&png_base64_data)?;
+    TextLib::load(TextLib::default_dir()).learn(&passive_key, &crop)
 }
 
 /// Store a species-corrected slot crop as a learned icon template — the
@@ -387,6 +402,7 @@ pub fn run() {
             scan_current_box,
             capture_screen,
             save_pal_template,
+            save_passive_label,
             apply_default_calibration,
             debug_grid_capture,
             debug_sheet_read

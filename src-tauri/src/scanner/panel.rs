@@ -14,6 +14,7 @@ use image::RgbaImage;
 use serde::{Deserialize, Serialize};
 
 use super::synth::TextSynth;
+use super::textlib::{png_base64, TextLib, TextMatch, EMPTY_LABEL};
 
 /// Species-name matches at or above this are authoritative overrides.
 pub const NAME_CONFIDENCE: f32 = 0.45;
@@ -216,9 +217,90 @@ impl PanelLayout {
         )
     }
 
+    /// Full row-level read: learned crops (exact, ~0.99) override synthesized
+    /// text; rows neither learned nor confidently synth-matched come back as
+    /// crops for one-click labeling. Row strips are cut at fixed geometry so
+    /// same-calibration crops are pixel-comparable.
+    #[allow(clippy::type_complexity)]
+    pub fn read_passive_rows(
+        &self,
+        synth: &TextSynth,
+        textlib: &TextLib,
+        region: &RgbaImage,
+        passive_names: &[(String, String)],
+        px_hint: Option<f32>,
+        expected_px: Option<f32>,
+    ) -> (Vec<String>, Vec<(String, String)>, Option<f32>) {
+        let (synth_keys_hits, found_px) =
+            self.read_passives_hits(synth, region, passive_names, px_hint, expected_px);
+
+        let row_px = expected_px.unwrap_or(self.px_name * PASSIVE_PX_RATIO);
+        let bands = super::synth::detect_text_rows(region, row_px as u32 / 3);
+
+        let mut known: Vec<String> = Vec::new();
+        let mut unknown: Vec<(String, String)> = Vec::new();
+        if bands.is_empty() {
+            // No band structure — trust whatever synth found.
+            known.extend(synth_keys_hits.iter().map(|(k, _)| k.clone()));
+            return (known, unknown, found_px);
+        }
+        for (by, bh) in bands {
+            let y0 = by.saturating_sub(4);
+            let h = (bh + 8).min(region.height() - y0);
+            let strip = image::imageops::crop_imm(region, 0, y0, region.width(), h).to_image();
+            // Learned template first — exact renders beat synthesis.
+            match textlib.identify(&strip) {
+                TextMatch::Known(label) if label == EMPTY_LABEL => continue,
+                TextMatch::Known(label) => {
+                    known.push(label);
+                    continue;
+                }
+                _ => {}
+            }
+            // Synth hit within this band?
+            match synth_keys_hits
+                .iter()
+                .find(|(_, hy)| *hy >= y0 && *hy < y0 + h)
+            {
+                Some((k, _)) => known.push(k.clone()),
+                None => {
+                    if let Ok(b64) = png_base64(&strip) {
+                        let id = format!("{:016x}", fx(&strip));
+                        unknown.push((id, b64));
+                    }
+                }
+            }
+        }
+        (known, unknown, found_px)
+    }
+
+    fn read_passives_hits(
+        &self,
+        synth: &TextSynth,
+        region: &RgbaImage,
+        passive_names: &[(String, String)],
+        px_hint: Option<f32>,
+        expected_px: Option<f32>,
+    ) -> (Vec<(String, u32)>, Option<f32>) {
+        let (lo, hi) = match px_hint {
+            Some(px) => (px - 1.0, px + 1.0),
+            None => {
+                let px = expected_px.unwrap_or(self.px_name * PASSIVE_PX_RATIO);
+                (px * 0.85, px * 1.15)
+            }
+        };
+        let hits = synth.find_labels(region, passive_names, false, lo, hi, PASSIVE_CONFIDENCE, true);
+        let px = hits.first().map(|(_, h)| h.px);
+        (
+            hits.into_iter().map(|(k, h)| (k, h.y)).collect(),
+            px,
+        )
+    }
+
     /// Read passive keys from a capture of `passives_rect`, top-to-bottom.
     /// Returns the keys plus the matched row scale — pass it back as
     /// `px_hint` on later reads to skip the scale sweep.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn read_passives(
         &self,
         synth: &TextSynth,
@@ -241,6 +323,16 @@ impl PanelLayout {
         let px = hits.first().map(|(_, h)| h.px);
         (hits.into_iter().map(|(k, _)| k).collect(), px)
     }
+}
+
+/// Small stable hash for row-crop identity in the UI.
+fn fx(img: &RgbaImage) -> u64 {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for &b in img.as_raw() {
+        h ^= b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    h
 }
 
 #[cfg(test)]
@@ -535,6 +627,7 @@ mod font_audit {
 
 
 
+
 #[cfg(test)]
 mod field_name {
     use super::*;
@@ -566,5 +659,63 @@ mod field_name {
         let (key, score) = layout.read_name(&synth, &band, &names).expect("name read");
         assert_eq!(key, "Monkey", "score {score}"); // Tanzee's tribe key
         assert!(score >= NAME_CONFIDENCE);
+    }
+}
+
+#[cfg(test)]
+mod learned_rows {
+    use super::*;
+    use crate::scanner::textlib::TextLib;
+    use palcalc_core::GameData;
+
+    /// Field capture: "Downtrodden" (white-on-dark row) synth-matches at only
+    /// 0.41 — under threshold by design (false positives live at 0.41 too).
+    /// The learned-crop layer closes it: the row surfaces as unknown, one
+    /// labeling teaches it, and the re-read resolves it exactly.
+    #[test]
+    #[ignore = "slow; --release -- --ignored"]
+    fn unknown_row_learn_roundtrip() {
+        let gd = GameData::load().unwrap();
+        let synth = TextSynth::new().unwrap();
+        let region = image::open(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/palbox/field_passives_downtrodden.png"),
+        )
+        .unwrap()
+        .to_rgba8();
+        let names: Vec<(String, String)> = gd
+            .passives
+            .iter()
+            .map(|(k, p)| (k.clone(), p.name.clone()))
+            .collect();
+        let layout = PanelLayout {
+            name_band: (1800, 200, 486, 66),
+            px_name: 36.0,
+        };
+        let panel = (1644, 180, 633, 1055);
+        let expected = Some(row_px_expected(panel));
+
+        let dir = std::env::temp_dir().join(format!("palcalc-rows-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let mut lib = TextLib::load(dir.clone());
+
+        let (keys, unknowns, _) =
+            layout.read_passive_rows(&synth, &lib, &region, &names, None, expected);
+        assert!(keys.is_empty(), "no confident synth match expected: {keys:?}");
+        // Two text bands surface: the "Passive Skills" header and the row.
+        assert_eq!(unknowns.len(), 2, "header + Downtrodden row");
+
+        // User labels both once: header = not-a-passive, row = Downtrodden.
+        let header = crate::scanner::textlib::png_from_base64(&unknowns[0].1).unwrap();
+        lib.learn(crate::scanner::textlib::EMPTY_LABEL, &header).unwrap();
+        let crop = crate::scanner::textlib::png_from_base64(&unknowns[1].1).unwrap();
+        lib.learn("Deffence_down1", &crop).unwrap();
+
+        let (keys, unknowns, _) =
+            layout.read_passive_rows(&synth, &lib, &region, &names, None, expected);
+        assert_eq!(keys, vec!["Deffence_down1"]);
+        assert!(unknowns.is_empty());
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

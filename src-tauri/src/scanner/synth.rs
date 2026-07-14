@@ -17,6 +17,7 @@ static REGULAR: &[u8] = include_bytes!("../../../data/fonts/NotoSans-Medium.ttf"
 static BOLD: &[u8] = include_bytes!("../../../data/fonts/NotoSansGoogle-Bold.ttf");
 
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub struct TextHit {
     pub score: f32,
     /// Position within the searched image.
@@ -58,6 +59,7 @@ impl TextSynth {
 
     /// Build from arbitrary font bytes (font-audit tooling). Leaks the
     /// buffers — fine for test/audit processes.
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn from_font_data(regular: Vec<u8>, bold: Vec<u8>) -> Result<Self, String> {
         let r: &'static [u8] = Box::leak(regular.into_boxed_slice());
         let b: &'static [u8] = Box::leak(bold.into_boxed_slice());
@@ -205,7 +207,7 @@ fn label_pass(
     font: &FontRef,
     full: &Luma,
     candidates: &[(String, String)],
-    rows: &[u32],
+    rows: &[(u32, u32)],
     px_lo: f32,
     px_hi: f32,
     min_score: f32,
@@ -223,7 +225,7 @@ fn label_pass(
                     sweep_topk_by(full, &tpl, 2, 3, val)
                 } else {
                     rows.iter()
-                        .filter_map(|&ry| sweep_at_row_by(full, &tpl, ry, 2, val))
+                        .filter_map(|&(ry, _)| sweep_at_row_by(full, &tpl, ry, 2, val))
                         .collect()
                 };
                 for (_, cx, cy) in coarse {
@@ -343,6 +345,12 @@ fn sweep_topk(img: &Luma, tpl: &Tpl, step: usize, k: usize) -> Vec<(f32, u32, u3
     kept
 }
 
+/// Public row detection for callers that need the raw text bands (the
+/// learned-crop layer crops unknown rows for one-click labeling).
+pub fn detect_text_rows(img: &RgbaImage, min_band: u32) -> Vec<(u32, u32)> {
+    text_rows(&luma_of(img), min_band)
+}
+
 /// Generalized variants comparing by a score transform (identity or abs).
 fn sweep_topk_by(
     img: &Luma,
@@ -450,7 +458,7 @@ fn refine_by(
 
 /// Vertical positions (top y) of text-bearing rows: bands where per-row
 /// luma contrast rises above the background level.
-fn text_rows(img: &Luma, min_band: u32) -> Vec<u32> {
+fn text_rows(img: &Luma, min_band: u32) -> Vec<(u32, u32)> {
     if img.h < 8 {
         return Vec::new();
     }
@@ -474,13 +482,13 @@ fn text_rows(img: &Luma, min_band: u32) -> Vec<u32> {
             band_start.get_or_insert(y);
         } else if let Some(s) = band_start.take() {
             if y - s >= min_band.max(4) {
-                rows.push(s);
+                rows.push((s, y - s));
             }
         }
     }
     if let Some(s) = band_start {
         if img.h - s >= min_band.max(4) {
-            rows.push(s);
+            rows.push((s, img.h - s));
         }
     }
     rows.truncate(6);

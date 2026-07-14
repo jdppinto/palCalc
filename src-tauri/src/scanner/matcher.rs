@@ -164,6 +164,7 @@ impl IconTemplates {
 
     /// Best-matching pal for a slot crop, with its weighted-NCC score in
     /// [-1, 1]. None when the crop has no content (empty slot).
+    #[cfg_attr(not(test), allow(dead_code))]
     pub fn identify(&self, crop: &RgbaImage) -> Option<(String, f32)> {
         self.identify_top(crop, 1).into_iter().next()
     }

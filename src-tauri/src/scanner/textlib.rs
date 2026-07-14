@@ -15,7 +15,7 @@ use image::RgbaImage;
 /// Reserved label for "this passive row is empty" — real game backgrounds are
 /// textured, so flatness alone can't detect empty rows; the user labels the
 /// empty rendering once like any other crop.
-pub const EMPTY_LABEL: &str = "__empty__";
+pub const EMPTY_LABEL: &str = "-empty-"; // no underscores: "__" is the stored-filename separator
 
 /// Below this stddev a zone crop is an empty row.
 const MIN_STDDEV: f32 = 4.0;

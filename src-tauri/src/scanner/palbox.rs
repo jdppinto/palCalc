@@ -11,7 +11,7 @@ use super::matcher::IconTemplates;
 use super::panel::{PanelLayout, NAME_CONFIDENCE};
 use super::platform::Backend;
 use super::synth::TextSynth;
-use super::textlib::png_base64;
+use super::textlib::{png_base64, TextLib};
 
 /// Global abort flag, flipped by the `abort_scan` command.
 pub static SCAN_ABORT: AtomicBool = AtomicBool::new(false);
@@ -112,8 +112,12 @@ pub struct SlotResult {
     pub score: f32,
     /// From the name row's symbol color (blue ♂ / warm ♀).
     pub gender: Option<Gender>,
-    /// Passive keys read from the hover panel via synthesized text matching.
+    /// Passive keys read from the hover panel (learned crops override
+    /// synthesized text).
     pub passives: Vec<String>,
+    /// Rows that neither matched a learned crop nor cleared synth confidence:
+    /// (id, png_base64) for one-click labeling in the UI.
+    pub passive_unknowns: Vec<(String, String)>,
     /// The raw slot capture — lets the UI submit a species correction, which
     /// becomes a learned template of the user's own game rendering.
     pub crop_png: String,
@@ -255,8 +259,6 @@ pub fn scan_box(
     if SCAN_ABORT.load(Ordering::Relaxed) {
         return Err("scan aborted".into());
     }
-    let slot = calib.slot_size;
-    let half = (slot / 2) as i32;
     let mut report = String::new();
     if let Some(dir) = debug_dir {
         let _ = std::fs::remove_dir_all(dir);
@@ -268,30 +270,13 @@ pub fn scan_box(
 
     // ---- Pass 2: hover occupied slots, read the panel ----
     let monitor = backend.focused_monitor_rect()?;
-    let (mx, my, mw, mh) = monitor;
     // Boxes are full of duplicate pals: identical panel captures are read
     // once and memoized by pixel hash.
     let mut name_cache: HashMap<u64, Option<(String, f32)>> = HashMap::new();
-    let mut passive_cache: HashMap<u64, Vec<String>> = HashMap::new();
-    let mut layout = PanelLayout::load_cache().filter(|l| {
-        let in_monitor = l.name_band.0 >= mx
-            && l.name_band.1 >= my
-            && l.name_band.0 + l.name_band.2 as i32 <= mx + mw as i32
-            && l.name_band.1 + l.name_band.3 as i32 <= my + mh as i32;
-        let in_panel = calib.panel.is_none_or(|(px, py, pw, ph)| {
-            l.name_band.0 >= px
-                && l.name_band.1 >= py
-                && l.name_band.1 + l.name_band.3 as i32 <= py + ph as i32
-                && l.name_band.0 + l.name_band.2 as i32 <= px + pw as i32 + 40
-        });
-        // A cached scale far from the panel-derived expectation means the
-        // cache was poisoned by a false discovery hit — rediscover.
-        let px_ok = calib.panel.is_none_or(|panel| {
-            let (lo, hi) = super::panel::name_px_range(panel);
-            l.px_name >= lo && l.px_name <= hi
-        });
-        in_monitor && in_panel && px_ok
-    });
+    #[allow(clippy::type_complexity)]
+    let mut passive_cache: HashMap<u64, (Vec<String>, Vec<(String, String)>)> = HashMap::new();
+    let mut layout = PanelLayout::load_validated(calib.panel, monitor);
+    let textlib = TextLib::load(TextLib::default_dir());
     let mut discovery_failures = 0u32;
     let mut row_px: Option<f32> = None;
     let occupied: Vec<usize> = pre
@@ -314,6 +299,7 @@ pub fn scan_box(
                 score: 0.0,
                 gender: None,
                 passives: Vec::new(),
+                passive_unknowns: Vec::new(),
                 crop_png: png_base64(&p.crop)?,
             });
             continue;
@@ -352,6 +338,7 @@ pub fn scan_box(
         let mut score = 0.0f32;
         let mut gender = None;
         let mut passives = Vec::new();
+        let mut passive_unknowns = Vec::new();
         if let Some(l) = &layout {
             // Name: authoritative when confident. Try the cheap staged reads
             // unless discovery already produced it this iteration.
@@ -403,17 +390,23 @@ pub fn scan_box(
                 let _ = pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
             }
             let pkey = img_hash(&pimg);
-            passives = match passive_cache.get(&pkey) {
+            (passives, passive_unknowns) = match passive_cache.get(&pkey) {
                 Some(cached) => cached.clone(),
                 None => {
                     let expected = calib.panel.map(super::panel::row_px_expected);
-            let (keys, found_px) =
-                l.read_passives(synth, &pimg, passive_names, row_px, expected);
+                    let (keys, unknowns, found_px) = l.read_passive_rows(
+                        synth,
+                        &textlib,
+                        &pimg,
+                        passive_names,
+                        row_px,
+                        expected,
+                    );
                     if row_px.is_none() {
                         row_px = found_px;
                     }
-                    passive_cache.insert(pkey, keys.clone());
-                    keys
+                    passive_cache.insert(pkey, (keys.clone(), unknowns.clone()));
+                    (keys, unknowns)
                 }
             };
         }
@@ -432,6 +425,7 @@ pub fn scan_box(
             score,
             gender,
             passives,
+            passive_unknowns,
             crop_png: png_base64(&p.crop)?,
         });
     }
@@ -485,6 +479,7 @@ pub struct SheetDebug {
     pub species: Option<String>,
     pub name_score: f32,
     pub passives: Vec<String>,
+    pub passive_unknowns: Vec<(String, String)>,
     pub gender: Option<Gender>,
     pub report_path: String,
 }
@@ -505,6 +500,7 @@ pub fn debug_read_sheet(
         species: None,
         name_score: 0.0,
         passives: Vec::new(),
+        passive_unknowns: Vec::new(),
         gender: None,
         report_path: report_dir.display().to_string(),
     };
@@ -594,12 +590,22 @@ pub fn debug_read_sheet(
     let _ = pimg.save(report_dir.join("passives_region.png"));
     out.passives_png = Some(png_base64(&pimg)?);
     let expected = calib.panel.map(super::panel::row_px_expected);
-    let (keys, px) = l.read_passives(synth, &pimg, passive_names, None, expected);
+    let textlib = TextLib::load(TextLib::default_dir());
+    let (keys, unknowns, px) =
+        l.read_passive_rows(synth, &textlib, &pimg, passive_names, None, expected);
     out.log.push(format!(
-        "passives: {keys:?} (row px {px:?}) in {:?}",
+        "passives: {keys:?} + {} unknown row(s) (row px {px:?}) in {:?}",
+        unknowns.len(),
         t.elapsed()
     ));
+    for (i, (_, b64)) in unknowns.iter().enumerate() {
+        use base64::Engine;
+        if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(b64) {
+            let _ = std::fs::write(report_dir.join(format!("unknown_row_{i}.png")), bytes);
+        }
+    }
     out.passives = keys;
+    out.passive_unknowns = unknowns;
     let _ = write_report_meta("sheet", &out.log);
     Ok(out)
 }

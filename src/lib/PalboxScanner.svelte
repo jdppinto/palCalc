@@ -29,6 +29,7 @@
     score: number;
     gender: Gender | null;
     passives: string[];
+    passive_unknowns: [string, string][];
     crop_png: string;
   }
 
@@ -57,6 +58,47 @@
   // Species correction: teaches the matcher this game's own rendering
   let fixing = $state<number | null>(null);
   let fixQuery = $state("");
+
+  // Unknown passive-row labeling (label once, exact matches forever)
+  let labelQuery = $state("");
+  let labeling = $state<string | null>(null);
+
+  const unknownRows = $derived.by(() => {
+    const seen = new Map<string, string>();
+    for (const r of results ?? []) {
+      for (const [id, png] of r.passive_unknowns) {
+        if (!seen.has(id)) seen.set(id, png);
+      }
+    }
+    return [...seen.entries()].map(([id, png]) => ({ id, png }));
+  });
+
+  const labelMatches = $derived(
+    passiveList
+      .filter((p) => p.name.toLowerCase().includes(labelQuery.trim().toLowerCase()))
+      .slice(0, 8),
+  );
+
+  async function labelRow(id: string, png: string, passiveKey: string) {
+    try {
+      await invoke("save_passive_label", { pngBase64Data: png, passiveKey });
+      results =
+        results?.map((r) => {
+          const hit = r.passive_unknowns.some(([uid]) => uid === id);
+          if (!hit) return r;
+          return {
+            ...r,
+            passives:
+              passiveKey === "-empty-" ? r.passives : [...r.passives, passiveKey],
+            passive_unknowns: r.passive_unknowns.filter(([uid]) => uid !== id),
+          };
+        }) ?? null;
+      labeling = null;
+      labelQuery = "";
+    } catch (e) {
+      error = String(e);
+    }
+  }
 
   // Debug tools
   interface DebugSlot { row: number; col: number; occupied: boolean; crop_png: string }
@@ -364,6 +406,28 @@
     {/if}
   </details>
 
+  {#if unknownRows.length > 0}
+    <div class="label-panel">
+      <h4>Unrecognized passive rows — label once, matched exactly forever</h4>
+      {#each unknownRows as u (u.id)}
+        <div class="unknown">
+          <img src={"data:image/png;base64," + u.png} alt="passive row" />
+          {#if labeling === u.id}
+            <input placeholder="Type passive name…" bind:value={labelQuery} />
+            {#each labelMatches as m (m.key)}
+              <button class="pick" onclick={() => labelRow(u.id, u.png, m.key)}>{m.name}</button>
+            {/each}
+            <button class="pick empty-pick" onclick={() => labelRow(u.id, u.png, "-empty-")}>
+              Not a passive
+            </button>
+          {:else}
+            <button onclick={() => (labeling = u.id)}>Label…</button>
+          {/if}
+        </div>
+      {/each}
+    </div>
+  {/if}
+
   {#if results}
     <p class="dim-text">
       Wrong or unknown species? Click ✎ and pick the right pal — the app
@@ -638,6 +702,44 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     background: #000;
+  }
+
+  .label-panel {
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+  }
+
+  .label-panel h4 {
+    margin: 0 0 0.5rem;
+  }
+
+  .unknown {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.35rem 0;
+  }
+
+  .unknown img {
+    max-width: 320px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #000;
+  }
+
+  .unknown input {
+    padding: 0.35rem 0.6rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+  }
+
+  .empty-pick {
+    color: var(--text-dim);
+    border-style: dashed;
   }
 
   .add-all {
