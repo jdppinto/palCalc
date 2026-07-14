@@ -21,6 +21,12 @@ use super::textlib::{png_base64, TextLib, TextMatch, EMPTY_LABEL};
 /// vocabulary hit (Inventory Kamera uses ~0.90-0.95 on much larger item
 /// vocabularies; ours are 333/114 entries with distinctive names).
 pub const OCR_MIN_SIM: f64 = 0.72;
+/// Passive rows sit near other UI text, and token-window matching lets stray
+/// words snap to short passive names at 0.72 ("attack" -> "Attack Up" is
+/// 0.75). Real rows read at ~1.00, so passives demand near-exact similarity.
+pub const OCR_MIN_SIM_PASSIVE: f64 = 0.85;
+/// The panel shows at most this many passive rows.
+pub const MAX_PASSIVES: usize = 4;
 
 /// Species-name matches at or above this are authoritative overrides.
 pub const NAME_CONFIDENCE: f32 = 0.45;
@@ -282,11 +288,18 @@ impl PanelLayout {
             known.extend(synth_keys_hits.iter().map(|(k, _)| k.clone()));
             return (known, unknown, found_px);
         }
+        // One OCR pass over the whole region; each line is then gated by
+        // GEOMETRY — it only counts for the boxed row band it sits inside.
+        // Per-strip OCR let text near (but not in) a row leak into the read.
+        let ocr_lines = ocr::read_lines_boxed(region).unwrap_or_default();
         // The synth sweep is expensive; with OCR as the primary reader it
         // only runs if some row is left unresolved.
         let mut synth_hits: Option<Vec<(String, u32)>> = None;
         let mut found_px: Option<f32> = None;
         for (by, bh) in bands {
+            if known.len() >= MAX_PASSIVES {
+                break;
+            }
             let y0 = by.saturating_sub(4);
             let h = (bh + 8).min(region.height() - y0);
             let strip = image::imageops::crop_imm(region, 0, y0, region.width(), h).to_image();
@@ -311,8 +324,27 @@ impl PanelLayout {
                 }
                 _ => {}
             }
-            // OCR + dictionary (Inventory Kamera recipe).
-            if let Ok(Some((key, _))) = ocr::read_and_match(&strip, passive_names, OCR_MIN_SIM) {
+            // OCR + dictionary (Inventory Kamera recipe): only lines whose
+            // vertical center falls inside THIS row band may match.
+            let row_match = ocr_lines
+                .iter()
+                .filter(|(_, (_, ly, _, lh))| {
+                    let cy = *ly as f32 + *lh as f32 / 2.0;
+                    cy >= y0 as f32 && cy < (y0 + h) as f32
+                })
+                .filter_map(|(text, _)| {
+                    ocr::best_vocab_match(text, passive_names, OCR_MIN_SIM_PASSIVE)
+                })
+                .max_by(|a, b| a.1.total_cmp(&b.1));
+            if let Some((key, _)) = row_match {
+                known.push(key.to_string());
+                continue;
+            }
+            // Region-pass OCR can miss faint rows the per-strip upscale
+            // catches; retry on the strip alone before falling back.
+            if let Ok(Some((key, _))) =
+                ocr::read_and_match(&strip, passive_names, OCR_MIN_SIM_PASSIVE)
+            {
                 known.push(key.to_string());
                 continue;
             }
