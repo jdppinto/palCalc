@@ -381,6 +381,26 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
     let sx = mw as f64 / 2560.0;
     let sy = mh as f64 / 1440.0;
     let _ = std::fs::remove_file(scanner::panel::PanelLayout::cache_path());
+    // Pal-sheet bounds, field-measured on the 2560x1440 reference (SoldierBee
+    // debug capture: 1641,175,638,1065), scaled with the monitor.
+    let panel = (
+        mx + (1641.0 * sx) as i32,
+        my + (175.0 * sy) as i32,
+        (638.0 * sx) as u32,
+        (1065.0 * sy) as u32,
+    );
+    // Materialize the computed reading zones from the panel so the button
+    // resets them to visible, clearable overrides. These use the exact same
+    // rect functions the scanner falls back to, so the button and the
+    // scan-time default can't drift apart.
+    use scanner::panel::PanelLayout;
+    let mut zones = std::collections::HashMap::new();
+    zones.insert("name".to_string(), PanelLayout::name_rect(panel));
+    zones.insert("gender".to_string(), PanelLayout::gender_rect(panel));
+    zones.insert(
+        "passives".to_string(),
+        PanelLayout::passives_search_rect(panel),
+    );
     let calib = GridCalibration {
         slot_tl: (mx + (934.0 * sx) as i32, my + (314.0 * sy) as i32),
         slot_br: (mx + (1469.0 * sx) as i32, my + (741.0 * sy) as i32),
@@ -388,15 +408,8 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         rows: 5,
         slot_size: ((96.0 * sx) as u32).max(40),
         delay_ms: 300,
-        // Pal-sheet bounds, field-measured on the 2560x1440 reference
-        // (SoldierBee debug capture: 1641,175,638,1065), scaled with the monitor.
-        panel: Some((
-            mx + (1641.0 * sx) as i32,
-            my + (175.0 * sy) as i32,
-            (638.0 * sx) as u32,
-            (1065.0 * sy) as u32,
-        )),
-        zones: Default::default(),
+        panel: Some(panel),
+        zones,
     };
     calib.save()?;
     Ok(calib)

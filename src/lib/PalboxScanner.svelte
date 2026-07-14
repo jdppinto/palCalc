@@ -464,7 +464,7 @@
       <button class="save" onclick={useDefaults}>
         Use default layout (16:9, scaled to your monitor)
       </button>
-      <span class="hint-inline">— or calibrate manually below</span>
+      <span class="hint-inline">— resets panel + all zones, or calibrate manually below</span>
     </div>
     <ol>
       <li>Open the Palbox in Palworld.</li>
