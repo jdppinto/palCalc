@@ -159,10 +159,10 @@ impl PanelLayout {
     pub fn name_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
         let (px, py, pw, ph) = panel;
         (
-            px + (pw as f32 * 0.2206) as i32,
-            py + (ph as f32 * 0.0233) as i32,
-            (pw as f32 * 0.6048) as u32,
-            (ph as f32 * 0.0359) as u32,
+            px + (pw as f32 * 0.2335) as i32,
+            py + (ph as f32 * 0.0254) as i32,
+            (pw as f32 * 0.5956) as u32,
+            (ph as f32 * 0.0376) as u32,
         )
     }
 
@@ -179,13 +179,18 @@ impl PanelLayout {
     }
 
     /// Passive-rows search area: the two-row grid band near the panel bottom.
+    /// This is a SEARCH region — `read_passive_rows` re-anchors on the "Passive
+    /// Skills" header inside it — so it is kept generous. The band spans the two
+    /// field-measured extremes: rows sat at ~0.855 of panel height on the 1115px
+    /// reference and ~0.889 on a shorter 1065px capture, so start high (0.848)
+    /// and run tall enough (0.126) to contain both.
     pub fn passives_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
         let (px, py, pw, ph) = panel;
         (
             px + (pw as f32 * 0.0206) as i32,
             py + (ph as f32 * 0.8484) as i32,
             (pw as f32 * 0.9508) as u32,
-            (ph as f32 * 0.0852) as u32,
+            (ph as f32 * 0.1260) as u32,
         )
     }
 

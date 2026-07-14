@@ -182,9 +182,9 @@
   // Default zone ratios — MUST match panel.rs (name_rect / gender_rect /
   // passives_search_rect). Shown as dashed guides so a fresh user has a target.
   const DEFAULT_ZONE_RATIOS: Record<string, Rect> = {
-    name: [0.2206, 0.0233, 0.6048, 0.0359],
+    name: [0.2335, 0.0254, 0.5956, 0.0376],
     gender: [0.9063, 0.0206, 0.0683, 0.0359],
-    passives: [0.0206, 0.8484, 0.9508, 0.0852],
+    passives: [0.0206, 0.8484, 0.9508, 0.126],
   };
   function defaultZoneRect(key: string): Rect | null {
     if (!calib.panel) return null;
