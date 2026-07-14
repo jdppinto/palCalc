@@ -8,7 +8,8 @@ use tauri::{Emitter, State};
 use scanner::matcher::IconTemplates;
 use scanner::palbox::{scan_box, GridCalibration, SCAN_ABORT};
 use scanner::platform::{self, WindowInfo};
-use scanner::textlib::{png_base64, png_from_base64, TextLib};
+use scanner::synth::TextSynth;
+use scanner::textlib::{png_base64, png_from_base64};
 
 #[derive(Serialize)]
 struct PalEntry {
@@ -167,20 +168,6 @@ async fn capture_screen() -> Result<FrozenFrame, String> {
     .map_err(|e| format!("capture task panicked: {e}"))?
 }
 
-/// Store a user-labeled passive crop in the label-once template library.
-#[tauri::command]
-fn save_passive_label(
-    png_base64_data: String,
-    passive_key: String,
-    data: State<GameData>,
-) -> Result<(), String> {
-    if passive_key != scanner::textlib::EMPTY_LABEL && !data.passives.contains_key(&passive_key) {
-        return Err(format!("unknown passive key: {passive_key}"));
-    }
-    let crop = png_from_base64(&png_base64_data)?;
-    TextLib::load(TextLib::default_dir()).learn(&passive_key, &crop)
-}
-
 /// Store a species-corrected slot crop as a learned icon template — the
 /// user's own game rendering, which survives icon-art drift.
 #[tauri::command]
@@ -220,6 +207,17 @@ async fn scan_current_box(
 ) -> Result<Vec<scanner::palbox::SlotResult>, String> {
     let calib = GridCalibration::load().ok_or("not calibrated yet")?;
     let pal_icons = scanner::matcher::pal_icon_map(&data);
+    let species_names: Vec<(String, String)> = data
+        .pals
+        .iter()
+        .filter(|(k, _)| data.icons.contains_key(*k))
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    let passive_names: Vec<(String, String)> = data
+        .passives
+        .iter()
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
     SCAN_ABORT.store(false, Ordering::Relaxed);
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
@@ -228,14 +226,16 @@ async fn scan_current_box(
             &pal_icons,
             Some(&scanner::matcher::user_templates_dir()),
         )?;
-        let textlib = TextLib::load(TextLib::default_dir());
+        let synth = TextSynth::new()?;
         let debug_dir = GridCalibration::config_path()
             .parent()
             .map(|p| p.join("debug"));
         scan_box(
             backend.as_mut(),
             &templates,
-            &textlib,
+            &synth,
+            &species_names,
+            &passive_names,
             &calib,
             threshold.unwrap_or(0.55),
             debug_dir.as_deref(),
@@ -246,6 +246,28 @@ async fn scan_current_box(
     })
     .await
     .map_err(|e| format!("scan task panicked: {e}"))?
+}
+
+/// One-click calibration: grid geometry measured on the 2560x1440 reference
+/// screenshot, scaled to the focused monitor. Panel reading needs no setup at
+/// all (auto-discovered), so this is the entire calibration for 16:9 layouts.
+#[tauri::command]
+fn apply_default_calibration() -> Result<GridCalibration, String> {
+    let mut backend = platform::detect()?;
+    let (mx, my, mw, mh) = backend.focused_monitor_rect()?;
+    let sx = mw as f64 / 2560.0;
+    let sy = mh as f64 / 1440.0;
+    let calib = GridCalibration {
+        slot_tl: (mx + (934.0 * sx) as i32, my + (314.0 * sy) as i32),
+        slot_br: (mx + (1469.0 * sx) as i32, my + (741.0 * sy) as i32),
+        cols: 6,
+        rows: 5,
+        slot_size: ((96.0 * sx) as u32).max(40),
+        delay_ms: 300,
+        zones: Default::default(),
+    };
+    calib.save()?;
+    Ok(calib)
 }
 
 pub fn run() {
@@ -264,8 +286,8 @@ pub fn run() {
             abort_scan,
             scan_current_box,
             capture_screen,
-            save_passive_label,
-            save_pal_template
+            save_pal_template,
+            apply_default_calibration
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

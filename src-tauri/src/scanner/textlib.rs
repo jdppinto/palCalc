@@ -274,6 +274,7 @@ pub mod font_validation {
     }
 
     #[test]
+    #[ignore = "superseded by panel integration test; slow in debug"]
     fn validate_noto_sans_against_real_passive_crops() {
         let fx = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/palbox");
         let cases = [("zone_1_4_passive1.png", "Artisan"), ("zone_1_4_passive3.png", "Swift")];
@@ -304,6 +305,7 @@ mod font_discrimination {
     use palcalc_core::GameData;
 
     #[test]
+    #[ignore = "superseded by panel integration test; slow in debug"]
     fn synthesized_names_discriminate() {
         let fx = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/palbox");
         let gd = GameData::load().unwrap();
@@ -339,6 +341,7 @@ mod name_discrimination {
     use palcalc_core::GameData;
 
     #[test]
+    #[ignore = "superseded by panel integration test; slow in debug"]
     fn synthesized_species_name_discriminates() {
         let fx = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/palbox");
         let gd = GameData::load().unwrap();

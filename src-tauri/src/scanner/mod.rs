@@ -8,5 +8,7 @@
 
 pub mod matcher;
 pub mod palbox;
+pub mod panel;
 pub mod platform;
+pub mod synth;
 pub mod textlib;
