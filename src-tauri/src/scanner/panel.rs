@@ -421,3 +421,94 @@ mod field_fixtures {
         );
     }
 }
+
+#[cfg(test)]
+mod font_audit {
+    use super::*;
+    use crate::scanner::synth::TextSynth;
+
+    fn fixture(name: &str) -> RgbaImage {
+        image::open(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/palbox")
+                .join(name),
+        )
+        .unwrap()
+        .to_rgba8()
+    }
+
+    /// Score every candidate game font (drop .ufont/.ttf/.otf files into
+    /// gaming-debug/fonts/) against each matching task independently:
+    ///
+    ///   name-lamball   field_discovery.png  -> "Lamball"  (bold role)
+    ///   name-lifmunk   name_lifmunk.png     -> "Lifmunk"  (bold role)
+    ///   pass-artisan   zone_1_4_passive1    -> "Artisan"  (regular role)
+    ///   pass-fragrant  field_passives.png   -> "Fragrant Foliage" (regular)
+    ///
+    /// Run: cargo test --release font_audit --lib -- --ignored --nocapture
+    #[test]
+    #[ignore = "manual audit tool"]
+    fn font_audit() {
+        let fonts_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../gaming-debug/fonts");
+        let mut fonts: Vec<std::path::PathBuf> = std::fs::read_dir(&fonts_dir)
+            .map(|r| {
+                r.flatten()
+                    .map(|e| e.path())
+                    .filter(|p| {
+                        matches!(
+                            p.extension().and_then(|e| e.to_str()),
+                            Some("ufont") | Some("ttf") | Some("otf")
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        fonts.sort();
+        // Baseline for comparison
+        let noto = std::path::PathBuf::from("/usr/share/fonts/noto/NotoSans-Regular.ttf");
+        if noto.exists() {
+            fonts.insert(0, noto);
+        }
+        assert!(!fonts.is_empty(), "no fonts found in {fonts_dir:?}");
+
+        let disc = fixture("field_discovery.png");
+        let lif = fixture("name_lifmunk.png");
+        let art = fixture("zone_1_4_passive1.png");
+        let frag = fixture("field_passives.png");
+
+        eprintln!(
+            "{:36} {:>12} {:>12} {:>12} {:>13}",
+            "font", "name-lamball", "name-lifmunk", "pass-artisan", "pass-fragrant"
+        );
+        for path in fonts {
+            let Ok(bytes) = std::fs::read(&path) else {
+                continue;
+            };
+            let Ok(synth) = TextSynth::from_font_data(bytes.clone(), bytes) else {
+                eprintln!("{:36} unparseable", path.file_name().unwrap().to_string_lossy());
+                continue;
+            };
+            let score = |img: &RgbaImage, label: &str, bold: bool, lo: f32, hi: f32| -> f32 {
+                let cand = vec![("x".to_string(), label.to_string())];
+                synth
+                    .find_labels(img, &cand, bold, lo, hi, 0.05, true)
+                    .first()
+                    .map(|(_, h)| h.score)
+                    .unwrap_or(0.0)
+            };
+            let s1 = score(&disc, "Lamball", true, 28.0, 44.0);
+            let s2 = score(&lif, "Lifmunk", true, 30.0, 44.0);
+            let s3 = score(&art, "Artisan", false, 24.0, 34.0);
+            let s4 = score(&frag, "Fragrant Foliage", false, 20.0, 34.0);
+            eprintln!(
+                "{:36} {:>12.3} {:>12.3} {:>12.3} {:>13.3}",
+                path.file_name().unwrap().to_string_lossy(),
+                s1,
+                s2,
+                s3,
+                s4
+            );
+        }
+    }
+}

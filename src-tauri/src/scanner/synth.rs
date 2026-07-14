@@ -51,6 +51,17 @@ impl TextSynth {
         })
     }
 
+    /// Build from arbitrary font bytes (font-audit tooling). Leaks the
+    /// buffers — fine for test/audit processes.
+    pub fn from_font_data(regular: Vec<u8>, bold: Vec<u8>) -> Result<Self, String> {
+        let r: &'static [u8] = Box::leak(regular.into_boxed_slice());
+        let b: &'static [u8] = Box::leak(bold.into_boxed_slice());
+        Ok(Self {
+            regular: FontRef::try_from_slice(r).map_err(|e| e.to_string())?,
+            bold: FontRef::try_from_slice(b).map_err(|e| e.to_string())?,
+        })
+    }
+
     fn font(&self, bold: bool) -> &FontRef<'static> {
         if bold {
             &self.bold
