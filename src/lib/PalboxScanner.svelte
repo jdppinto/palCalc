@@ -31,6 +31,7 @@
     row: number;
     col: number;
     species: string | null;
+    unidentified: boolean;
     score: number;
     gender: Gender | null;
     passives: PassiveRead[];
@@ -474,6 +475,9 @@
                 </span>
               </div>
               <span class="score">{r.score.toFixed(2)}</span>
+            {:else if r.unidentified}
+              <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="unknown pal" />
+              <span class="dim">unknown pal — ✎ to teach</span>
             {:else}
               <span class="dim">empty</span>
             {/if}

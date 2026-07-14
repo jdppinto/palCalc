@@ -107,6 +107,10 @@ pub struct SlotResult {
     pub col: u32,
     /// None = empty slot or below-threshold match.
     pub species: Option<String>,
+    /// True when the slot clearly holds SOMETHING but no template matched
+    /// above threshold (unreleased pal, unlearned rendering) — the UI offers
+    /// a correction instead of showing "empty".
+    pub unidentified: bool,
     pub score: f32,
     /// From the "gender" zone by symbol color (blue ♂ / warm ♀).
     pub gender: Option<Gender>,
@@ -190,10 +194,9 @@ pub fn scan_box(
                 let top = templates.identify_top(&crop, 3);
                 report.push_str(&format!("slot {row},{col}: {top:?}\n"));
             }
-            let matched = templates
-                .identify(&crop)
-                .filter(|(_, score)| *score >= threshold);
-            let (species, score) = match matched {
+            let raw = templates.identify(&crop);
+            let unidentified = raw.as_ref().is_some_and(|(_, s)| *s < threshold);
+            let (species, score) = match raw.filter(|(_, score)| *score >= threshold) {
                 Some((key, score)) => (Some(key), score),
                 None => (None, 0.0),
             };
@@ -239,6 +242,7 @@ pub fn scan_box(
                 row,
                 col,
                 species,
+                unidentified,
                 score,
                 gender,
                 passives,
