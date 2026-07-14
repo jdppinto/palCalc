@@ -147,36 +147,45 @@ impl PanelLayout {
         (panel.0, panel.1, panel.2, (panel.3 as f32 * 0.15) as u32)
     }
 
-    /// Gender-symbol zone: a tight box around the symbol at the right end of
-    /// the name row. Field-measured on a female Yeti (panel (1650,175,630,1115),
-    /// override (2221,198,43,40)): the symbol sits at ~90.6% of panel width and
-    /// is only ~6.8% wide — the earlier 0.86 offset / 0.13 width swept in
-    /// background pixels and diluted the pink vote to None. Vertically it hugs
-    /// the name text (px_name tall, centered in the band) rather than the loose
-    /// discovery band, keeping inert padding out of the color vote.
-    pub fn gender_rect(&self, panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
-        let (px, _, pw, _) = panel;
-        let h = self.px_name.round().max(1.0) as u32;
-        let y = self.name_band.1
-            + ((self.name_band.3 as f32 - self.px_name) / 2.0).round() as i32;
+    // Field-measured zone ratios. All three come from one hand-tuned capture
+    // (female Yeti, panel (1650,175,630,1115); overrides name (1789,201,381,40),
+    // gender (2221,198,43,40), passives (1663,1121,599,95)) and are stored as
+    // fractions of the calibrated panel rect so they scale with resolution/UI
+    // scale. The earlier auto-derived zones (0.86/0.13 gender, discovery-sized
+    // name, 0.84-to-bottom passives) misread gender as None; these are the
+    // in-game corrected values.
+
+    /// Name-text zone: fraction-of-panel box around the pal name.
+    pub fn name_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
+        let (px, py, pw, ph) = panel;
         (
-            px + (pw as f32 * 0.906) as i32,
-            y,
-            (pw as f32 * 0.068) as u32,
-            h,
+            px + (pw as f32 * 0.2206) as i32,
+            py + (ph as f32 * 0.0233) as i32,
+            (pw as f32 * 0.6048) as u32,
+            (ph as f32 * 0.0359) as u32,
         )
     }
 
-    /// Passive-rows search area inside a user-delimited panel rect: rows sit
-    /// at ~88-100% of the panel height; starting higher pulls in the partner
-    /// skill description, which false-matches short passive names.
-    pub fn passives_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
-        let top = (panel.3 as f32 * 0.84) as i32;
+    /// Gender-symbol zone: tight box around the symbol at the right end of the
+    /// name row (color-vote only). ~90.6% panel-width offset, ~6.8% wide.
+    pub fn gender_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
+        let (px, py, pw, ph) = panel;
         (
-            panel.0,
-            panel.1 + top,
-            panel.2,
-            panel.3 - top as u32,
+            px + (pw as f32 * 0.9063) as i32,
+            py + (ph as f32 * 0.0206) as i32,
+            (pw as f32 * 0.0683) as u32,
+            (ph as f32 * 0.0359) as u32,
+        )
+    }
+
+    /// Passive-rows search area: the two-row grid band near the panel bottom.
+    pub fn passives_search_rect(panel: (i32, i32, u32, u32)) -> (i32, i32, u32, u32) {
+        let (px, py, pw, ph) = panel;
+        (
+            px + (pw as f32 * 0.0206) as i32,
+            py + (ph as f32 * 0.8484) as i32,
+            (pw as f32 * 0.9508) as u32,
+            (ph as f32 * 0.0852) as u32,
         )
     }
 
@@ -556,7 +565,7 @@ mod tests {
         assert_eq!(key, "Carbunclo", "band read wrong name ({score})");
 
         // Gender zone: the screenshot's Lifmunk shows the male symbol.
-        let gr = layout.gender_rect(panel);
+        let gr = PanelLayout::gender_rect(panel);
         let gender = crate::scanner::palbox::classify_gender_pub(&crop(&shot, gr));
         assert_eq!(gender, Some(palcalc_core::Gender::Male), "zone {gr:?}");
 

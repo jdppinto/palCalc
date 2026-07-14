@@ -359,7 +359,13 @@ pub fn scan_box(
         if let Some(l) = &layout {
             // Name: authoritative when confident. Try the cheap staged reads
             // unless discovery already produced it this iteration.
-            let (nb, _) = calib.zone_or("name", l.name_band);
+            let (nb, _) = calib.zone_or(
+                "name",
+                match calib.panel {
+                    Some(panel) => PanelLayout::name_rect(panel),
+                    None => l.name_band,
+                },
+            );
             let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
@@ -387,7 +393,7 @@ pub fn scan_box(
             }
             gender = match calib.panel {
                 Some(panel) => {
-                    let (gr, _) = calib.zone_or("gender", l.gender_rect(panel));
+                    let (gr, _) = calib.zone_or("gender", PanelLayout::gender_rect(panel));
                     let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
                     classify_gender(&gimg)
                 }
@@ -589,7 +595,13 @@ pub fn debug_read_sheet(
     }
 
     let t = std::time::Instant::now();
-    let (nb, n_ovr) = calib.zone_or("name", l.name_band);
+    let (nb, n_ovr) = calib.zone_or(
+        "name",
+        match calib.panel {
+            Some(panel) => PanelLayout::name_rect(panel),
+            None => l.name_band,
+        },
+    );
     out.zones_used.push(("name".into(), nb, n_ovr));
     out.log.push(format!("name zone: {nb:?} (override: {n_ovr})"));
     let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
@@ -608,7 +620,7 @@ pub fn debug_read_sheet(
     }
     out.gender = match calib.panel {
         Some(panel) => {
-            let (gr, g_ovr) = calib.zone_or("gender", l.gender_rect(panel));
+            let (gr, g_ovr) = calib.zone_or("gender", PanelLayout::gender_rect(panel));
             out.zones_used.push(("gender".into(), gr, g_ovr));
             out.log.push(format!("gender zone: {gr:?} (override: {g_ovr})"));
             let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
