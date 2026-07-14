@@ -388,12 +388,13 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         rows: 5,
         slot_size: ((96.0 * sx) as u32).max(40),
         delay_ms: 300,
-        // Panel bounds on the reference layout, scaled with the monitor.
+        // Pal-sheet bounds, field-measured on the 2560x1440 reference
+        // (SoldierBee debug capture: 1641,175,638,1065), scaled with the monitor.
         panel: Some((
-            mx + (1650.0 * sx) as i32,
+            mx + (1641.0 * sx) as i32,
             my + (175.0 * sy) as i32,
-            (630.0 * sx) as u32,
-            (1115.0 * sy) as u32,
+            (638.0 * sx) as u32,
+            (1065.0 * sy) as u32,
         )),
         zones: Default::default(),
     };
