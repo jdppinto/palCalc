@@ -25,11 +25,11 @@
     "monitor: (0, 0, 2560, 1440)",
     "panel rect: Some((1644, 180, 633, 1055))",
     "cached layout (validated): name_band (1736, 183, 570, 77) px 40.76413",
-    "name read: Carbunclo at 0.658 in 792.996617ms",
+    "name read: ThunderDragonMan at 1.000 in 73.230081ms",
     "gender zone: (2188, 183, 82, 77)",
     "gender: Some(Male)",
     "passives region: (1644, 1066, 633, 169)",
-    "passives: [\"ElementResist_Ice_1_PAL\"] + 1 unknown row(s) (row px Some(28.323544)) in 1.823983824s"
+    "passives: [\"CraftSpeed_up2\", \"Nocturnal\"] + 1 unknown row(s) (row px Some(28.323544)) in 5.304997649s"
   ],
   "panel_layout": {
     "name_band": [
