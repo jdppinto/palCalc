@@ -129,9 +129,13 @@ pub fn classify_gender_pub(img: &image::RgbaImage) -> Option<Gender> {
     classify_gender(img)
 }
 
-/// Classify the gender symbol by dominant saturated color.
+/// Classify the gender symbol by dominant saturated color: male is BLUE,
+/// female is PINK (red with a strong blue component). Plain saturated red
+/// does NOT vote — alpha pals show a deep-red horned icon next to the gender
+/// symbol inside the zone (field data: it cancelled a male read to None),
+/// and its blue channel sits at green level, far below pink's.
 fn classify_gender(img: &image::RgbaImage) -> Option<Gender> {
-    let (mut blue, mut warm, mut colored) = (0u32, 0u32, 0u32);
+    let (mut blue, mut pink, mut colored) = (0u32, 0u32, 0u32);
     for p in img.pixels() {
         let (r, g, b) = (p[0] as i32, p[1] as i32, p[2] as i32);
         let max = r.max(g).max(b);
@@ -142,16 +146,16 @@ fn classify_gender(img: &image::RgbaImage) -> Option<Gender> {
         colored += 1;
         if b > r + 25 && b > g + 15 {
             blue += 1;
-        } else if r > b + 25 {
-            warm += 1;
+        } else if r > b + 25 && b > g + 15 {
+            pink += 1;
         }
     }
     if colored < 10 {
         return None;
     }
-    if blue > warm * 2 {
+    if blue > pink * 2 {
         Some(Gender::Male)
-    } else if warm > blue * 2 {
+    } else if pink > blue * 2 {
         Some(Gender::Female)
     } else {
         None
@@ -779,5 +783,23 @@ mod tests {
         assert_eq!(classify_gender(&male), Some(Gender::Male));
         assert_eq!(classify_gender(&female), Some(Gender::Female));
         assert_eq!(classify_gender(&neutral), None);
+    }
+}
+
+#[cfg(test)]
+mod gender_tests {
+    use super::*;
+
+    /// Field capture: alpha pal's red horned icon shares the gender zone with
+    /// the blue male symbol; red must not vote as female.
+    #[test]
+    fn alpha_icon_does_not_confuse_gender() {
+        let img = image::open(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/palbox/gender_zone_alpha_male.png"),
+        )
+        .unwrap()
+        .to_rgba8();
+        assert_eq!(classify_gender(&img), Some(Gender::Male));
     }
 }
