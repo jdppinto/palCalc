@@ -592,3 +592,24 @@ mod real_fixtures {
 }
 
 
+
+#[cfg(test)]
+mod grid_explore {
+    use super::*;
+    use palcalc_core::GameData;
+
+    #[test]
+    fn explore_grid_fixtures() {
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/grid");
+        let gd = GameData::load().unwrap();
+        let t = IconTemplates::load(&pal_icon_map(&gd), None).unwrap();
+        for r in 0..5 {
+            for c in 0..6 {
+                let img = image::open(dir.join(format!("g_{r}_{c}.png"))).unwrap().to_rgba8();
+                let top = t.identify_top(&img, 2);
+                let named: Vec<String> = top.iter().map(|(k, s)| format!("{} {s:.2}", gd.pals[k].name)).collect();
+                eprintln!("g {r},{c}: {}", if named.is_empty() { "EMPTY".into() } else { named.join(" | ") });
+            }
+        }
+    }
+}
