@@ -155,6 +155,77 @@ pub struct ScanProgress {
     pub species: Option<String>,
 }
 
+/// One slot of the pass-1 grid capture.
+pub struct PreSlot {
+    pub row: u32,
+    pub col: u32,
+    pub cx: i32,
+    pub cy: i32,
+    pub crop: image::RgbaImage,
+    pub occupied: bool,
+}
+
+/// Pass 1 in isolation: park the cursor, capture the grid once (unhovered),
+/// classify every slot empty/occupied.
+pub fn classify_grid(
+    backend: &mut dyn Backend,
+    calib: &GridCalibration,
+    debug_dir: Option<&std::path::Path>,
+    report: &mut String,
+    templates: Option<&IconTemplates>,
+) -> Result<Vec<PreSlot>, String> {
+    let slot = calib.slot_size;
+    let half = (slot / 2) as i32;
+    let (tlx, tly) = calib.slot_center(0, 0);
+    let (brx, bry) = calib.slot_center(calib.rows - 1, calib.cols - 1);
+    let gx = tlx.min(brx) - half;
+    let gy = tly.min(bry) - half;
+    let gw = (tlx.max(brx) + half - gx).max(1) as u32;
+    let gh = (tly.max(bry) + half - gy).max(1) as u32;
+    report.push_str(&format!("grid rect: ({gx}, {gy}) {gw}x{gh}\n"));
+
+    // Park away from the grid so no slot is hover-highlighted.
+    backend.move_cursor(gx - slot as i32, gy - slot as i32)?;
+    std::thread::sleep(Duration::from_millis(calib.delay_ms.max(250)));
+    let grid_img = backend.capture_region(gx, gy, gw, gh)?;
+    if let Some(dir) = debug_dir {
+        let _ = grid_img.save(dir.join("grid.png"));
+    }
+
+    let mut pre: Vec<PreSlot> = Vec::new();
+    for row in 0..calib.rows {
+        for col in 0..calib.cols {
+            let (cx, cy) = calib.slot_center(row, col);
+            let crop = image::imageops::crop_imm(
+                &grid_img,
+                (cx - half - gx).max(0) as u32,
+                (cy - half - gy).max(0) as u32,
+                slot,
+                slot,
+            )
+            .to_image();
+            let occupied = super::matcher::slot_occupied(&crop);
+            report.push_str(&format!("slot {row},{col}: occupied={occupied}"));
+            if let Some(t) = templates {
+                if let Some(dir) = debug_dir {
+                    let _ = crop.save(dir.join(format!("slot_{row}_{col}.png")));
+                    report.push_str(&format!(" icon-candidates {:?}", t.identify_top(&crop, 3)));
+                }
+            }
+            report.push('\n');
+            pre.push(PreSlot {
+                row,
+                col,
+                cx,
+                cy,
+                crop,
+                occupied,
+            });
+        }
+    }
+    Ok(pre)
+}
+
 /// Two-pass scan of the currently open box. Never clicks.
 ///
 /// Pass 1: park the cursor off-grid and identify every slot's species from a
@@ -187,59 +258,7 @@ pub fn scan_box(
     }
 
     // ---- Pass 1: unhovered grid capture ----
-    let (tlx, tly) = calib.slot_center(0, 0);
-    let (brx, bry) = calib.slot_center(calib.rows - 1, calib.cols - 1);
-    let gx = tlx.min(brx) - half;
-    let gy = tly.min(bry) - half;
-    let gw = (tlx.max(brx) + half - gx).max(1) as u32;
-    let gh = (tly.max(bry) + half - gy).max(1) as u32;
-
-    // Park away from the grid so no slot is hover-highlighted.
-    backend.move_cursor(gx - slot as i32, gy - slot as i32)?;
-    std::thread::sleep(Duration::from_millis(calib.delay_ms.max(250)));
-    let grid_img = backend.capture_region(gx, gy, gw, gh)?;
-    if let Some(dir) = debug_dir {
-        let _ = grid_img.save(dir.join("grid.png"));
-    }
-
-    struct Pre {
-        row: u32,
-        col: u32,
-        cx: i32,
-        cy: i32,
-        crop: image::RgbaImage,
-        occupied: bool,
-    }
-    let mut pre: Vec<Pre> = Vec::new();
-    for row in 0..calib.rows {
-        for col in 0..calib.cols {
-            let (cx, cy) = calib.slot_center(row, col);
-            let crop = image::imageops::crop_imm(
-                &grid_img,
-                (cx - half - gx).max(0) as u32,
-                (cy - half - gy).max(0) as u32,
-                slot,
-                slot,
-            )
-            .to_image();
-            let occupied = super::matcher::slot_occupied(&crop);
-            if let Some(dir) = debug_dir {
-                let _ = crop.save(dir.join(format!("slot_{row}_{col}.png")));
-                report.push_str(&format!(
-                    "slot {row},{col}: occupied={occupied} icon-candidates {:?}\n",
-                    templates.identify_top(&crop, 3)
-                ));
-            }
-            pre.push(Pre {
-                row,
-                col,
-                cx,
-                cy,
-                crop,
-                occupied,
-            });
-        }
-    }
+    let pre = classify_grid(backend, calib, debug_dir, &mut report, Some(templates))?;
 
     // ---- Pass 2: hover occupied slots, read the panel ----
     let monitor = backend.focused_monitor_rect()?;
@@ -395,6 +414,112 @@ pub fn scan_box(
     }
     results.sort_by_key(|r| (r.row, r.col));
     Ok(results)
+}
+
+/// Everything one isolated sheet read produces, with a step-by-step log —
+/// backs the UI debug button (user hovers a pal, presses, waits 2s).
+#[derive(Debug, Clone, Serialize)]
+pub struct SheetDebug {
+    pub log: Vec<String>,
+    pub name_band_png: Option<String>,
+    pub passives_png: Option<String>,
+    pub species: Option<String>,
+    pub name_score: f32,
+    pub passives: Vec<String>,
+    pub gender: Option<Gender>,
+}
+
+/// Read the currently displayed pal sheet in isolation.
+pub fn debug_read_sheet(
+    backend: &mut dyn Backend,
+    synth: &TextSynth,
+    species_names: &[(String, String)],
+    passive_names: &[(String, String)],
+    calib: &GridCalibration,
+) -> Result<SheetDebug, String> {
+    let mut out = SheetDebug {
+        log: Vec::new(),
+        name_band_png: None,
+        passives_png: None,
+        species: None,
+        name_score: 0.0,
+        passives: Vec::new(),
+        gender: None,
+    };
+    let monitor = backend.focused_monitor_rect()?;
+    out.log.push(format!("monitor: {monitor:?}"));
+    out.log.push(format!("panel rect: {:?}", calib.panel));
+
+    let mut layout = PanelLayout::load_cache();
+    out.log.push(format!(
+        "cached layout: {}",
+        layout
+            .as_ref()
+            .map(|l| format!("name_band {:?} px {}", l.name_band, l.px_name))
+            .unwrap_or_else(|| "none".into())
+    ));
+
+    if layout.is_none() {
+        let t = std::time::Instant::now();
+        let drect = match calib.panel {
+            Some(pr) => PanelLayout::name_search_rect(pr),
+            None => PanelLayout::discovery_rect(monitor),
+        };
+        out.log.push(format!("discovery region: {drect:?}"));
+        let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
+        match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names) {
+            Some((l, key, score)) => {
+                out.log.push(format!(
+                    "discovery: {key} at {score:.3} px {} in {:?} -> band {:?}",
+                    l.px_name,
+                    t.elapsed(),
+                    l.name_band
+                ));
+                layout = Some(l);
+            }
+            None => out
+                .log
+                .push(format!("discovery FAILED in {:?}", t.elapsed())),
+        }
+    }
+
+    let Some(l) = layout else {
+        out.log.push("no layout — cannot read sheet".into());
+        return Ok(out);
+    };
+
+    let t = std::time::Instant::now();
+    let band = backend.capture_region(l.name_band.0, l.name_band.1, l.name_band.2, l.name_band.3)?;
+    out.name_band_png = Some(png_base64(&band)?);
+    match l.read_name(synth, &band, species_names) {
+        Some((key, score)) => {
+            out.log
+                .push(format!("name read: {key} at {score:.3} in {:?}", t.elapsed()));
+            out.species = Some(key);
+            out.name_score = score;
+        }
+        None => out
+            .log
+            .push(format!("name read: NO confident match in {:?}", t.elapsed())),
+    }
+    out.gender = classify_gender(&band);
+    out.log.push(format!("gender: {:?}", out.gender));
+
+    let pr = match calib.panel {
+        Some(panel) => PanelLayout::passives_search_rect(panel),
+        None => l.passives_rect(),
+    };
+    out.log.push(format!("passives region: {pr:?}"));
+    let t = std::time::Instant::now();
+    let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
+    out.passives_png = Some(png_base64(&pimg)?);
+    let (keys, px) = l.read_passives(synth, &pimg, passive_names, None);
+    out.log.push(format!(
+        "passives: {keys:?} (row px {px:?}) in {:?}",
+        t.elapsed()
+    ));
+    out.passives = keys;
+    Ok(out)
 }
 
 /// Cheap FNV-style pixel hash for per-scan capture memoization.

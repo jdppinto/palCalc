@@ -58,6 +58,44 @@
   let fixing = $state<number | null>(null);
   let fixQuery = $state("");
 
+  // Debug tools
+  interface DebugSlot { row: number; col: number; occupied: boolean; crop_png: string }
+  interface SheetDebug {
+    log: string[];
+    name_band_png: string | null;
+    passives_png: string | null;
+    species: string | null;
+    name_score: number;
+    passives: string[];
+    gender: Gender | null;
+  }
+  let debugLog = $state<string[]>([]);
+  let debugSlots = $state<DebugSlot[] | null>(null);
+  let debugSheet = $state<SheetDebug | null>(null);
+  let debugRunning = $state(false);
+
+  async function runDebug(kind: "grid" | "sheet") {
+    debugRunning = true;
+    debugLog = [`waiting 2s — switch to the game${kind === "sheet" ? " and hover a pal" : ""}…`];
+    debugSlots = null;
+    debugSheet = null;
+    try {
+      if (kind === "grid") {
+        const r = await invoke<{ log: string[]; slots: DebugSlot[] }>("debug_grid_capture");
+        debugLog = r.log;
+        debugSlots = r.slots;
+      } else {
+        const r = await invoke<SheetDebug>("debug_sheet_read");
+        debugLog = r.log;
+        debugSheet = r;
+      }
+    } catch (e) {
+      debugLog = [...debugLog, `ERROR: ${e}`];
+    } finally {
+      debugRunning = false;
+    }
+  }
+
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   onMount(async () => {
@@ -269,6 +307,48 @@
   {#if error}
     <p class="banner error">{error}</p>
   {/if}
+
+  <details>
+    <summary>Debug tools</summary>
+    <div class="row">
+      <button onclick={() => runDebug("grid")} disabled={debugRunning}>
+        Test empty detection (2s)
+      </button>
+      <button onclick={() => runDebug("sheet")} disabled={debugRunning}>
+        Test sheet read (2s) — hover a pal first
+      </button>
+    </div>
+    {#if debugLog.length > 0}
+      <pre class="debug-log">{debugLog.join("\n")}</pre>
+    {/if}
+    {#if debugSlots}
+      <div class="debug-grid" style={`grid-template-columns: repeat(${calib.cols}, 48px)`}>
+        {#each debugSlots as d (d.row * 100 + d.col)}
+          <div class="debug-slot" class:occupied={d.occupied} title={`(${d.row},${d.col}) ${d.occupied ? "occupied" : "empty"}`}>
+            <img src={"data:image/png;base64," + d.crop_png} alt="" />
+          </div>
+        {/each}
+      </div>
+    {/if}
+    {#if debugSheet}
+      <div class="debug-sheet">
+        <p>
+          species: <strong>{debugSheet.species ? (pal(debugSheet.species)?.name ?? debugSheet.species) : "—"}</strong>
+          ({debugSheet.name_score.toFixed(3)})
+          {genderSymbol(debugSheet.gender)}
+          · passives: {debugSheet.passives.map(passiveName).join(", ") || "none"}
+        </p>
+        {#if debugSheet.name_band_png}
+          <p class="dim-text">name band capture:</p>
+          <img class="debug-img" src={"data:image/png;base64," + debugSheet.name_band_png} alt="name band" />
+        {/if}
+        {#if debugSheet.passives_png}
+          <p class="dim-text">passives region capture:</p>
+          <img class="debug-img" src={"data:image/png;base64," + debugSheet.passives_png} alt="passives region" />
+        {/if}
+      </div>
+    {/if}
+  </details>
 
   {#if results}
     <p class="dim-text">
@@ -504,6 +584,46 @@
   .pick {
     padding: 0.25rem 0.6rem;
     font-size: 0.85rem;
+  }
+
+  .debug-log {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.78rem;
+    max-height: 260px;
+    overflow: auto;
+    white-space: pre-wrap;
+  }
+
+  .debug-grid {
+    display: grid;
+    gap: 3px;
+    margin-top: 0.5rem;
+  }
+
+  .debug-slot {
+    border: 2px solid #f87171;
+    border-radius: 6px;
+    opacity: 0.55;
+  }
+
+  .debug-slot.occupied {
+    border-color: #4ade80;
+    opacity: 1;
+  }
+
+  .debug-slot img {
+    width: 100%;
+    display: block;
+  }
+
+  .debug-img {
+    max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #000;
   }
 
   .add-all {

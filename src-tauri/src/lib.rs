@@ -247,6 +247,98 @@ async fn scan_current_box(
     .map_err(|e| format!("scan task panicked: {e}"))?
 }
 
+#[derive(Serialize)]
+struct DebugGridResult {
+    log: Vec<String>,
+    slots: Vec<DebugSlot>,
+}
+
+#[derive(Serialize)]
+struct DebugSlot {
+    row: u32,
+    col: u32,
+    occupied: bool,
+    crop_png: String,
+}
+
+/// Isolated test of pass 1: waits 2s (switch to the game!), captures the
+/// grid, classifies empty/occupied per slot.
+#[tauri::command]
+async fn debug_grid_capture(data: State<'_, GameData>) -> Result<DebugGridResult, String> {
+    let calib = GridCalibration::load().ok_or("not calibrated yet")?;
+    let pal_icons = scanner::matcher::pal_icon_map(&data);
+    tauri::async_runtime::spawn_blocking(move || {
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        let mut backend = platform::detect()?;
+        let templates =
+            IconTemplates::load(&pal_icons, Some(&scanner::matcher::user_templates_dir()))?;
+        let debug_dir = GridCalibration::config_path()
+            .parent()
+            .map(|p| p.join("debug"));
+        if let Some(d) = &debug_dir {
+            let _ = std::fs::create_dir_all(d);
+        }
+        let mut report = String::new();
+        let pre = scanner::palbox::classify_grid(
+            backend.as_mut(),
+            &calib,
+            debug_dir.as_deref(),
+            &mut report,
+            Some(&templates),
+        )?;
+        Ok(DebugGridResult {
+            log: report.lines().map(String::from).collect(),
+            slots: pre
+                .into_iter()
+                .map(|p| {
+                    Ok(DebugSlot {
+                        row: p.row,
+                        col: p.col,
+                        occupied: p.occupied,
+                        crop_png: png_base64(&p.crop)?,
+                    })
+                })
+                .collect::<Result<Vec<_>, String>>()?,
+        })
+    })
+    .await
+    .map_err(|e| format!("debug task panicked: {e}"))?
+}
+
+/// Isolated test of the sheet read: waits 2s (hover a pal in-game!), then
+/// reads name, passives and gender from the current screen.
+#[tauri::command]
+async fn debug_sheet_read(
+    data: State<'_, GameData>,
+) -> Result<scanner::palbox::SheetDebug, String> {
+    let calib = GridCalibration::load().ok_or("not calibrated yet")?;
+    let species_names: Vec<(String, String)> = data
+        .pals
+        .iter()
+        .filter(|(k, _)| data.icons.contains_key(*k))
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    let passive_names: Vec<(String, String)> = data
+        .passives
+        .iter()
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    tauri::async_runtime::spawn_blocking(move || {
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        let mut backend = platform::detect()?;
+        let synth = TextSynth::new()?;
+        scanner::palbox::debug_read_sheet(
+            backend.as_mut(),
+            &synth,
+            &species_names,
+            &passive_names,
+            &calib,
+        )
+    })
+    .await
+    .map_err(|e| format!("debug task panicked: {e}"))?
+}
+
 /// One-click calibration: grid geometry measured on the 2560x1440 reference
 /// screenshot, scaled to the focused monitor. Panel reading needs no setup at
 /// all (auto-discovered), so this is the entire calibration for 16:9 layouts.
@@ -293,7 +385,9 @@ pub fn run() {
             scan_current_box,
             capture_screen,
             save_pal_template,
-            apply_default_calibration
+            apply_default_calibration,
+            debug_grid_capture,
+            debug_sheet_read
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
