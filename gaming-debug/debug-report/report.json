@@ -1,43 +1,43 @@
 {
   "calibration": {
     "cols": 6,
-    "delay_ms": 100,
+    "delay_ms": 300,
     "panel": [
-      1644,
-      180,
-      633,
-      1055
+      1650,
+      175,
+      630,
+      1115
     ],
     "rows": 5,
     "slot_br": [
-      1467,
-      749
+      1469,
+      741
     ],
-    "slot_size": 82,
+    "slot_size": 96,
     "slot_tl": [
-      933,
-      319
+      934,
+      314
     ],
     "zones": {}
   },
   "kind": "sheet",
   "log": [
     "monitor: (0, 0, 2560, 1440)",
-    "panel rect: Some((1644, 180, 633, 1055))",
-    "cached layout (validated): name_band (1736, 183, 570, 77) px 40.76413",
-    "name read: Kitsunebi_Ice at 1.000 in 61.391132ms",
-    "gender zone: (2188, 183, 82, 77)",
+    "panel rect: Some((1650, 175, 630, 1115))",
+    "cached layout (validated): name_band (1650, 188, 654, 59) px 40.7",
+    "name read: Kitsunebi_Ice at 1.000 in 78.062559ms",
+    "gender zone: (2191, 188, 81, 59)",
     "gender: Some(Male)",
-    "passives region: (1644, 1066, 633, 169)",
-    "passives: [\"PAL_ALLAttack_down1\", \"Noukin\", \"Noukin\"] + 0 unknown row(s) (row px None) in 132.753933ms"
+    "passives region: (1650, 1111, 630, 179)",
+    "passives: [\"MoveSpeed_up_1\", \"Noukin\"] + 0 unknown row(s) (row px None) in 182.24624ms"
   ],
   "panel_layout": {
     "name_band": [
-      1736,
-      183,
-      570,
-      77
+      1650,
+      188,
+      654,
+      59
     ],
-    "px_name": 40.764129638671875
+    "px_name": 40.70000076293945
   }
 }
