@@ -76,7 +76,7 @@
   let error = $state<string | null>(null);
 
   // Species correction: teaches the matcher this game's own rendering
-  let fixing = $state<number | null>(null);
+  let fixing = $state<string | null>(null); // "boxIndex,row,col"
   let fixQuery = $state("");
 
   // Unknown passive-row labeling (label once, exact matches forever)
@@ -452,16 +452,24 @@
       .slice(0, 8),
   );
 
-  async function fixSpecies(index: number, speciesKey: string) {
-    const r = results?.[index];
+  // Find a result by composite key.
+  function findSlot(key: string): SlotResult | undefined {
+    const [bi, row, col] = key.split(",").map(Number);
+    return results?.find((r) => r.box_index === bi && r.row === row && r.col === col);
+  }
+
+  async function fixSpecies(key: string, speciesKey: string) {
+    const r = findSlot(key);
     if (!r) return;
     try {
       await invoke("save_pal_template", {
         pngBase64Data: r.crop_png,
         species: speciesKey,
       });
-      results = results!.map((s, i) =>
-        i === index ? { ...s, species: speciesKey, score: 1.0 } : s,
+      results = results!.map((s) =>
+        s.box_index === r.box_index && s.row === r.row && s.col === r.col
+          ? { ...s, species: speciesKey, score: 1.0 }
+          : s,
       );
       fixing = null;
       fixQuery = "";
@@ -811,44 +819,55 @@
       Wrong or unknown species? Click ✎ and pick the right pal — the app
       learns your game's rendering and matches it exactly from then on.
     </p>
-    <div class="results">
-      {#each results as r, i (r.row * 100 + r.col)}
-        <div class="slot" class:empty={!r.species && !r.unidentified}>
-          {#if fixing === i}
-            <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="slot" />
-            <div class="fix-box">
-              <input placeholder="Correct pal…" bind:value={fixQuery} />
-              <div class="fix-options">
-                {#each fixMatches as m (m.key)}
-                  <button class="pick" onclick={() => fixSpecies(i, m.key)}>{m.name}</button>
-                {/each}
+    {#each [...new Set(results.map(r => r.box_index))].sort() as bi}
+      {@const box = results.filter(r => r.box_index === bi)}
+      {#if results.some(r => r.box_index !== 0)}<p class="dim-text">Box {bi + 1}</p>{/if}
+      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, 1fr)`}>
+        {#each box as r (r.box_index + "," + r.row + "," + r.col)}
+          {@const slotKey = r.box_index + "," + r.row + "," + r.col}
+          <div
+            class="slot"
+            class:empty={!r.species && !r.unidentified}
+            style={`grid-row: ${r.row + 1}; grid-column: ${r.col + 1}`}
+          >
+            {#if fixing === slotKey}
+              <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="slot" />
+              <div class="fix-box">
+                <input placeholder="Correct pal…" bind:value={fixQuery} />
+                <div class="fix-options">
+                  {#each fixMatches as m (m.key)}
+                    <button class="pick" onclick={() => fixSpecies(slotKey, m.key)}>{m.name}</button>
+                  {/each}
+                </div>
               </div>
-            </div>
-            <button class="fix" onclick={() => (fixing = null)}>✕</button>
-          {:else}
-            {#if r.species}
-              {@const p = pal(r.species)}
-              {#if p?.icon}<img src={"/icons/" + p.icon} alt="" />{/if}
-              <div class="slot-info">
-                <span>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
-                <span class="passives">
-                  {r.passives.map(passiveName).join(", ") || "no passives read"}
-                </span>
-              </div>
-              <span class="score">{r.score.toFixed(2)}</span>
-            {:else if r.unidentified}
-              <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="unknown pal" />
-              <span class="dim">unknown pal — ✎ to teach</span>
+              <button class="fix" onclick={() => (fixing = null)}>✕</button>
             {:else}
-              <span class="dim">empty</span>
+              {#if r.species}
+                {@const p = pal(r.species)}
+                {#if p?.icon}<img src={"/icons/" + p.icon} alt="" />{/if}
+                <div class="slot-info">
+                  <span>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
+                  <span class="passives">
+                    {r.passives.map(passiveName).join(", ") || "no passives read"}
+                  </span>
+                </div>
+                <span class="score">{r.score.toFixed(2)}</span>
+              {:else if r.unidentified}
+                <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="unknown pal" />
+                <span class="dim">unknown pal — ✎ to teach</span>
+              {:else}
+                <span class="dim">empty</span>
+              {/if}
+              {#if !r.species}
+                <button class="fix" title="Correct species" onclick={() => { fixing = slotKey; fixQuery = ""; }}>
+                  ✎
+                </button>
+              {/if}
             {/if}
-            <button class="fix" title="Correct species" onclick={() => { fixing = i; fixQuery = ""; }}>
-              ✎
-            </button>
-          {/if}
-        </div>
-      {/each}
-    </div>
+          </div>
+        {/each}
+      </div>
+    {/each}
     {#if found.length > 0}
       <button class="add-all" onclick={addAll}>
         Add {found.length} pal{found.length === 1 ? "" : "s"} to Owned Pals
@@ -959,8 +978,7 @@
 
   .results {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .slot {
