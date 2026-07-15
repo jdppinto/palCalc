@@ -409,13 +409,21 @@
     }
   }
 
+  let scanReportPath = $state<string | null>(null);
+
   async function scan() {
     scanning = true;
     error = null;
     results = null;
+    scanReportPath = null;
     progress = null;
     try {
-      results = await invoke<SlotResult[]>("scan_current_box", {});
+      const r = await invoke<{ slots: SlotResult[]; report_path: string }>(
+        "scan_current_box",
+        {},
+      );
+      results = r.slots;
+      scanReportPath = r.report_path;
     } catch (e) {
       error = String(e);
     } finally {
@@ -639,6 +647,16 @@
       Owned Pals.
     </span>
   </div>
+
+  {#if scanReportPath}
+    <p class="dim-text">
+      Scan debug bundle written to <code>{scanReportPath}</code> — pass it on
+      with:<br />
+      <code>cp -r {scanReportPath} ~/Projects/palCalc/gaming-debug && cd
+      ~/Projects/palCalc && git add gaming-debug && git commit -m debug &&
+      git push</code>
+    </p>
+  {/if}
 
   {#if error}
     <p class="banner error">{error}</p>

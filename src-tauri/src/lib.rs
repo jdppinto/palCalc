@@ -245,12 +245,18 @@ fn save_pal_template(
 
 /// Scan the currently open palbox page. Emits `scan-progress` events and
 /// returns the slot results. Runs on a blocking thread so the UI stays live.
+#[derive(Serialize)]
+struct ScanResult {
+    slots: Vec<scanner::palbox::SlotResult>,
+    report_path: String,
+}
+
 #[tauri::command]
 async fn scan_current_box(
     app: tauri::AppHandle,
     data: State<'_, GameData>,
     #[allow(unused_variables)] threshold: Option<f32>,
-) -> Result<Vec<scanner::palbox::SlotResult>, String> {
+) -> Result<ScanResult, String> {
     let calib = GridCalibration::load().ok_or("not calibrated yet")?;
     let pal_icons = scanner::matcher::pal_icon_map(&data);
     let species_names: Vec<(String, String)> = data
@@ -273,21 +279,23 @@ async fn scan_current_box(
             Some(&scanner::matcher::user_templates_dir()),
         )?;
         let synth = TextSynth::new()?;
-        let debug_dir = GridCalibration::config_path()
-            .parent()
-            .map(|p| p.join("debug"));
-        scan_box(
+        // Dump captures into the shareable debug-report bundle, same as the
+        // other debug actions, so a full scan can be handed over for tuning.
+        let report_dir = scanner::palbox::reset_report_dir()?;
+        let (slots, log) = scan_box(
             backend.as_mut(),
             &templates,
             &synth,
             &species_names,
             &passive_names,
             &calib,
-            debug_dir.as_deref(),
+            Some(&report_dir),
             |p| {
                 let _ = app.emit("scan-progress", &p);
             },
-        )
+        )?;
+        let report_path = scanner::palbox::write_report_meta("scan", &log)?;
+        Ok(ScanResult { slots, report_path })
     })
     .await
     .map_err(|e| format!("scan task panicked: {e}"))?

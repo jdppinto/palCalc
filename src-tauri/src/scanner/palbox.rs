@@ -326,6 +326,8 @@ pub fn classify_grid(
 ///
 /// When `debug_dir` is set, captures and match candidates are dumped there
 /// (wiped per scan) so misdetections can be tuned against real data offline.
+/// Returns the per-slot results plus the debug log lines (for the shareable
+/// report bundle).
 #[allow(clippy::too_many_arguments)]
 pub fn scan_box(
     backend: &mut dyn Backend,
@@ -336,7 +338,7 @@ pub fn scan_box(
     calib: &GridCalibration,
     debug_dir: Option<&std::path::Path>,
     mut on_progress: impl FnMut(ScanProgress),
-) -> Result<Vec<SlotResult>, String> {
+) -> Result<(Vec<SlotResult>, Vec<String>), String> {
     if SCAN_ABORT.load(Ordering::Relaxed) {
         return Err("scan aborted".into());
     }
@@ -503,6 +505,20 @@ pub fn scan_box(
             total,
             species: species.clone(),
         });
+        report.push_str(&format!(
+            "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
+            p.row,
+            p.col,
+            species.as_deref().unwrap_or("<none>"),
+            score,
+            gender,
+            passives,
+            if passive_unknowns.is_empty() {
+                String::new()
+            } else {
+                format!(" +{} unknown row(s)", passive_unknowns.len())
+            },
+        ));
         results.push(SlotResult {
             row: p.row,
             col: p.col,
@@ -515,11 +531,12 @@ pub fn scan_box(
             crop_png: png_base64(&p.crop)?,
         });
     }
+    let log: Vec<String> = report.lines().map(String::from).collect();
     if let Some(dir) = debug_dir {
-        let _ = std::fs::write(dir.join("report.txt"), report);
+        let _ = std::fs::write(dir.join("report.txt"), &report);
     }
     results.sort_by_key(|r| (r.row, r.col));
-    Ok(results)
+    Ok((results, log))
 }
 
 /// The shareable debug bundle directory: every debug run wipes and refills
@@ -831,7 +848,7 @@ mod tests {
         // No panel exists in the mock: empty candidate lists keep the
         // (futile) discovery attempts cheap.
         let mut progress_events = 0;
-        let results = scan_box(
+        let (results, _log) = scan_box(
             &mut backend,
             &templates,
             &synth,
