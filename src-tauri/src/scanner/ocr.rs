@@ -87,17 +87,71 @@ pub fn read_lines_boxed(img: &RgbaImage) -> Result<Vec<(String, (i32, i32, u32, 
 /// Inventory-Kamera-style dictionary correction: the vocabulary entry most
 /// similar to `line` (normalized Levenshtein over lowercased alphanumerics),
 /// if it clears `min_sim`. Returns (key, similarity).
+/// Like `best_vocab_match` but tokenizes a merged OCR line and only returns
+/// matches for tokens whose estimated bounding box falls within `(cx, cw)`.
+/// This handles lines that span two passive columns (e.g. "Insomia Swift")
+/// so each column gets only its own token's match.
+pub fn best_vocab_match_in_cell<'a>(
+    line: &str,
+    line_rect: (i32, i32, u32, u32),
+    cx: u32,
+    cw: u32,
+    vocab: &'a [(String, String)],
+    min_sim: f64,
+) -> Option<(&'a str, f64)> {
+    if line_rect.2 < 1 {
+        return best_vocab_match(line, vocab, min_sim);
+    }
+    let tokens: Vec<&str> = line.split_whitespace().collect();
+    if tokens.is_empty() {
+        return best_vocab_match(line, vocab, min_sim);
+    }
+    let total_chars: usize = tokens.iter().map(|t| t.len()).sum();
+    let line_left = line_rect.0 as f32;
+    let line_w = line_rect.2 as f32;
+    let cell_l = cx as f32;
+    let cell_r = (cx + cw) as f32;
+    let mut char_offset: f32 = 0.0;
+    let mut best: Option<(&str, f64, usize)> = None;
+    for token in &tokens {
+        let tlen = token.len() as f32;
+        let token_l = line_left + char_offset / total_chars as f32 * line_w;
+        let token_r = line_left + (char_offset + tlen) / total_chars as f32 * line_w;
+        let token_cx = (token_l + token_r) / 2.0;
+        char_offset += tlen;
+        if token_cx < cell_l || token_cx >= cell_r {
+            continue;
+        }
+        let n = norm(token);
+        if n.len() < 3 {
+            continue;
+        }
+        for (key, name) in vocab {
+            let v = norm(name);
+            let sim = strsim::normalized_levenshtein(&n, &v);
+            if sim >= min_sim
+                && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
+            {
+                best = Some((key.as_str(), sim, v.len()));
+            }
+        }
+    }
+    best.map(|(k, s, _)| (k, s))
+}
+
+fn norm(s: &str) -> String {
+    s.to_lowercase()
+        .chars()
+        .filter(|c| c.is_alphanumeric())
+        .collect()
+}
+
+/// OCR → best-match pipeline (original, used by cell crops).
 pub fn best_vocab_match<'a>(
     line: &str,
     vocab: &'a [(String, String)],
     min_sim: f64,
 ) -> Option<(&'a str, f64)> {
-    fn norm(s: &str) -> String {
-        s.to_lowercase()
-            .chars()
-            .filter(|c| c.is_alphanumeric())
-            .collect()
-    }
     // OCR often merges neighbouring UI text into one line ("LEVEL Lamball"),
     // so match every contiguous token window as well as the whole line.
     let tokens: Vec<&str> = line.split_whitespace().collect();

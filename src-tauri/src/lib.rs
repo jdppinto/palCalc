@@ -7,6 +7,7 @@ use tauri::{Emitter, State};
 
 use scanner::matcher::IconTemplates;
 use scanner::palbox::{scan_box, scan_boxes, GridCalibration, SCAN_ABORT};
+use std::os::windows::ffi::OsStrExt;
 use scanner::platform::{self, WindowInfo};
 use scanner::synth::TextSynth;
 use scanner::textlib::{png_base64, png_from_base64, TextLib, EMPTY_LABEL};
@@ -495,7 +496,25 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
     Ok(calib)
 }
 
+fn extract_webview2_loader() {
+    let dll = include_bytes!("WebView2Loader.dll");
+    let dir = std::env::temp_dir().join("palcalc");
+    let _ = std::fs::create_dir_all(&dir);
+    let path = dir.join("WebView2Loader.dll");
+    if !path.exists() {
+        let _ = std::fs::write(&path, dll);
+    }
+    unsafe extern "system" {
+        fn LoadLibraryW(name: *const u16) -> isize;
+    }
+    unsafe {
+        let wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+        LoadLibraryW(wide.as_ptr());
+    }
+}
+
 pub fn run() {
+    extract_webview2_loader();
     let data = GameData::load().expect("failed to parse embedded game data");
     tauri::Builder::default()
         .manage(data)
