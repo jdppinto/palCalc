@@ -139,12 +139,25 @@ fn save_calibration(calib: GridCalibration) -> Result<(), String> {
 
 /// Set or clear a user-drawn zone override ("name" / "gender" / "passives"),
 /// absolute screen coords. Pass rect: null to revert to the computed zone.
+/// Save (or clear) a reading-zone override. The UI sends an ABSOLUTE screen
+/// rect; we store it as a FRACTION of the panel so it tracks the sheet.
 #[tauri::command]
 fn save_zone(key: String, rect: Option<(i32, i32, u32, u32)>) -> Result<(), String> {
     let mut calib = GridCalibration::load().ok_or("no calibration saved yet")?;
     match rect {
-        Some(r) => {
-            calib.zones.insert(key, r);
+        Some((rx, ry, rw, rh)) => {
+            let (px, py, pw, ph) = calib
+                .panel
+                .ok_or("set the pal-sheet (panel) bounds before saving a zone")?;
+            calib.zones.insert(
+                key,
+                (
+                    (rx - px) as f32 / pw as f32,
+                    (ry - py) as f32 / ph as f32,
+                    rw as f32 / pw as f32,
+                    rh as f32 / ph as f32,
+                ),
+            );
         }
         None => {
             calib.zones.remove(&key);
@@ -390,16 +403,25 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         (1065.0 * sy) as u32,
     );
     // Materialize the computed reading zones from the panel so the button
-    // resets them to visible, clearable overrides. These use the exact same
-    // rect functions the scanner falls back to, so the button and the
-    // scan-time default can't drift apart.
+    // resets them to visible, clearable overrides. Stored as panel fractions
+    // (same units the scanner defaults use), so they can't drift from the
+    // scan-time fallback and they track the sheet if it's later moved.
     use scanner::panel::PanelLayout;
+    let (px, py, pw, ph) = panel;
+    let as_frac = |(rx, ry, rw, rh): (i32, i32, u32, u32)| {
+        (
+            (rx - px) as f32 / pw as f32,
+            (ry - py) as f32 / ph as f32,
+            rw as f32 / pw as f32,
+            rh as f32 / ph as f32,
+        )
+    };
     let mut zones = std::collections::HashMap::new();
-    zones.insert("name".to_string(), PanelLayout::name_rect(panel));
-    zones.insert("gender".to_string(), PanelLayout::gender_rect(panel));
+    zones.insert("name".to_string(), as_frac(PanelLayout::name_rect(panel)));
+    zones.insert("gender".to_string(), as_frac(PanelLayout::gender_rect(panel)));
     zones.insert(
         "passives".to_string(),
-        PanelLayout::passives_search_rect(panel),
+        as_frac(PanelLayout::passives_search_rect(panel)),
     );
     let calib = GridCalibration {
         slot_tl: (mx + (934.0 * sx) as i32, my + (314.0 * sy) as i32),

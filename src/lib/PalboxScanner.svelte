@@ -15,6 +15,8 @@
     slot_size: number;
     delay_ms: number;
     panel: Rect | null;
+    // Zone overrides stored as FRACTIONS of the panel (fx,fy,fw,fh), so they
+    // track the sheet. Resolve to absolute screen px via zoneAbs().
     zones: Record<string, Rect>;
   }
 
@@ -195,6 +197,21 @@
       Math.round(py + ry * ph),
       Math.round(rw * pw),
       Math.round(rh * ph),
+    ];
+  }
+
+  // Stored zone overrides are FRACTIONS of the panel; resolve to an absolute
+  // screen rect for overlays. Null if no override or no panel.
+  function zoneAbs(key: string): Rect | null {
+    const z = calib.zones[key];
+    if (!z || !calib.panel) return null;
+    const [px, py, pw, ph] = calib.panel;
+    const [fx, fy, fw, fh] = z;
+    return [
+      Math.round(px + fx * pw),
+      Math.round(py + fy * ph),
+      Math.round(fw * pw),
+      Math.round(fh * ph),
     ];
   }
 
@@ -585,10 +602,10 @@
                 <span style={`background:${ZONE_COLORS[key]}`}>{key}</span>
               </div>
             {/if}
-            {#if calib.zones[key]}
+            {#if zoneAbs(key)}
               <div
                 class="zone-box"
-                style={`${rectPct(calib.zones[key], [frame.x, frame.y, frame.w, frame.h])}border-color:${ZONE_COLORS[key]};`}
+                style={`${rectPct(zoneAbs(key)!, [frame.x, frame.y, frame.w, frame.h])}border-color:${ZONE_COLORS[key]};`}
                 title={`${key} (override)`}
               >
                 <span style={`background:${ZONE_COLORS[key]}`}>{key} ✎</span>

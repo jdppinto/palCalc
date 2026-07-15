@@ -33,12 +33,12 @@ pub struct GridCalibration {
     /// reads are constrained inside it — nothing else on screen is processed.
     #[serde(default)]
     pub panel: Option<(i32, i32, u32, u32)>,
-    /// User-delineated hover-panel field zones, absolute screen rects
-    /// (x, y, w, h). Known keys: "gender", "passive1".."passive4", "name".
-    /// The panel appears at a fixed position, so one calibration serves
-    /// every slot.
+    /// User-drawn field-zone overrides, stored as FRACTIONS of the panel rect
+    /// (fx, fy, fw, fh) so they track the sheet when it moves/resizes — exactly
+    /// like the computed defaults. Known keys: "name", "gender", "passives".
+    /// Legacy configs stored absolute pixels here; `load()` migrates them.
     #[serde(default)]
-    pub zones: HashMap<String, (i32, i32, u32, u32)>,
+    pub zones: HashMap<String, (f32, f32, f32, f32)>,
 }
 
 impl Default for GridCalibration {
@@ -75,16 +75,48 @@ impl GridCalibration {
     }
 
     /// A user-drawn zone override for `key` ("name" / "gender" / "passives"),
-    /// or the computed default. The bool reports whether an override applied.
+    /// resolved against the panel rect into an absolute screen rect, or the
+    /// computed `default`. The bool reports whether an override applied.
+    /// Overrides are stored as panel fractions, so they follow the sheet.
     pub fn zone_or(
         &self,
         key: &str,
         default: (i32, i32, u32, u32),
     ) -> ((i32, i32, u32, u32), bool) {
-        match self.zones.get(key) {
-            Some(r) => (*r, true),
-            None => (default, false),
+        match (self.zones.get(key), self.panel) {
+            (Some(&(fx, fy, fw, fh)), Some((px, py, pw, ph))) => {
+                let rect = (
+                    px + (fx * pw as f32) as i32,
+                    py + (fy * ph as f32) as i32,
+                    (fw * pw as f32) as u32,
+                    (fh * ph as f32) as u32,
+                );
+                (rect, true)
+            }
+            // Override present but no panel to resolve against: fall back to the
+            // computed default rather than a meaningless fraction.
+            _ => (default, false),
         }
+    }
+
+    /// Absolute screen rects for every stored override, resolved against the
+    /// current panel — for display/debug. Empty if no panel is set.
+    pub fn zone_rects_abs(&self) -> HashMap<String, (i32, i32, u32, u32)> {
+        let mut out = HashMap::new();
+        if let Some((px, py, pw, ph)) = self.panel {
+            for (k, &(fx, fy, fw, fh)) in &self.zones {
+                out.insert(
+                    k.clone(),
+                    (
+                        px + (fx * pw as f32) as i32,
+                        py + (fy * ph as f32) as i32,
+                        (fw * pw as f32) as u32,
+                        (fh * ph as f32) as u32,
+                    ),
+                );
+            }
+        }
+        out
     }
 
     pub fn config_path() -> std::path::PathBuf {
@@ -99,7 +131,39 @@ impl GridCalibration {
 
     pub fn load() -> Option<Self> {
         let text = std::fs::read_to_string(Self::config_path()).ok()?;
-        serde_json::from_str(&text).ok()
+        let mut calib: Self = serde_json::from_str(&text).ok()?;
+        calib.migrate_absolute_zones();
+        Some(calib)
+    }
+
+    /// Legacy configs stored zones as absolute screen pixels; current configs
+    /// store panel fractions (all components in 0..1). Detect the old format —
+    /// any component clearly outside the fraction range — and convert against
+    /// the panel. Without a panel we can't convert, so drop them (they were
+    /// unusable anyway).
+    fn migrate_absolute_zones(&mut self) -> Option<()> {
+        let looks_absolute = self
+            .zones
+            .values()
+            .any(|&(fx, fy, fw, fh)| fx > 1.5 || fy > 1.5 || fw > 1.5 || fh > 1.5);
+        if !looks_absolute {
+            return Some(());
+        }
+        match self.panel {
+            Some((px, py, pw, ph)) => {
+                for v in self.zones.values_mut() {
+                    let (ax, ay, aw, ah) = *v;
+                    *v = (
+                        (ax - px as f32) / pw as f32,
+                        (ay - py as f32) / ph as f32,
+                        aw / pw as f32,
+                        ah / ph as f32,
+                    );
+                }
+            }
+            None => self.zones.clear(),
+        }
+        Some(())
     }
 
     pub fn save(&self) -> Result<(), String> {
@@ -836,6 +900,50 @@ mod tests {
         assert_eq!(classify_gender(&male), Some(Gender::Male));
         assert_eq!(classify_gender(&female), Some(Gender::Female));
         assert_eq!(classify_gender(&neutral), None);
+    }
+
+    #[test]
+    fn zone_or_resolves_fraction_against_panel() {
+        let mut c = GridCalibration {
+            panel: Some((1000, 100, 600, 1000)),
+            ..Default::default()
+        };
+        c.zones.insert("passives".into(), (0.05, 0.85, 0.9, 0.1));
+        let (rect, ovr) = c.zone_or("passives", (0, 0, 1, 1));
+        assert!(ovr);
+        assert_eq!(rect, (1030, 950, 540, 100));
+        // Move the sheet: the same fraction tracks it.
+        c.panel = Some((1200, 100, 600, 1000));
+        let (moved, _) = c.zone_or("passives", (0, 0, 1, 1));
+        assert_eq!(moved, (1230, 950, 540, 100));
+        // No override -> default, flagged false.
+        let (def, ovr2) = c.zone_or("name", (5, 6, 7, 8));
+        assert!(!ovr2);
+        assert_eq!(def, (5, 6, 7, 8));
+    }
+
+    #[test]
+    fn migrate_absolute_zones_converts_legacy_pixels() {
+        let mut c = GridCalibration {
+            panel: Some((1000, 100, 600, 1000)),
+            ..Default::default()
+        };
+        // Legacy absolute pixel zone (components >> 1).
+        c.zones.insert("passives".into(), (1030.0, 950.0, 540.0, 100.0));
+        c.migrate_absolute_zones();
+        let (fx, fy, fw, fh) = c.zones["passives"];
+        assert!((fx - 0.05).abs() < 1e-4);
+        assert!((fy - 0.85).abs() < 1e-4);
+        assert!((fw - 0.9).abs() < 1e-4);
+        assert!((fh - 0.1).abs() < 1e-4);
+        // Already-fractional zones are left untouched.
+        let mut d = GridCalibration {
+            panel: Some((1000, 100, 600, 1000)),
+            ..Default::default()
+        };
+        d.zones.insert("name".into(), (0.2, 0.02, 0.6, 0.04));
+        d.migrate_absolute_zones();
+        assert_eq!(d.zones["name"], (0.2, 0.02, 0.6, 0.04));
     }
 }
 
