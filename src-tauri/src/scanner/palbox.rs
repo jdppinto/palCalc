@@ -178,6 +178,8 @@ impl GridCalibration {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct SlotResult {
+    /// Palbox page this slot belongs to (0-based). Single-box scans set 0.
+    pub box_index: u32,
     pub row: u32,
     pub col: u32,
     /// None = empty slot or below-threshold match.
@@ -244,6 +246,12 @@ pub struct ScanProgress {
     pub current: u32,
     pub total: u32,
     pub species: Option<String>,
+    /// 1-based current box and total boxes in a multi-box sweep. For a
+    /// single-box scan these are (1, 1).
+    #[serde(default)]
+    pub box_current: u32,
+    #[serde(default)]
+    pub box_total: u32,
 }
 
 /// One slot of the pass-1 grid capture.
@@ -375,6 +383,7 @@ pub fn scan_box(
     for (i, p) in pre.iter().enumerate() {
         if !occupied.contains(&i) {
             results.push(SlotResult {
+                box_index: 0,
                 row: p.row,
                 col: p.col,
                 species: None,
@@ -504,6 +513,8 @@ pub fn scan_box(
             current: done,
             total,
             species: species.clone(),
+            box_current: 1,
+            box_total: 1,
         });
         report.push_str(&format!(
             "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
@@ -520,6 +531,7 @@ pub fn scan_box(
             },
         ));
         results.push(SlotResult {
+            box_index: 0,
             row: p.row,
             col: p.col,
             unidentified: species.is_none(),
@@ -537,6 +549,69 @@ pub fn scan_box(
     }
     results.sort_by_key(|r| (r.row, r.col));
     Ok((results, log))
+}
+
+/// Sweep `box_count` palbox pages: scan the open box, press E to advance, scan
+/// the next, and so on. Results from every box are concatenated with each
+/// slot tagged by `box_index`; the merged debug bundle keeps each box's
+/// captures under a `box_<N>` subdir. Never clicks — page switching is the E
+/// key only. Leaves the palbox on the LAST scanned page (no wrap-back). Aborts
+/// return the boxes scanned so far.
+#[allow(clippy::too_many_arguments)]
+pub fn scan_boxes(
+    backend: &mut dyn Backend,
+    templates: &IconTemplates,
+    synth: &TextSynth,
+    species_names: &[(String, String)],
+    passive_names: &[(String, String)],
+    calib: &GridCalibration,
+    box_count: u32,
+    debug_dir: Option<&std::path::Path>,
+    mut on_progress: impl FnMut(ScanProgress),
+) -> Result<(Vec<SlotResult>, Vec<String>), String> {
+    if let Some(dir) = debug_dir {
+        let _ = std::fs::remove_dir_all(dir);
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let mut all: Vec<SlotResult> = Vec::new();
+    let mut merged_log: Vec<String> = Vec::new();
+    // Box-switch settle: the page change animates; capturing too soon grabs a
+    // mid-transition frame.
+    let settle = Duration::from_millis(calib.delay_ms.max(400));
+
+    for b in 0..box_count {
+        if SCAN_ABORT.load(Ordering::Relaxed) {
+            break;
+        }
+        if b > 0 {
+            backend.key(super::platform::KEY_E)?;
+            std::thread::sleep(settle);
+        }
+        let box_dir = debug_dir.map(|d| d.join(format!("box_{b}")));
+        let (mut slots, log) = scan_box(
+            backend,
+            templates,
+            synth,
+            species_names,
+            passive_names,
+            calib,
+            box_dir.as_deref(),
+            |p| {
+                on_progress(ScanProgress {
+                    box_current: b + 1,
+                    box_total: box_count,
+                    ..p
+                });
+            },
+        )?;
+        for s in &mut slots {
+            s.box_index = b;
+        }
+        merged_log.push(format!("=== box {b} ==="));
+        merged_log.extend(log);
+        all.extend(slots);
+    }
+    Ok((all, merged_log))
 }
 
 /// The shareable debug bundle directory: every debug run wipes and refills
@@ -767,6 +842,7 @@ mod tests {
     struct MockBackend {
         screen: RgbaImage,
         cursor: (i32, i32),
+        keys: Vec<u16>,
     }
 
     impl Backend for MockBackend {
@@ -788,6 +864,10 @@ mod tests {
         }
         fn focused_monitor_rect(&mut self) -> Result<(i32, i32, u32, u32), String> {
             Ok((0, 0, self.screen.width(), self.screen.height()))
+        }
+        fn key(&mut self, keycode: u16) -> Result<(), String> {
+            self.keys.push(keycode);
+            Ok(())
         }
     }
 
@@ -842,6 +922,7 @@ mod tests {
         let mut backend = MockBackend {
             screen,
             cursor: (0, 0),
+            keys: Vec::new(),
         };
         SCAN_ABORT.store(false, Ordering::Relaxed);
         let synth = TextSynth::new().unwrap();
@@ -877,6 +958,68 @@ mod tests {
         }
     }
 
+    /// scan_boxes sweeps N pages: presses E between boxes (N-1 times), tags
+    /// each slot with its box index, and reports box counters in progress.
+    #[test]
+    fn scan_boxes_presses_e_and_tags_box_index() {
+        let gd = GameData::load().unwrap();
+        let templates =
+            IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd), None).unwrap();
+        // One occupied slot, one empty — enough to exercise tagging.
+        let cell = 120u32;
+        let mut screen = RgbaImage::from_pixel(400, 300, image::Rgba([30, 32, 40, 255]));
+        let file = &gd.icons["SheepBall"];
+        let bytes = crate::scanner::matcher::embedded_icon(file).unwrap();
+        let icon = image::load_from_memory(bytes).unwrap().to_rgba8();
+        let icon = image::imageops::resize(&icon, 100, 100, image::imageops::FilterType::Triangle);
+        image::imageops::overlay(&mut screen, &icon, 10, 10);
+
+        let calib = GridCalibration {
+            slot_tl: (60, 60),
+            slot_br: (60 + cell as i32, 60),
+            cols: 2,
+            rows: 1,
+            slot_size: 110,
+            delay_ms: 0,
+            panel: None,
+            zones: HashMap::new(),
+        };
+        let mut backend = MockBackend {
+            screen,
+            cursor: (0, 0),
+            keys: Vec::new(),
+        };
+        SCAN_ABORT.store(false, Ordering::Relaxed);
+        let synth = TextSynth::new().unwrap();
+        let mut max_box_total = 0;
+        let (results, log) = scan_boxes(
+            &mut backend,
+            &templates,
+            &synth,
+            &[],
+            &[],
+            &calib,
+            3,
+            None,
+            |p| {
+                max_box_total = max_box_total.max(p.box_total);
+                assert!(p.box_current >= 1 && p.box_current <= 3);
+            },
+        )
+        .unwrap();
+
+        // 3 boxes advanced => E pressed twice.
+        assert_eq!(backend.keys, vec![super::super::platform::KEY_E; 2]);
+        assert_eq!(max_box_total, 3);
+        // 2 slots per box * 3 boxes.
+        assert_eq!(results.len(), 6);
+        assert_eq!(results.iter().filter(|r| r.box_index == 0).count(), 2);
+        assert_eq!(results.iter().filter(|r| r.box_index == 1).count(), 2);
+        assert_eq!(results.iter().filter(|r| r.box_index == 2).count(), 2);
+        assert!(log.iter().any(|l| l == "=== box 0 ==="));
+        assert!(log.iter().any(|l| l == "=== box 2 ==="));
+    }
+
     #[test]
     fn abort_stops_scan() {
         let gd = GameData::load().unwrap();
@@ -885,6 +1028,7 @@ mod tests {
         let mut backend = MockBackend {
             screen: RgbaImage::from_pixel(400, 400, image::Rgba([0, 0, 0, 255])),
             cursor: (0, 0),
+            keys: Vec::new(),
         };
         SCAN_ABORT.store(true, Ordering::Relaxed);
         let calib = GridCalibration {

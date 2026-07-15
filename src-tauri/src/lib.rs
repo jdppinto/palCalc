@@ -6,7 +6,7 @@ use std::sync::atomic::Ordering;
 use tauri::{Emitter, State};
 
 use scanner::matcher::IconTemplates;
-use scanner::palbox::{scan_box, GridCalibration, SCAN_ABORT};
+use scanner::palbox::{scan_box, scan_boxes, GridCalibration, SCAN_ABORT};
 use scanner::platform::{self, WindowInfo};
 use scanner::synth::TextSynth;
 use scanner::textlib::{png_base64, png_from_base64, TextLib, EMPTY_LABEL};
@@ -301,6 +301,56 @@ async fn scan_current_box(
     .map_err(|e| format!("scan task panicked: {e}"))?
 }
 
+/// Palworld has 32 palbox pages, advanced with the E key.
+const PALBOX_PAGES: u32 = 32;
+
+/// Sweep all 32 palbox pages: scan the open box, press E, scan the next, etc.
+/// Leaves the palbox on the last page. Open the palbox on page 1 first.
+#[tauri::command]
+async fn scan_all_boxes(
+    app: tauri::AppHandle,
+    data: State<'_, GameData>,
+) -> Result<ScanResult, String> {
+    let calib = GridCalibration::load().ok_or("not calibrated yet")?;
+    let pal_icons = scanner::matcher::pal_icon_map(&data);
+    let species_names: Vec<(String, String)> = data
+        .pals
+        .iter()
+        .filter(|(k, _)| data.icons.contains_key(*k))
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    let passive_names: Vec<(String, String)> = data
+        .passives
+        .iter()
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    SCAN_ABORT.store(false, Ordering::Relaxed);
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut backend = platform::detect()?;
+        let templates =
+            IconTemplates::load(&pal_icons, Some(&scanner::matcher::user_templates_dir()))?;
+        let synth = TextSynth::new()?;
+        let report_dir = scanner::palbox::reset_report_dir()?;
+        let (slots, log) = scan_boxes(
+            backend.as_mut(),
+            &templates,
+            &synth,
+            &species_names,
+            &passive_names,
+            &calib,
+            PALBOX_PAGES,
+            Some(&report_dir),
+            |p| {
+                let _ = app.emit("scan-progress", &p);
+            },
+        )?;
+        let report_path = scanner::palbox::write_report_meta("scan-all", &log)?;
+        Ok(ScanResult { slots, report_path })
+    })
+    .await
+    .map_err(|e| format!("scan task panicked: {e}"))?
+}
+
 #[derive(Serialize)]
 struct DebugGridResult {
     log: Vec<String>,
@@ -461,6 +511,7 @@ pub fn run() {
             save_zone,
             abort_scan,
             scan_current_box,
+            scan_all_boxes,
             capture_screen,
             save_pal_template,
             save_passive_label,

@@ -35,6 +35,7 @@
   }
 
   interface SlotResult {
+    box_index: number;
     row: number;
     col: number;
     species: string | null;
@@ -65,7 +66,12 @@
   let countdown = $state(0);
   let capturing = $state<0 | 1 | 2 | 3 | 4>(0);
   let scanning = $state(false);
-  let progress = $state<{ current: number; total: number } | null>(null);
+  let progress = $state<{
+    current: number;
+    total: number;
+    box_current?: number;
+    box_total?: number;
+  } | null>(null);
   let results = $state<SlotResult[] | null>(null);
   let error = $state<string | null>(null);
 
@@ -349,7 +355,12 @@
       calib = status.calibration;
       calibSaved = true;
     }
-    await listen<{ current: number; total: number }>("scan-progress", (e) => {
+    await listen<{
+      current: number;
+      total: number;
+      box_current?: number;
+      box_total?: number;
+    }>("scan-progress", (e) => {
       progress = e.payload;
     });
   });
@@ -411,7 +422,7 @@
 
   let scanReportPath = $state<string | null>(null);
 
-  async function scan() {
+  async function runScan(command: "scan_current_box" | "scan_all_boxes") {
     scanning = true;
     error = null;
     results = null;
@@ -419,7 +430,7 @@
     progress = null;
     try {
       const r = await invoke<{ slots: SlotResult[]; report_path: string }>(
-        "scan_current_box",
+        command,
         {},
       );
       results = r.slots;
@@ -430,6 +441,8 @@
       scanning = false;
     }
   }
+  const scan = () => runScan("scan_current_box");
+  const scanAll = () => runScan("scan_all_boxes");
 
   const found = $derived(results?.filter((r) => r.species !== null) ?? []);
 
@@ -635,16 +648,24 @@
     <button class="scan" onclick={scan} disabled={scanning || !calibSaved || !status?.backend}>
       {scanning ? "Scanning…" : "Scan current box"}
     </button>
+    <button class="scan" onclick={scanAll} disabled={scanning || !calibSaved || !status?.backend}>
+      Scan all 32 boxes
+    </button>
     {#if scanning}
       <button onclick={() => invoke("abort_scan")}>Abort</button>
       {#if progress}
         <progress value={progress.current} max={progress.total}></progress>
-        <span class="pos">{progress.current} / {progress.total}</span>
+        <span class="pos">
+          {#if progress.box_total && progress.box_total > 1}
+            box {progress.box_current}/{progress.box_total} ·
+          {/if}
+          {progress.current} / {progress.total}
+        </span>
       {/if}
     {/if}
     <span class="hint-inline">
-      Scan one box, switch box in-game, scan again — results accumulate in
-      Owned Pals.
+      "Scan all" presses E to page through every box — open the palbox on box 1
+      and keep Palworld focused. Results accumulate in Owned Pals.
     </span>
   </div>
 

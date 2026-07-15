@@ -3,6 +3,10 @@
 use image::RgbaImage;
 use serde::Serialize;
 
+/// Linux input-event keycode for the E key (input-event-codes.h `KEY_E`).
+/// Palworld advances the palbox to the next page on E.
+pub const KEY_E: u16 = 18;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct WindowInfo {
     pub title: String,
@@ -22,6 +26,9 @@ pub trait Backend: Send {
     /// Geometry of the currently focused monitor (x, y, w, h) — the canvas
     /// for freeze-frame zone calibration.
     fn focused_monitor_rect(&mut self) -> Result<(i32, i32, u32, u32), String>;
+    /// Press and release a key by Linux input-event keycode. Used to advance
+    /// the palbox page (E) during a multi-box scan.
+    fn key(&mut self, keycode: u16) -> Result<(), String>;
 }
 
 pub fn detect() -> Result<Box<dyn Backend>, String> {
@@ -370,6 +377,26 @@ mod linux {
                 .or(monitors.first())
                 .map(|m| (m.x, m.y, m.width, m.height))
                 .ok_or_else(|| "no monitors reported by Hyprland".into())
+        }
+
+        fn key(&mut self, keycode: u16) -> Result<(), String> {
+            // Real uinput key event (press + release) via ydotool — the same
+            // event path the mouse motion uses, because the game reads input
+            // events, not compositor-injected state.
+            if !self.ydotool_available() {
+                return Err(
+                    "ydotool not available — needed to send the E key to switch palbox pages"
+                        .into(),
+                );
+            }
+            let status = std::process::Command::new("ydotool")
+                .args(["key", &format!("{keycode}:1"), &format!("{keycode}:0")])
+                .status()
+                .map_err(|e| format!("ydotool key: {e}"))?;
+            if !status.success() {
+                return Err("ydotool key failed".into());
+            }
+            Ok(())
         }
     }
 }
