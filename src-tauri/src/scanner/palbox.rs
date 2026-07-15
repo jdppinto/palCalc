@@ -530,6 +530,19 @@ pub fn scan_box(
                 format!(" +{} unknown row(s)", passive_unknowns.len())
             },
         ));
+        // Dump this run's unknown passive-row crops so misses are inspectable
+        // (named by slot so they never collide across the box).
+        if let Some(dir) = debug_dir {
+            use base64::Engine;
+            for (j, (_, b64)) in passive_unknowns.iter().enumerate() {
+                if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(b64) {
+                    let _ = std::fs::write(
+                        dir.join(format!("unknown_{}_{}_{}.png", p.row, p.col, j)),
+                        bytes,
+                    );
+                }
+            }
+        }
         results.push(SlotResult {
             box_index: 0,
             row: p.row,

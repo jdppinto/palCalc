@@ -673,7 +673,8 @@
     <p class="dim-text">
       Scan debug bundle written to <code>{scanReportPath}</code> — pass it on
       with:<br />
-      <code>cp -r {scanReportPath} ~/Projects/palCalc/gaming-debug && cd
+      <code>rm -rf ~/Projects/palCalc/gaming-debug/debug-report && cp -r
+      {scanReportPath} ~/Projects/palCalc/gaming-debug && cd
       ~/Projects/palCalc && git add gaming-debug && git commit -m debug &&
       git push</code>
     </p>
@@ -697,7 +698,8 @@
       <p class="dim-text">
         Shareable bundle written to <code>{debugReportPath}</code> — pass it on
         with:<br />
-        <code>cp -r {debugReportPath} ~/Projects/palCalc/gaming-debug && cd
+        <code>rm -rf ~/Projects/palCalc/gaming-debug/debug-report && cp -r
+        {debugReportPath} ~/Projects/palCalc/gaming-debug && cd
         ~/Projects/palCalc && git add gaming-debug && git commit -m debug &&
         git push</code>
       </p>
