@@ -30,6 +30,8 @@ pub struct OwnedPal {
     /// Internal passive keys (from passive_skills_assignable.json)
     #[serde(default)]
     pub passives: Vec<String>,
+    #[serde(default)]
+    pub gender: Option<Gender>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -46,6 +48,9 @@ pub struct PlanRequest {
     pub max_steps: Option<u32>,
     #[serde(default)]
     pub max_routes: Option<usize>,
+    /// Number of pal reversers available to flip genders during breeding.
+    #[serde(default)]
+    pub reversers: u32,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -71,6 +76,8 @@ pub struct Route {
     pub covered: Vec<String>,
     pub missing: Vec<String>,
     pub root: RouteNode,
+    /// Number of pal reversers consumed by this route.
+    pub reversers_used: u32,
 }
 
 /// Search diagnostics so the UI can explain fast returns: once the pareto
@@ -98,7 +105,7 @@ pub struct PlanOutcome {
 
 #[derive(Debug, Clone, Copy)]
 enum Prov {
-    Owned(u32),
+    Owned(u32, Option<Gender>),
     Wild,
     Bred {
         a: u32,
@@ -113,7 +120,76 @@ struct St {
     species: u16,
     mask: u16,
     steps: u32,
+    total_passives: u16,
+    reversed_mask: u64,
     prov: Prov,
+}
+
+/// Returns (reversers needed, owned index to flip). reversers is 0 (OK),
+/// 1 (flip the returned owned index), or u32::MAX (impossible).
+fn gender_ok(prov_a: Prov, prov_b: Prov, req_a: Option<Gender>, req_b: Option<Gender>) -> (u32, Option<u32>) {
+    fn compatible(
+        ga: Option<Gender>,
+        gb: Option<Gender>,
+        req_a: Option<Gender>,
+        req_b: Option<Gender>,
+    ) -> bool {
+        if let (Some(a), Some(b)) = (ga, gb) {
+            if a == b {
+                return false;
+            }
+        }
+        if let (Some(r), Some(g)) = (req_a, ga) {
+            if r != g {
+                return false;
+            }
+        }
+        if let (Some(r), Some(g)) = (req_b, gb) {
+            if r != g {
+                return false;
+            }
+        }
+        true
+    }
+
+    let flip = |g: Gender| match g {
+        Gender::Male => Gender::Female,
+        Gender::Female => Gender::Male,
+    };
+
+    let ga = match prov_a {
+        Prov::Owned(_, g) => g,
+        _ => None,
+    };
+    let gb = match prov_b {
+        Prov::Owned(_, g) => g,
+        _ => None,
+    };
+
+    if compatible(ga, gb, req_a, req_b) {
+        return (0, None);
+    }
+    // Try flipping parent A — report its owned index.
+    if let Some(a) = ga {
+        if compatible(Some(flip(a)), gb, req_a, req_b) {
+            let oi = match prov_a {
+                Prov::Owned(i, _) => Some(i),
+                _ => None,
+            };
+            return (1, oi);
+        }
+    }
+    // Try flipping parent B — report its owned index.
+    if let Some(b) = gb {
+        if compatible(ga, Some(flip(b)), req_a, req_b) {
+            let oi = match prov_b {
+                Prov::Owned(i, _) => Some(i),
+                _ => None,
+            };
+            return (1, oi);
+        }
+    }
+    (u32::MAX, None)
 }
 
 pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, String> {
@@ -152,6 +228,8 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
 
     let mut states: Vec<St> = Vec::new();
     let mut per_species: Vec<Vec<u32>> = vec![Vec::new(); n];
+    // flipped_seed[owned_idx] = state ID of the flipped-gender copy.
+    let mut flipped_seed: Vec<Option<u32>> = vec![None; req.owned.len()];
 
     // Seed owned pals first so they dominate equivalent wild seeds.
     let mut frontier: Vec<u32> = Vec::new();
@@ -171,7 +249,9 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
                 species: sp,
                 mask,
                 steps: 0,
-                prov: Prov::Owned(oi as u32),
+                total_passives: o.passives.len() as u16,
+                reversed_mask: 0,
+                prov: Prov::Owned(oi as u32, o.gender),
             },
         ) {
             frontier.push(id);
@@ -189,6 +269,8 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
                     species: i as u16,
                     mask: 0,
                     steps: 0,
+                    total_passives: 0,
+                    reversed_mask: 0,
                     prov: Prov::Wild,
                 },
             ) {
@@ -234,14 +316,79 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
                     // be claimed. An emptied frontier only means "explored
                     // everything within the budget".
                     if !budget_clipped {
+                        let base_tp = sa.total_passives.max(sb.total_passives);
+                        let base_mask = sa.reversed_mask | sb.reversed_mask;
                         budget_clipped = pair_children[&key].iter().any(|&(child, _, _)| {
-                            !dominated(&states, &per_species[child as usize], mask, steps)
+                            !dominated(
+                                &states,
+                                &per_species[child as usize],
+                                mask,
+                                steps,
+                                base_tp,
+                                base_mask,
+                            )
                         });
                     }
                     continue;
                 }
                 for &(child, ga, gb) in &pair_children[&key] {
                     let (ga, gb) = if swapped { (gb, ga) } else { (ga, gb) };
+                    let (rev_needed, flip_oi) = gender_ok(sa.prov, sb.prov, ga, gb);
+                    if rev_needed == u32::MAX {
+                        continue;
+                    }
+                    // Resolve parent IDs: when a reverser is needed on an owned pal,
+                    // use its flipped-gender seed (create on first use).
+                    let (pa, pb) = if rev_needed == 1 {
+                        let oi = flip_oi.unwrap();
+                        let oidx = oi as usize;
+                        let flipped_id = flipped_seed[oidx].unwrap_or_else(|| {
+                            let o = &req.owned[oidx];
+                            let sp = idx[o.species.as_str()];
+                            let m = o
+                                .passives
+                                .iter()
+                                .filter_map(|p| passive_bit.get(p.as_str()))
+                                .fold(0u16, |acc, b| acc | b);
+                            let fg = match o.gender {
+                                Some(Gender::Male) => Some(Gender::Female),
+                                Some(Gender::Female) => Some(Gender::Male),
+                                None => None,
+                            };
+                            let st = St {
+                                species: sp,
+                                mask: m,
+                                steps: 0,
+                                total_passives: o.passives.len() as u16,
+                                reversed_mask: 1u64 << oi,
+                                prov: Prov::Owned(oi, fg),
+                            };
+                            if let Some(id) = insert(&mut states, &mut per_species, st) {
+                                flipped_seed[oidx] = Some(id);
+                                id
+                            } else {
+                                u32::MAX // sentinel: insert rejected
+                            }
+                        });
+                        if flipped_id == u32::MAX {
+                            continue;
+                        }
+                        // Replace whichever parent needs the flip.
+                        if matches!(sa.prov, Prov::Owned(i, _) if Some(i) == flip_oi) {
+                            (flipped_id, s)
+                        } else {
+                            (f, flipped_id)
+                        }
+                    } else {
+                        (f, s)
+                    };
+                    let rev_mask =
+                        states[pa as usize].reversed_mask | states[pb as usize].reversed_mask;
+                    if rev_mask.count_ones() as u32 > req.reversers {
+                        continue;
+                    }
+                    let total_passives =
+                        sa.total_passives.max(sb.total_passives);
                     if let Some(id) = insert(
                         &mut states,
                         &mut per_species,
@@ -249,9 +396,11 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
                             species: child,
                             mask,
                             steps,
+                            total_passives,
+                            reversed_mask: rev_mask,
                             prov: Prov::Bred {
-                                a: f,
-                                b: s,
+                                a: pa,
+                                b: pb,
                                 gender_a: ga,
                                 gender_b: gb,
                             },
@@ -300,6 +449,7 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
                 steps: s.steps,
                 covered,
                 missing,
+                reversers_used: s.reversed_mask.count_ones() as u32,
                 root: build_node(gd, &keys, &states, &req.owned, &passive_bit, id),
             }
         })
@@ -317,23 +467,51 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
     })
 }
 
-/// True when some existing state covers a superset of `mask` in no more steps.
-fn dominated(states: &[St], list: &[u32], mask: u16, steps: u32) -> bool {
+/// True when some existing state covers a superset of `mask` in no more steps
+/// with fewer or equal total passives and a subset of the reversed-owned mask.
+fn dominated(
+    states: &[St],
+    list: &[u32],
+    mask: u16,
+    steps: u32,
+    total_passives: u16,
+    reversed_mask: u64,
+) -> bool {
     list.iter().any(|&id| {
         let e = &states[id as usize];
-        e.mask & mask == mask && e.steps <= steps
+        e.mask & mask == mask
+            && e.steps <= steps
+            && e.total_passives <= total_passives
+            && e.reversed_mask | reversed_mask == reversed_mask
     })
 }
 
 /// Pareto insert: reject if dominated; evict states the newcomer dominates.
+/// Seed states (steps == 0) represent distinct owned individuals and must not
+/// be deduplicated — they may carry different genders that affect breeding.
 fn insert(states: &mut Vec<St>, per_species: &mut [Vec<u32>], st: St) -> Option<u32> {
-    if dominated(states, &per_species[st.species as usize], st.mask, st.steps) {
+    if st.steps > 0
+        && dominated(
+            states,
+            &per_species[st.species as usize],
+            st.mask,
+            st.steps,
+            st.total_passives,
+            st.reversed_mask,
+        )
+    {
         return None;
     }
     let list = &mut per_species[st.species as usize];
     list.retain(|&id| {
         let e = &states[id as usize];
-        !(st.mask & e.mask == e.mask && st.steps <= e.steps)
+        if e.steps == 0 && st.steps == 0 {
+            return true; // keep both seed states — different individuals
+        }
+        !(st.mask & e.mask == e.mask
+            && st.steps <= e.steps
+            && st.total_passives <= e.total_passives
+            && st.reversed_mask | e.reversed_mask == e.reversed_mask)
     });
     if list.len() >= PARETO_CAP {
         // Evict the weakest entry if the newcomer beats it.
@@ -342,12 +520,21 @@ fn insert(states: &mut Vec<St>, per_species: &mut [Vec<u32>], st: St) -> Option<
             .enumerate()
             .min_by_key(|(_, &id)| {
                 let e = &states[id as usize];
-                (e.mask.count_ones(), std::cmp::Reverse(e.steps))
+                (
+                    e.mask.count_ones(),
+                    std::cmp::Reverse(e.steps),
+                    e.total_passives,
+                    std::cmp::Reverse(e.reversed_mask.count_ones()),
+                )
             })
             .expect("cap > 0");
         let w = &states[worst as usize];
-        if (st.mask.count_ones(), std::cmp::Reverse(st.steps))
-            <= (w.mask.count_ones(), std::cmp::Reverse(w.steps))
+        // Don't evict a seed with another seed at the cap either.
+        if w.steps == 0 && st.steps == 0 {
+            return None;
+        }
+        if (st.mask.count_ones(), std::cmp::Reverse(st.steps), st.total_passives, std::cmp::Reverse(st.reversed_mask.count_ones()))
+            <= (w.mask.count_ones(), std::cmp::Reverse(w.steps), w.total_passives, std::cmp::Reverse(w.reversed_mask.count_ones()))
         {
             return None;
         }
@@ -382,7 +569,7 @@ fn build_node(
     };
     match s.prov {
         Prov::Wild => node.owned = Some("wild".into()),
-        Prov::Owned(oi) => {
+        Prov::Owned(oi, _) => {
             let o = &owned[oi as usize];
             node.owned = Some(if o.label.is_empty() {
                 info.name.clone()

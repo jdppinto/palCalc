@@ -7,6 +7,7 @@ use tauri::{Emitter, State};
 
 use scanner::matcher::IconTemplates;
 use scanner::palbox::{scan_box, scan_boxes, GridCalibration, SCAN_ABORT};
+#[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
 use scanner::platform::{self, WindowInfo};
 use scanner::synth::TextSynth;
@@ -496,6 +497,9 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
     Ok(calib)
 }
 
+#[cfg(windows)]
+// If a dead_code / unused warning appears on the LoadLibraryW import below,
+// add #[allow(dead_code)] to the function or the extern block.
 fn extract_webview2_loader() {
     let dll = include_bytes!("WebView2Loader.dll");
     let dir = std::env::temp_dir().join("palcalc");
@@ -514,6 +518,7 @@ fn extract_webview2_loader() {
 }
 
 pub fn run() {
+    #[cfg(windows)]
     extract_webview2_loader();
     let data = GameData::load().expect("failed to parse embedded game data");
     tauri::Builder::default()

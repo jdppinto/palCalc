@@ -486,8 +486,9 @@
     addManyOwned(
       found.map((r) => ({
         species: r.species!,
-        label: `${pal(r.species)?.name ?? r.species} (scan)${genderSymbol(r.gender) ? " " + genderSymbol(r.gender) : ""}`,
+        label: `${pal(r.species)?.name ?? r.species} (scan)`,
         passives: r.passives,
+        gender: r.gender,
       })),
     );
     results = null;
