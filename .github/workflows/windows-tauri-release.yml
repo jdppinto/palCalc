@@ -35,15 +35,12 @@ jobs:
         run: npm run tauri build
 
       - name: Create GitHub release
-        id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            src-tauri/target/release/palcalc.exe
 
       - name: Upload executable to release
         uses: softprops/action-gh-release@v1
