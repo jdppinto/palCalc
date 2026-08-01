@@ -181,6 +181,42 @@ pub fn best_vocab_match<'a>(
             }
         }
     }
+
+    // Subspecies boost: when OCR reads "Gobfin lgns" (corrupted suffix),
+    // the token window "gobfin" matches base "Gobfin" at 1.0 while the full
+    // line "gobfinlgns" only matches "Gobfin Ignis" at ~0.83. The base
+    // always wins despite the OCR clearly seeing extra text.
+    //
+    // Fix: if the full OCR line is longer than the best match's name (proving
+    // the OCR actually saw characters beyond the base name), check whether
+    // any longer vocab entry starts with the best match's normalized name
+    // (prefix containment = genuine subspecies relationship) and scores
+    // above min_sim against the full line.
+    let boost = best.as_ref().and_then(|(best_key, _, best_len)| {
+        let full_candidate = candidates.first()?;
+        if full_candidate.len() <= *best_len {
+            return None;
+        }
+        let best_name = &vocab
+            .iter()
+            .find(|(k, _)| k.as_str() == *best_key)?
+            .1;
+        let best_norm = norm(&best_name);
+        for (key, name) in vocab {
+            let v = norm(name);
+            if v.len() > *best_len && v.starts_with(&best_norm) {
+                let sim = strsim::normalized_levenshtein(full_candidate, &v);
+                if sim >= min_sim {
+                    return Some((key.as_str(), sim, v.len()));
+                }
+            }
+        }
+        None
+    });
+    if let Some(b) = boost {
+        best = Some(b);
+    }
+
     best.map(|(k, s, _)| (k, s))
 }
 
@@ -246,6 +282,44 @@ mod tests {
         // Plain base name still resolves to the base.
         let (key, _) = best_vocab_match("Fuack", &vocab, 0.72).unwrap();
         assert_eq!(key, "Blueplatypus");
+    }
+
+    /// When OCR corrupts the subspecies suffix (e.g. "lgns" instead of
+    /// "Ignis"), the token window matches the base name perfectly while
+    /// the full line only partially matches the variant. The subspecies
+    /// boost must still prefer the variant because the full line is longer
+    /// than the base name — the OCR clearly saw extra text.
+    #[test]
+    fn corrupted_suffix_still_matches_subspecies() {
+        let vocab = vec![
+            ("Blueplatypus".to_string(), "Fuack".to_string()),
+            ("BluePlatypus_Fire".to_string(), "Fuack Ignis".to_string()),
+        ];
+        let (key, sim) = best_vocab_match("Fuack lgns", &vocab, 0.72).unwrap();
+        assert_eq!(key, "BluePlatypus_Fire", "sim {sim}");
+    }
+
+    /// A base-only read (no extra text) must NOT be boosted to a subspecies.
+    #[test]
+    fn base_only_read_not_boosted() {
+        let vocab = vec![
+            ("Blueplatypus".to_string(), "Fuack".to_string()),
+            ("BluePlatypus_Fire".to_string(), "Fuack Ignis".to_string()),
+        ];
+        let (key, _) = best_vocab_match("Fuack", &vocab, 0.72).unwrap();
+        assert_eq!(key, "Blueplatypus");
+    }
+
+    /// Merged UI text ("Tanzee Level") must not be boosted to a subspecies
+    /// even though the full line is longer — the extra text isn't a suffix.
+    #[test]
+    fn merged_ui_text_not_boosted() {
+        let vocab = vec![
+            ("Monkey".to_string(), "Tanzee".to_string()),
+            ("Monkey_Fire".to_string(), "Tanzee Ignis".to_string()),
+        ];
+        let (key, _) = best_vocab_match("Tanzee Level", &vocab, 0.72).unwrap();
+        assert_eq!(key, "Monkey");
     }
 
     /// Every accumulated field fixture, through OCR + dictionary — including
