@@ -1,5 +1,8 @@
 name: Windows Tauri Release
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
