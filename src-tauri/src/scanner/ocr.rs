@@ -192,27 +192,29 @@ pub fn best_vocab_match<'a>(
     // any longer vocab entry starts with the best match's normalized name
     // (prefix containment = genuine subspecies relationship) and scores
     // above min_sim against the full line.
-    if let Some((best_key, _best_sim, best_len)) = &best {
-        if let Some(full_candidate) = candidates.first() {
-            if full_candidate.len() > *best_len {
-                let best_norm = norm(
-                    &vocab
-                        .iter()
-                        .find(|(k, _)| k.as_str() == *best_key)
-                        .unwrap()
-                        .1,
-                );
-                for (key, name) in vocab {
-                    let v = norm(name);
-                    if v.len() > *best_len && v.starts_with(&best_norm) {
-                        let sim = strsim::normalized_levenshtein(full_candidate, &v);
-                        if sim >= *min_sim {
-                            best = Some((key.as_str(), sim, v.len()));
-                        }
-                    }
+    let boost = best.as_ref().and_then(|(best_key, _, best_len)| {
+        let full_candidate = candidates.first()?;
+        if full_candidate.len() <= *best_len {
+            return None;
+        }
+        let best_name = &vocab
+            .iter()
+            .find(|(k, _)| k.as_str() == *best_key)?
+            .1;
+        let best_norm = norm(&best_name);
+        for (key, name) in vocab {
+            let v = norm(name);
+            if v.len() > *best_len && v.starts_with(&best_norm) {
+                let sim = strsim::normalized_levenshtein(full_candidate, &v);
+                if sim >= min_sim {
+                    return Some((key.as_str(), sim, v.len()));
                 }
             }
         }
+        None
+    });
+    if let Some(b) = boost {
+        best = Some(b);
     }
 
     best.map(|(k, s, _)| (k, s))
