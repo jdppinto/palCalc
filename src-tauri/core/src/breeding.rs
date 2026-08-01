@@ -75,7 +75,7 @@ impl GameData {
         let mut best_order = i32::MAX;
         for (rank, order, key) in &self.eligible {
             let dist = (rank - target).abs();
-            if dist < best_dist || (dist == best_dist && *order < best_order) {
+            if dist < best_dist || (dist == best_dist && *order > best_order) {
                 best_dist = dist;
                 best_order = *order;
                 best_key = key;

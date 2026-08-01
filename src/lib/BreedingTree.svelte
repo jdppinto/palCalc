@@ -30,12 +30,14 @@
   // zoom behavior binds whenever the svg element actually appears.
   $effect(() => {
     if (!svgEl) return;
+    const sel = select(svgEl);
     const z = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.15, 3])
       .on("zoom", (e: D3ZoomEvent<SVGSVGElement, unknown>) => {
         transform = e.transform.toString();
       });
-    select(svgEl).call(z);
+    sel.call(z);
+    return () => { sel.on(".zoom", null); };
   });
 
   // Reset view state when a different route arrives
@@ -101,12 +103,24 @@
   }
 
   function toggle(l: Laid) {
+    if (!layout) return;
     const next = new Set(collapsed);
+    const species = l.node.species;
+
     if (next.has(l.id)) {
-      next.delete(l.id);
+      for (const n of layout.nodes) {
+        if (n.node.species === species) {
+          next.delete(n.id);
+        }
+      }
     } else if (l.node.parents.length === 2) {
-      next.add(l.id);
+      for (const n of layout.nodes) {
+        if (n.node.species === species && n.node.parents.length === 2) {
+          next.add(n.id);
+        }
+      }
     }
+
     collapsed = next;
     // Highlight the chain from this node down to the target
     const chain = new Set<string>();

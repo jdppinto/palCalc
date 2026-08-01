@@ -283,7 +283,13 @@
         log(`panel bounds set (${rect.join(", ")})`);
       } else {
         await invoke("save_zone", { key: zoneAspect, rect });
-        calib.zones = { ...calib.zones, [zoneAspect]: rect };
+        if (calib.panel) {
+          const [px, py, pw, ph] = calib.panel;
+          calib.zones = { ...calib.zones, [zoneAspect]: [
+            (rect[0] - px) / pw, (rect[1] - py) / ph,
+            rect[2] / pw, rect[3] / ph,
+          ]};
+        }
         log(`zone '${zoneAspect}' saved (${rect.join(", ")})`);
       }
       zoneSel = null;
@@ -348,9 +354,10 @@
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   onMount(async () => {
-    pals = await invoke<PalEntry[]>("list_pals");
-    passiveList = await invoke<PassiveEntry[]>("list_passives");
-    status = await invoke<ScannerStatus>("scanner_status");
+    try {
+      pals = await invoke<PalEntry[]>("list_pals");
+      passiveList = await invoke<PassiveEntry[]>("list_passives");
+      status = await invoke<ScannerStatus>("scanner_status");
     if (status.calibration) {
       calib = status.calibration;
       calibSaved = true;
@@ -363,6 +370,9 @@
     }>("scan-progress", (e) => {
       progress = e.payload;
     });
+    } catch (e) {
+      error = String(e);
+    }
   });
 
   function pal(key: string | null): PalEntry | undefined {
@@ -402,8 +412,8 @@
           Math.abs(x - panelTl[0]),
           Math.abs(y - panelTl[1]),
         ];
+        calibSaved = false;
       }
-      calibSaved = false;
     } catch (e) {
       error = String(e);
     }
@@ -492,6 +502,7 @@
       })),
     );
     results = null;
+    scanReportPath = null;
   }
 </script>
 
@@ -661,7 +672,7 @@
       Scan all 32 boxes
     </button>
     {#if scanning}
-      <button onclick={() => invoke("abort_scan")}>Abort</button>
+      <button onclick={() => invoke("abort_scan").catch(() => {})}>Abort</button>
       {#if progress}
         <progress value={progress.current} max={progress.total}></progress>
         <span class="pos">
@@ -859,7 +870,7 @@
               {:else}
                 <span class="dim">empty</span>
               {/if}
-              {#if !r.species}
+              {#if r.unidentified}
                 <button class="fix" title="Correct species" onclick={() => { fixing = slotKey; fixQuery = ""; }}>
                   ✎
                 </button>

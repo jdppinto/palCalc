@@ -23,12 +23,14 @@
   let target = $state<string | null>(null);
   let desired = $state<string[]>([]);
   let assumeWild = $state(false);
-  let maxSteps = $state(500);
+  const WARN_STEP_THRESHOLD = 500;
+  let maxSteps = $state(WARN_STEP_THRESHOLD);
   let reversers = $state(0);
 
   let newSpecies = $state<string | null>(null);
   let newPassives = $state<string[]>([]);
   let newGender = $state<Gender | null>(null);
+  let detailsOpen = $state(ownedStore.list.length > 0);
 
   let routes = $state<Route[] | null>(null);
   let stats = $state<PlanStats | null>(null);
@@ -57,6 +59,7 @@
       passives: newPassives,
       gender: newGender,
     });
+    detailsOpen = true;
     newSpecies = null;
     newPassives = [];
     newGender = null;
@@ -77,7 +80,7 @@
           desired_passives: desired,
           owned: ownedStore.list,
           assume_wild: assumeWild,
-          max_steps: maxSteps,
+          max_steps: Number.isFinite(maxSteps) ? maxSteps : 500,
           reversers,
         },
       });
@@ -96,7 +99,7 @@
 
 {#snippet tree(node: RouteNode, gender: Gender | null)}
   <li>
-    <div class="node" class:leaf={node.owned !== null}>
+    <div class="node">
       {#if node.icon}
         <img src={"/icons/" + node.icon} alt="" />
       {/if}
@@ -139,7 +142,7 @@
       </label>
     </div>
 
-    {#if maxSteps > 500}
+    {#if maxSteps > WARN_STEP_THRESHOLD}
       <p class="warn">
         ⚠ {maxSteps}-step budget — with many desired passives and owned pals
         this can get expensive and your PC will suffer. (Often the search
@@ -149,7 +152,7 @@
 
     <PassivePicker {passives} bind:selected={desired} label="Desired passives (up to 8)" />
 
-    <details open={ownedStore.list.length > 0}>
+    <details bind:open={detailsOpen}>
       <summary>Owned pals ({ownedStore.list.length})</summary>
       <div class="owned-add">
         <PalSelect {pals} bind:value={newSpecies} label="Species" />
@@ -163,15 +166,15 @@
         </div>
         <div class="owned-gender">
           <label>
-            <input type="radio" name="newGender" checked={newGender === null} onclick={() => newGender = null} />
+            <input type="radio" name="newGender" checked={newGender === null} onchange={() => newGender = null} />
             any
           </label>
           <label>
-            <input type="radio" name="newGender" checked={newGender === "Male"} onclick={() => newGender = "Male"} />
+            <input type="radio" name="newGender" checked={newGender === "Male"} onchange={() => newGender = "Male"} />
             ♂
           </label>
           <label>
-            <input type="radio" name="newGender" checked={newGender === "Female"} onclick={() => newGender = "Female"} />
+            <input type="radio" name="newGender" checked={newGender === "Female"} onchange={() => newGender = "Female"} />
             ♀
           </label>
         </div>
