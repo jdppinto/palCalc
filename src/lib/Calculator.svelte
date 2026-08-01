@@ -22,15 +22,19 @@
       results = [];
       return;
     }
+    let cancelled = false;
     invoke<BreedResult[]>("calculate_simple", { a, b })
       .then((r) => {
+        if (cancelled) return;
         results = r;
         error = null;
       })
       .catch((e) => {
+        if (cancelled) return;
         error = String(e);
         results = [];
       });
+    return () => { cancelled = true; };
   });
 
   function swap() {
@@ -59,7 +63,7 @@
 
   {#if results.length > 0}
     <div class="results">
-      {#each results as r (r.child + (r.gender_a ?? ""))}
+      {#each results as r (r.child + (r.gender_a ?? "") + (r.gender_b ?? ""))}
         <div class="card">
           {#if r.icon}
             <img src={"/icons/" + r.icon} alt={r.name} />

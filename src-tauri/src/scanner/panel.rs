@@ -382,18 +382,31 @@ impl PanelLayout {
                 let region_cell_lines: Vec<&(String, (i32, i32, u32, u32))> = ocr_lines
                     .iter()
                     .filter(|(_, (lx, ly, lw, lh))| {
-                        let cy = *ly as f32 + *lh as f32 / 2.0;
-                        let cxm = *lx as f32 + *lw as f32 / 2.0;
-                        cy >= y0 as f32
-                            && cy < (y0 + h) as f32
-                            && cxm >= cx as f32
-                            && cxm < (cx + cw) as f32
+                        let ry = *ly as f32;
+                        let rh = *lh as f32;
+                        let rx = *lx as f32;
+                        let rw = *lw as f32;
+                        let cy0 = y0 as f32;
+                        let ch = h as f32;
+                        let cx0 = cx as f32;
+                        let cw0 = cw as f32;
+                        // Overlap (not just center-containment) so that merged
+                        // OCR lines spanning both columns ("Insomia Swift")
+                        // are visible to both sides and token-matched below.
+                        ry < cy0 + ch && ry + rh > cy0 && rx < cx0 + cw0 && rx + rw > cx0
                     })
                     .collect();
                 let region_match = region_cell_lines
                     .iter()
-                    .filter_map(|(text, _)| {
-                        ocr::best_vocab_match(text, passive_names, OCR_MIN_SIM_PASSIVE)
+                    .filter_map(|(text, rect)| {
+                        ocr::best_vocab_match_in_cell(
+                            text,
+                            *rect,
+                            cx,
+                            cw,
+                            passive_names,
+                            OCR_MIN_SIM_PASSIVE,
+                        )
                     })
                     .max_by(|a, b| a.1.total_cmp(&b.1));
                 if let Some((key, _)) = region_match {

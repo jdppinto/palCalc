@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
 use crate::types::*;
@@ -77,16 +77,18 @@ impl GameData {
             }
         }
 
+        let raw_specials: HashMap<TribeKey, Vec<SpecialComboRow>> =
+            serde_json::from_str(SPECIAL_COMBOS)?;
+
+        let special_children: HashSet<TribeKey> = raw_specials.keys().cloned().collect();
+
         let mut eligible: Vec<(i32, i32, TribeKey)> = pals
             .values()
-            .filter(|p| p.child_eligible)
+            .filter(|p| p.child_eligible && !special_children.contains(&p.key))
             .map(|p| (p.rank, p.order, p.key.clone()))
             .collect();
         eligible.sort();
         assert!(!eligible.is_empty(), "no child-eligible pals in data");
-
-        let raw_specials: HashMap<TribeKey, Vec<SpecialComboRow>> =
-            serde_json::from_str(SPECIAL_COMBOS)?;
         let mut specials: HashMap<(TribeKey, TribeKey), Vec<BreedOutcome>> = HashMap::new();
         for (child, rows) in &raw_specials {
             for row in rows {

@@ -324,9 +324,12 @@ pub mod font_validation {
     fn validate_noto_sans_against_real_passive_crops() {
         let fx = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/palbox");
         let cases = [("zone_1_4_passive1.png", "Artisan"), ("zone_1_4_passive3.png", "Swift")];
-        for weight in ["Regular", "Medium", "Bold"] {
-            let bytes = std::fs::read(format!("/usr/share/fonts/noto/NotoSans-{weight}.ttf")).unwrap();
-            let font = FontRef::try_from_slice(&bytes).unwrap();
+        for (weight, bytes) in [
+            ("Regular", include_bytes!("../../../data/fonts/NotoSans-Regular.ttf") as &[_]),
+            ("Medium", include_bytes!("../../../data/fonts/NotoSans-Medium.ttf")),
+            ("Bold", include_bytes!("../../../data/fonts/NotoSans-Bold.ttf")),
+        ] {
+            let font = FontRef::try_from_slice(bytes).unwrap();
             for (file, text) in cases {
                 let crop = image::open(fx.join(file)).unwrap().to_rgba8();
                 let mut best = (-1.0f32, 0.0f32);
@@ -355,8 +358,7 @@ mod font_discrimination {
     fn synthesized_names_discriminate() {
         let fx = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/palbox");
         let gd = GameData::load().unwrap();
-        let bytes = std::fs::read("/usr/share/fonts/noto/NotoSans-Regular.ttf").unwrap();
-        let font = FontRef::try_from_slice(&bytes).unwrap();
+        let font = FontRef::try_from_slice(include_bytes!("../../../data/fonts/NotoSans-Regular.ttf")).unwrap();
         for (file, truth) in [("zone_1_4_passive1.png", "Artisan"), ("zone_1_4_passive3.png", "Swift")] {
             let crop = image::open(fx.join(file)).unwrap().to_rgba8();
             let mut scores: Vec<(String, f32)> = gd
@@ -391,8 +393,7 @@ mod name_discrimination {
     fn synthesized_species_name_discriminates() {
         let fx = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/palbox");
         let gd = GameData::load().unwrap();
-        let bytes = std::fs::read("/usr/share/fonts/noto/NotoSans-Bold.ttf").unwrap();
-        let font = FontRef::try_from_slice(&bytes).unwrap();
+        let font = FontRef::try_from_slice(include_bytes!("../../../data/fonts/NotoSans-Bold.ttf")).unwrap();
         let crop = image::open(fx.join("name_lifmunk.png")).unwrap().to_rgba8();
         let mut scores: Vec<(String, f32)> = gd
             .pals

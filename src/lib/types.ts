@@ -26,6 +26,7 @@ export interface OwnedPal {
   species: string;
   label: string;
   passives: string[];
+  gender: Gender | null;
 }
 
 export interface PlanRequest {
@@ -35,6 +36,7 @@ export interface PlanRequest {
   assume_wild: boolean;
   max_steps?: number;
   max_routes?: number;
+  reversers: number;
 }
 
 export interface RouteNode {
@@ -53,6 +55,7 @@ export interface Route {
   covered: string[];
   missing: string[];
   root: RouteNode;
+  reversers_used: number;
 }
 
 export interface PlanStats {

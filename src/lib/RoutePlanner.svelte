@@ -23,10 +23,14 @@
   let target = $state<string | null>(null);
   let desired = $state<string[]>([]);
   let assumeWild = $state(false);
-  let maxSteps = $state(500);
+  const WARN_STEP_THRESHOLD = 500;
+  let maxSteps = $state(WARN_STEP_THRESHOLD);
+  let reversers = $state(0);
 
   let newSpecies = $state<string | null>(null);
   let newPassives = $state<string[]>([]);
+  let newGender = $state<Gender | null>(null);
+  let detailsOpen = $state(ownedStore.list.length > 0);
 
   let routes = $state<Route[] | null>(null);
   let stats = $state<PlanStats | null>(null);
@@ -49,14 +53,20 @@
 
   function addOwned() {
     if (!newSpecies) return;
-    const count = ownedStore.list.filter((o) => o.species === newSpecies).length;
     addOwnedPal({
       species: newSpecies,
-      label: `${palName(newSpecies)} #${count + 1}`,
+      label: `${palName(newSpecies)} #${ownedStore.list.length + 1}`,
       passives: newPassives,
+      gender: newGender,
     });
+    detailsOpen = true;
     newSpecies = null;
     newPassives = [];
+    newGender = null;
+  }
+
+  function genderSymbol(g: Gender | null): string {
+    return g === "Male" ? " ♂" : g === "Female" ? " ♀" : "";
   }
 
   async function planRoutes() {
@@ -70,7 +80,8 @@
           desired_passives: desired,
           owned: ownedStore.list,
           assume_wild: assumeWild,
-          max_steps: maxSteps,
+          max_steps: Number.isFinite(maxSteps) ? maxSteps : 500,
+          reversers,
         },
       });
       routes = out.routes;
@@ -84,14 +95,11 @@
     }
   }
 
-  function genderSymbol(g: Gender | null): string {
-    return g === "Male" ? " ♂" : g === "Female" ? " ♀" : "";
-  }
 </script>
 
 {#snippet tree(node: RouteNode, gender: Gender | null)}
   <li>
-    <div class="node" class:leaf={node.owned !== null}>
+    <div class="node">
       {#if node.icon}
         <img src={"/icons/" + node.icon} alt="" />
       {/if}
@@ -124,13 +132,17 @@
         <input type="checkbox" bind:checked={assumeWild} />
         assume wild catches
       </label>
+      <label class="rev">
+        reversers
+        <input type="number" min="0" bind:value={reversers} />
+      </label>
       <label class="depth">
         max steps
         <input type="number" min="1" bind:value={maxSteps} />
       </label>
     </div>
 
-    {#if maxSteps > 500}
+    {#if maxSteps > WARN_STEP_THRESHOLD}
       <p class="warn">
         ⚠ {maxSteps}-step budget — with many desired passives and owned pals
         this can get expensive and your PC will suffer. (Often the search
@@ -140,17 +152,31 @@
 
     <PassivePicker {passives} bind:selected={desired} label="Desired passives (up to 8)" />
 
-    <details open={ownedStore.list.length > 0}>
+    <details bind:open={detailsOpen}>
       <summary>Owned pals ({ownedStore.list.length})</summary>
       <div class="owned-add">
         <PalSelect {pals} bind:value={newSpecies} label="Species" />
         <div class="owned-passives">
-          <PassivePicker
-            {passives}
-            bind:selected={newPassives}
-            max={4}
-            label="Its passives (up to 4)"
-          />
+        <PassivePicker
+          {passives}
+          bind:selected={newPassives}
+          max={4}
+          label="Its passives (up to 4)"
+        />
+        </div>
+        <div class="owned-gender">
+          <label>
+            <input type="radio" name="newGender" checked={newGender === null} onchange={() => newGender = null} />
+            any
+          </label>
+          <label>
+            <input type="radio" name="newGender" checked={newGender === "Male"} onchange={() => newGender = "Male"} />
+            ♂
+          </label>
+          <label>
+            <input type="radio" name="newGender" checked={newGender === "Female"} onchange={() => newGender = "Female"} />
+            ♀
+          </label>
         </div>
         <button class="add" onclick={addOwned} disabled={!newSpecies}>Add</button>
       </div>
@@ -158,7 +184,7 @@
         <ul class="owned-list">
           {#each ownedStore.list as o, i (i)}
             <li>
-              <span>{o.label}</span>
+              <span>{o.label}{genderSymbol(o.gender)}</span>
               <span class="dim">
                 {o.passives.length
                   ? o.passives.map(passiveName).join(", ")
@@ -207,6 +233,9 @@
             <header>
               <strong>Route {i + 1}</strong>
               <span>{r.steps} step{r.steps === 1 ? "" : "s"}</span>
+              {#if r.reversers_used}
+                <span class="tag rev">♻{r.reversers_used}</span>
+              {/if}
               {#each r.covered as p (p)}
                 <span class="tag passive">✓ {p}</span>
               {/each}
@@ -255,6 +284,7 @@
     white-space: nowrap;
   }
 
+  .rev,
   .depth {
     display: flex;
     align-items: center;
@@ -262,6 +292,15 @@
     padding-bottom: 0.35rem;
     color: var(--text-dim);
     white-space: nowrap;
+  }
+
+  .rev input {
+    width: 3.2rem;
+    padding: 0.3rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
   }
 
   .depth input {
@@ -293,6 +332,21 @@
 
   .owned-passives {
     flex: 1.4;
+  }
+
+  .owned-gender {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    padding-bottom: 0.15rem;
+  }
+
+  .owned-gender label {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    cursor: pointer;
+    font-size: 0.9rem;
   }
 
   .add {
@@ -445,6 +499,11 @@
   .tag.missing {
     background: rgba(239, 68, 68, 0.15);
     color: #f87171;
+  }
+
+  .tag.rev {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
   }
 
   .warn {

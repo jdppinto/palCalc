@@ -43,9 +43,344 @@ pub fn detect() -> Result<Box<dyn Backend>, String> {
                 .into(),
         )
     }
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(target_os = "windows")]
     {
-        Err("scanner backend for this OS is not implemented yet (Windows planned)".into())
+        Ok(Box::new(windows_impl::WinBackend::new()))
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "windows")))]
+    {
+        Err("scanner backend not implemented for this OS".into())
+    }
+}
+
+#[cfg(target_os = "windows")]
+mod windows_impl {
+    use super::{Backend, WindowInfo};
+    use image::RgbaImage;
+    use std::ffi::c_void;
+
+    pub struct WinBackend;
+
+    impl WinBackend {
+        pub fn new() -> Self {
+            WinBackend
+        }
+    }
+
+    #[allow(non_snake_case)]
+    #[allow(non_camel_case_types)]
+    mod ffi {
+        use std::ffi::c_void;
+        #[repr(C)]
+        pub struct RECT {
+            pub left: i32,
+            pub top: i32,
+            pub right: i32,
+            pub bottom: i32,
+        }
+
+        #[repr(C)]
+        pub struct POINT {
+            pub x: i32,
+            pub y: i32,
+        }
+
+        #[repr(C)]
+        pub struct MONITORINFO {
+            pub cb_size: u32,
+            pub rc_monitor: RECT,
+            pub rc_work: RECT,
+            pub dw_flags: u32,
+        }
+
+        #[repr(C)]
+        pub struct BITMAPINFOHEADER {
+            pub bi_size: u32,
+            pub bi_width: i32,
+            pub bi_height: i32,
+            pub bi_planes: u16,
+            pub bi_bit_count: u16,
+            pub bi_compression: u32,
+            pub bi_size_image: u32,
+            pub bi_x_pels_per_meter: i32,
+            pub bi_y_pels_per_meter: i32,
+            pub bi_clr_used: u32,
+            pub bi_clr_important: u32,
+        }
+
+        pub const SRCCOPY: u32 = 0x00CC0020;
+        pub const KEYEVENTF_KEYUP: u32 = 0x0002;
+        pub const MONITOR_DEFAULTTONEAREST: u32 = 2;
+        pub const DIB_RGB_COLORS: u32 = 0;
+        pub const SM_CXVIRTUALSCREEN: i32 = 78;
+        pub const SM_CYVIRTUALSCREEN: i32 = 79;
+        pub const SM_XVIRTUALSCREEN: i32 = 76;
+        pub const SM_YVIRTUALSCREEN: i32 = 77;
+
+        extern "system" {
+            pub fn GetDC(hWnd: isize) -> isize;
+            pub fn ReleaseDC(hWnd: isize, hDC: isize) -> i32;
+            pub fn CreateCompatibleDC(hdc: isize) -> isize;
+            pub fn DeleteDC(hdc: isize) -> i32;
+            pub fn CreateCompatibleBitmap(hdc: isize, cx: i32, cy: i32) -> isize;
+            pub fn DeleteObject(hObject: isize) -> i32;
+            pub fn SelectObject(hdc: isize, hgdiobj: isize) -> isize;
+            pub fn BitBlt(
+                hdc: isize,
+                x: i32,
+                y: i32,
+                cx: i32,
+                cy: i32,
+                hdcSrc: isize,
+                x1: i32,
+                y1: i32,
+                rop: u32,
+            ) -> i32;
+            pub fn GetDIBits(
+                hdc: isize,
+                hbmp: isize,
+                start: u32,
+                lines: u32,
+                lpvBits: *mut c_void,
+                lpbmi: *mut BITMAPINFOHEADER,
+                usage: u32,
+            ) -> i32;
+            pub fn EnumWindows(
+                lpEnumFunc: Option<
+                    unsafe extern "system" fn(isize, isize) -> i32,
+                >,
+                lParam: isize,
+            ) -> i32;
+            pub fn GetWindowTextW(
+                hWnd: isize,
+                lpString: *mut u16,
+                nMaxCount: i32,
+            ) -> i32;
+            pub fn GetWindowRect(hWnd: isize, lpRect: *mut RECT) -> i32;
+            pub fn IsWindowVisible(hWnd: isize) -> i32;
+            pub fn GetCursorPos(lpPoint: *mut POINT) -> i32;
+            pub fn SetCursorPos(x: i32, y: i32) -> i32;
+            pub fn keybd_event(
+                bVk: u8,
+                bScan: u8,
+                dwFlags: u32,
+                dwExtraInfo: usize,
+            );
+            pub fn GetForegroundWindow() -> isize;
+            pub fn MonitorFromWindow(hwnd: isize, dwFlags: u32) -> isize;
+            pub fn GetMonitorInfoW(
+                hMonitor: isize,
+                lpmi: *mut MONITORINFO,
+            ) -> i32;
+            pub fn GetSystemMetrics(nIndex: i32) -> i32;
+        }
+    }
+
+    fn vk_from_keycode(keycode: u16) -> Result<u8, String> {
+        match keycode {
+            18 => Ok(0x45), // KEY_E -> VK_E
+            _ => Err(format!("unmapped keycode {keycode}")),
+        }
+    }
+
+    fn capture_gdi(x: i32, y: i32, w: u32, h: u32) -> Result<RgbaImage, String> {
+        use self::ffi::*;
+        unsafe {
+            let hdc = GetDC(0);
+            if hdc == 0 {
+                return Err("GetDC failed".into());
+            }
+            let mem_dc = CreateCompatibleDC(hdc);
+            if mem_dc == 0 {
+                ReleaseDC(0, hdc);
+                return Err("CreateCompatibleDC failed".into());
+            }
+            let hbmp = CreateCompatibleBitmap(hdc, w as i32, h as i32);
+            if hbmp == 0 {
+                DeleteDC(mem_dc);
+                ReleaseDC(0, hdc);
+                return Err("CreateCompatibleBitmap failed".into());
+            }
+            SelectObject(mem_dc, hbmp);
+            BitBlt(mem_dc, 0, 0, w as i32, h as i32, hdc, x, y, SRCCOPY);
+
+            let mut bmi = BITMAPINFOHEADER {
+                bi_size: std::mem::size_of::<BITMAPINFOHEADER>() as u32,
+                bi_width: w as i32,
+                bi_height: -(h as i32),
+                bi_planes: 1,
+                bi_bit_count: 32,
+                bi_compression: 0,
+                bi_size_image: 0,
+                bi_x_pels_per_meter: 0,
+                bi_y_pels_per_meter: 0,
+                bi_clr_used: 0,
+                bi_clr_important: 0,
+            };
+
+            let buf_size = w as usize * h as usize * 4;
+            let mut pixels = vec![0u8; buf_size];
+            let ret = GetDIBits(
+                hdc,
+                hbmp,
+                0,
+                h,
+                pixels.as_mut_ptr() as *mut c_void,
+                &mut bmi,
+                DIB_RGB_COLORS,
+            );
+
+            DeleteObject(hbmp);
+            DeleteDC(mem_dc);
+            ReleaseDC(0, hdc);
+
+            if ret == 0 {
+                return Err("GetDIBits failed".into());
+            }
+
+            for pixel in pixels.chunks_exact_mut(4) {
+                pixel.swap(0, 2);
+            }
+
+            RgbaImage::from_raw(w, h, pixels)
+                .ok_or_else(|| "RgbaImage::from_raw failed".into())
+        }
+    }
+
+    unsafe extern "system" fn enum_proc(
+        hwnd: isize,
+        lparam: isize,
+    ) -> i32 {
+        use self::ffi::*;
+        if IsWindowVisible(hwnd) == 0 {
+            return 1;
+        }
+        let mut buf = [0u16; 512];
+        let len = GetWindowTextW(hwnd, buf.as_mut_ptr(), 512);
+        if len <= 0 {
+            return 1;
+        }
+        let title = String::from_utf16_lossy(&buf[..len as usize]);
+        if title.is_empty() {
+            return 1;
+        }
+        let mut rect = RECT {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
+        if GetWindowRect(hwnd, &mut rect) == 0 {
+            return 1;
+        }
+        let windows = &mut *(lparam as *mut Vec<WindowInfo>);
+        windows.push(WindowInfo {
+            title,
+            x: rect.left,
+            y: rect.top,
+            w: (rect.right - rect.left).max(0) as u32,
+            h: (rect.bottom - rect.top).max(0) as u32,
+        });
+        1
+    }
+
+    impl Backend for WinBackend {
+        fn name(&self) -> &'static str {
+            "windows (GDI)"
+        }
+
+        fn list_windows(&mut self) -> Result<Vec<WindowInfo>, String> {
+            let mut windows = Vec::new();
+            unsafe {
+                let ret = ffi::EnumWindows(
+                    Some(enum_proc),
+                    &mut windows as *mut Vec<WindowInfo> as isize,
+                );
+                if ret == 0 {
+                    return Err("EnumWindows failed".into());
+                }
+            }
+            Ok(windows)
+        }
+
+        fn capture_region(
+            &mut self,
+            x: i32,
+            y: i32,
+            w: u32,
+            h: u32,
+        ) -> Result<RgbaImage, String> {
+            capture_gdi(x, y, w, h)
+        }
+
+        fn move_cursor(&mut self, x: i32, y: i32) -> Result<(), String> {
+            unsafe {
+                if ffi::SetCursorPos(x, y) == 0 {
+                    return Err("SetCursorPos failed".into());
+                }
+            }
+            Ok(())
+        }
+
+        fn cursor_pos(&mut self) -> Result<(i32, i32), String> {
+            let mut pt = ffi::POINT { x: 0, y: 0 };
+            unsafe {
+                if ffi::GetCursorPos(&mut pt) == 0 {
+                    return Err("GetCursorPos failed".into());
+                }
+            }
+            Ok((pt.x, pt.y))
+        }
+
+        fn focused_monitor_rect(
+            &mut self,
+        ) -> Result<(i32, i32, u32, u32), String> {
+            unsafe {
+                let hwnd = ffi::GetForegroundWindow();
+                let monitor =
+                    ffi::MonitorFromWindow(hwnd, ffi::MONITOR_DEFAULTTONEAREST);
+                let mut mi = ffi::MONITORINFO {
+                    cb_size: std::mem::size_of::<ffi::MONITORINFO>() as u32,
+                    rc_monitor: ffi::RECT {
+                        left: 0,
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                    },
+                    rc_work: ffi::RECT {
+                        left: 0,
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                    },
+                    dw_flags: 0,
+                };
+                if ffi::GetMonitorInfoW(monitor, &mut mi) == 0 {
+                    // fallback: use virtual screen bounds
+                    let x = ffi::GetSystemMetrics(ffi::SM_XVIRTUALSCREEN);
+                    let y = ffi::GetSystemMetrics(ffi::SM_YVIRTUALSCREEN);
+                    let w = ffi::GetSystemMetrics(ffi::SM_CXVIRTUALSCREEN);
+                    let h = ffi::GetSystemMetrics(ffi::SM_CYVIRTUALSCREEN);
+                    return Ok((x, y, w.max(0) as u32, h.max(0) as u32));
+                }
+                let r = mi.rc_monitor;
+                Ok((
+                    r.left,
+                    r.top,
+                    (r.right - r.left).max(0) as u32,
+                    (r.bottom - r.top).max(0) as u32,
+                ))
+            }
+        }
+
+        fn key(&mut self, keycode: u16) -> Result<(), String> {
+            let vk = vk_from_keycode(keycode)?;
+            unsafe {
+                ffi::keybd_event(vk, 0, 0, 0);
+                ffi::keybd_event(vk, 0, ffi::KEYEVENTF_KEYUP, 0);
+            }
+            Ok(())
+        }
     }
 }
 
