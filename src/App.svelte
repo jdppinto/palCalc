@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import BreedingTree from "./lib/BreedingTree.svelte";
   import Calculator from "./lib/Calculator.svelte";
-  import { initOwnedStore } from "./lib/owned.svelte";
+  import { flushSave, initOwnedStore } from "./lib/owned.svelte";
   import PalboxScanner from "./lib/PalboxScanner.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import type { Route } from "./lib/types";
@@ -11,7 +11,11 @@
   let tab = $state<Tab>("calculator");
   let treeRoute = $state<Route | null>(null);
 
-  onMount(() => initOwnedStore());
+  onMount(() => {
+    initOwnedStore();
+    window.addEventListener("beforeunload", flushSave);
+    return () => window.removeEventListener("beforeunload", flushSave);
+  });
 
   function showTree(route: Route) {
     treeRoute = route;

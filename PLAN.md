@@ -67,11 +67,14 @@ pcalc/
 │   │   ├── RoutePlanner.svelte       # Advanced: target + passives + owned pals
 │   │   ├── BreedingTree.svelte       # SVG/D3 zoomable tree
 │   │   ├── PalboxScanner.svelte      # Scan UI: window select, progress, results
-│   │   ├── PalList.svelte            # Owned pals display & management
+│   │   ├── PalSelect.svelte          # Searchable pal dropdown component
+│   │   ├── PassivePicker.svelte      # Passive skill selection component
+│   │   ├── owned.svelte.ts           # Owned pals store (file-backed persistence)
 │   │   └── types.ts                  # TS types mirroring Rust types
 │   └── main.ts
 ├── package.json
-├── tauri.conf.json
+├── src-tauri/
+│   └── tauri.conf.json
 └── PLAN.md
 ```
 
@@ -225,9 +228,8 @@ One runtime-selected `Backend` trait: `list_windows`, `capture_region`,
     variants for 0.55+) until one is accepted. Relative travel via **`ydotool`**
     (uinput virtual mouse) when present — needed to generate real motion events so
     the game registers the hover.
-- **Windows / X11:** **not implemented** — the fallback backend returns
-  `"scanner backend for this OS is not implemented yet (Windows planned)"`. (`xcap`/`enigo`
-  from the original plan were never added.)
+- **Windows:** Implemented via `xcap` (DXGI screen capture) and `enigo` (mouse/keyboard). The Windows backend provides `list_windows`, `capture_region`, `move_cursor`, `cursor_pos`, and `focused_monitor_rect`.
+- **X11:** Not implemented — the fallback backend returns an error.
 
 ### Calibration (`GridCalibration` in `palbox.rs`, saved to `~/.config/palcalc/calibration.json`)
 Note the config dir is `palcalc/`, not the plan's old `pcalc/`. Fields:
@@ -301,7 +303,7 @@ Progress via the `on_progress` callback (`ScanProgress { current, total, species
 - `SlotResult { row, col, species, unidentified, score, gender, passives, passive_unknowns, crop_png }`.
   `unidentified` distinguishes "occupied but no confident match" (offer a
   correction / teach flow) from "empty".
-- Owned pals auto-save to `~/.config/palcalc/owned_pals.json` via store subscription.
+- Owned pals auto-save to `<exe_dir>/palcalc/owned_pals.json` (Windows) or `~/.config/palcalc/owned_pals.json` (Linux) via Tauri commands.
 - **Not implemented vs. original plan:** no 4-step click-corner wizard, no
   auto-pagination across boxes, no `palbox_cache.json` load-on-start,
   no F-detail-view fallback capture.
@@ -310,7 +312,7 @@ Progress via the `on_progress` callback (`ScanProgress { current, total, species
 
 1. **Connected workflow**: Scanner populates "Owned Pals" list → Route Planner auto-filters to owned
 2. **Manual pal management**: Add/edit/delete pals with passives, import/export JSON
-3. **Persistence**: Owned pals auto-saved to `~/.config/pcalc/owned_pals.json` via store subscription, loaded on app start. Scanned pal cache saved (not auto-loaded). Saved routes/recent calculations not yet implemented.
+3. **Persistence**: Owned pals auto-saved to `<exe_dir>/palcalc/owned_pals.json` (Windows) or `~/.config/palcalc/owned_pals.json` (Linux) via Tauri commands, loaded on app start. Scanned pal cache saved (not auto-loaded). Saved routes/recent calculations not yet implemented.
 4. **Export route**: JSON export of a breeding route (shareable)
 5. **Bundling**: Tauri build → `.msi` (Windows), `.AppImage`/`.deb` (Linux)
 
@@ -336,5 +338,5 @@ What the logic rests on, ranked by how well-established it is. Anything below "c
 - **Passive scoring**: Deterministic heuristic (no probabilities). `+1` per desired, `-0.25` per undesired. Chosen because real inheritance odds are community-tested only and contested (see Mechanics Confidence).
 - **Beam search**: Width=1000, prune dominated paths (more steps + lower score).
 - **Tree rendering**: Svelte-rendered SVG; zoom/pan via `d3-zoom` + `d3-selection` micro-packages only, with `<foreignObject>` for rich node content.
-- **Cross-platform strategy**: one `Backend` trait (capture + input + window geometry), selected at runtime. **Only the Hyprland/Wayland backend is implemented** (`libwayshot` wlr-screencopy + hand-rolled Hyprland IPC socket client + `ydotool` motion, `grim` capture fallback). The `hyprland` crate was dropped (panics on socket errors). Windows (`xcap`/`enigo`) and X11 are **not yet built** — the fallback backend errors out. GNOME/KDE portal capture out of scope for v1.
+- **Cross-platform strategy**: one `Backend` trait (capture + input + window geometry), selected at runtime. **Hyprland/Wayland** uses `libwayshot` wlr-screencopy + hand-rolled Hyprland IPC socket client + `ydotool` motion, `grim` capture fallback. **Windows** uses `xcap` (DXGI) + `enigo` (input). X11 is **not yet built** — the fallback backend errors out. GNOME/KDE portal capture out of scope for v1.
 - **Special combos with gender**: `ga`/`gb` fields tracked; gender-aware pathfinding flags gender requirements. Only 2 of 258 combos are gendered (Katress/Wixen pair). Note the encoding differs across files: `"M"`/`"F"` in `special_combos.json` vs `"NoneMale"`/`"NoneFemale"` in the redundant `game_data.json`.
