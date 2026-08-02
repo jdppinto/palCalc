@@ -489,7 +489,7 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         cols: 6,
         rows: 5,
         slot_size: ((96.0 * sx) as u32).max(40),
-        delay_ms: 300,
+        delay_ms: 100,
         panel: Some(panel),
         zones,
     };

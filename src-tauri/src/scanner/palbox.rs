@@ -49,7 +49,7 @@ impl Default for GridCalibration {
             cols: 6,
             rows: 5,
             slot_size: 90,
-            delay_ms: 300,
+            delay_ms: 100,
             panel: None,
             zones: HashMap::new(),
         }
@@ -120,13 +120,7 @@ impl GridCalibration {
     }
 
     pub fn config_path() -> std::path::PathBuf {
-        let base = std::env::var_os("XDG_CONFIG_HOME")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|| {
-                std::path::PathBuf::from(std::env::var_os("HOME").unwrap_or_default())
-                    .join(".config")
-            });
-        base.join("palcalc").join("calibration.json")
+        super::config::palcalc_dir().join("calibration.json")
     }
 
     pub fn load() -> Option<Self> {
@@ -631,10 +625,7 @@ pub fn scan_boxes(
 /// it with captures plus a report.json carrying the log, the calibration and
 /// the cached layout — one `cp -r` hands the whole context over.
 pub fn debug_report_dir() -> std::path::PathBuf {
-    GridCalibration::config_path()
-        .parent()
-        .map(|p| p.join("debug-report"))
-        .unwrap_or_else(|| std::path::PathBuf::from("debug-report"))
+    super::config::palcalc_dir().join("debug-report")
 }
 
 pub fn reset_report_dir() -> Result<std::path::PathBuf, String> {
