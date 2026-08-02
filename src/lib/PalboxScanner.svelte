@@ -281,6 +281,7 @@
         calib.panel = rect;
         await invoke("save_calibration", { calib });
         calibSaved = true;
+        await refreshStatus();
         log(`panel bounds set (${rect.join(", ")})`);
       } else {
         await invoke("save_zone", { key: zoneAspect, rect });
@@ -376,6 +377,17 @@
     }
   });
 
+  async function refreshStatus() {
+    try {
+      status = await invoke<ScannerStatus>("scanner_status");
+      if (status.calibration) {
+        calib = status.calibration;
+      }
+    } catch (e) {
+      error = String(e);
+    }
+  }
+
   function pal(key: string | null): PalEntry | undefined {
     return pals.find((p) => p.key === key);
   }
@@ -389,6 +401,7 @@
       calib = await invoke<Calib>("apply_default_calibration");
       calibSaved = true;
       error = null;
+      await refreshStatus();
     } catch (e) {
       error = String(e);
     }
@@ -426,6 +439,7 @@
       await invoke("save_calibration", { calib });
       calibSaved = true;
       error = null;
+      await refreshStatus();
     } catch (e) {
       error = String(e);
     }
