@@ -22,7 +22,7 @@ const DEFAULT_MAX_ROUTES: usize = 10;
 const MAX_DESIRED: usize = 12;
 const PARETO_CAP: usize = 24;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OwnedPal {
     pub species: TribeKey,
     #[serde(default)]

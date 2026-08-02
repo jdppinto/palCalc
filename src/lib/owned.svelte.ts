@@ -1,22 +1,51 @@
-// Shared owned-pals store: the Route Planner edits it, the Scanner feeds it.
-// Persisted to localStorage; loaded synchronously so a save can never observe
-// (and clobber) a transient empty list.
+import { invoke } from "@tauri-apps/api/core";
 import type { OwnedPal } from "./types";
 
-const KEY = "palcalc.owned";
+let _initialized = false;
+let _pendingSave: OwnedPal[] | null = null;
+let _saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-function load(): OwnedPal[] {
+export const ownedStore = $state<{ list: OwnedPal[] }>({ list: [] });
+
+export async function initOwnedStore() {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const pals = await invoke<OwnedPal[]>("load_owned_pals");
+    if (pals.length > 0) {
+      ownedStore.list = pals;
+    } else {
+      const raw = localStorage.getItem("palcalc.owned");
+      if (raw) {
+        const migrated = JSON.parse(raw) as OwnedPal[];
+        ownedStore.list = migrated;
+        await invoke("save_owned_pals", { pals: migrated });
+        localStorage.removeItem("palcalc.owned");
+      }
+    }
   } catch {
-    return [];
+    const raw = localStorage.getItem("palcalc.owned");
+    if (raw) {
+      const migrated = JSON.parse(raw) as OwnedPal[];
+      ownedStore.list = migrated;
+      await invoke("save_owned_pals", { pals: migrated });
+      localStorage.removeItem("palcalc.owned");
+    }
+  }
+  _initialized = true;
+  if (_pendingSave) {
+    invoke("save_owned_pals", { pals: _pendingSave });
+    _pendingSave = null;
   }
 }
 
-export const ownedStore = $state<{ list: OwnedPal[] }>({ list: load() });
-
 function save() {
-  localStorage.setItem(KEY, JSON.stringify(ownedStore.list));
+  if (!_initialized) {
+    _pendingSave = [...ownedStore.list];
+    return;
+  }
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    invoke("save_owned_pals", { pals: ownedStore.list });
+  }, 100);
 }
 
 export function addOwnedPal(p: OwnedPal) {

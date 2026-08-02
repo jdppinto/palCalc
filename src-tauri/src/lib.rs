@@ -1,6 +1,6 @@
 mod scanner;
 
-use palcalc_core::{plan_routes, GameData, Gender, PlanOutcome, PlanRequest};
+use palcalc_core::{plan_routes, GameData, Gender, OwnedPal, PlanOutcome, PlanRequest};
 use serde::Serialize;
 use std::sync::atomic::Ordering;
 use tauri::{Emitter, State};
@@ -179,6 +179,29 @@ fn save_zone(key: String, rect: Option<(i32, i32, u32, u32)>) -> Result<(), Stri
 #[tauri::command]
 fn abort_scan() {
     SCAN_ABORT.store(true, Ordering::Relaxed);
+}
+
+#[tauri::command]
+fn load_owned_pals() -> Result<Vec<OwnedPal>, String> {
+    let path = scanner::config::palcalc_dir().join("owned_pals.json");
+    if !path.exists() {
+        return Ok(vec![]);
+    }
+    let data = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    serde_json::from_str(&data).map_err(|e| e.to_string())
+}
+
+// SAFETY: This must remain synchronous (not async fn) to ensure
+// serialized file access. If changed to async, add a Mutex.
+#[tauri::command]
+fn save_owned_pals(pals: Vec<OwnedPal>) -> Result<(), String> {
+    let dir = scanner::config::palcalc_dir();
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let path = dir.join("owned_pals.json");
+    let data = serde_json::to_string_pretty(&pals).map_err(|e| e.to_string())?;
+    let tmp = dir.join("owned_pals.json.tmp");
+    std::fs::write(&tmp, data).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
 }
 
 #[derive(Serialize)]
@@ -549,7 +572,9 @@ pub fn run() {
             save_passive_label,
             apply_default_calibration,
             debug_grid_capture,
-            debug_sheet_read
+            debug_sheet_read,
+            load_owned_pals,
+            save_owned_pals
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import BreedingTree from "./lib/BreedingTree.svelte";
   import Calculator from "./lib/Calculator.svelte";
+  import { initOwnedStore } from "./lib/owned.svelte";
   import PalboxScanner from "./lib/PalboxScanner.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import type { Route } from "./lib/types";
@@ -8,6 +10,8 @@
   type Tab = "calculator" | "planner" | "scanner" | "tree";
   let tab = $state<Tab>("calculator");
   let treeRoute = $state<Route | null>(null);
+
+  onMount(() => initOwnedStore());
 
   function showTree(route: Route) {
     treeRoute = route;
