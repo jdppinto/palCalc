@@ -49,7 +49,7 @@ impl Default for GridCalibration {
             cols: 6,
             rows: 5,
             slot_size: 90,
-            delay_ms: 300,
+            delay_ms: 100,
             panel: None,
             zones: HashMap::new(),
         }
