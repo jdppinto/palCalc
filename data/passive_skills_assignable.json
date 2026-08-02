@@ -2250,5 +2250,31 @@
       "add_world_tree_pal": false,
       "add_mutation_pal": false
     }
+  },
+  "MiniNushi": {
+    "name": "Whopper",
+    "description": "{EffectValue1}% increase to Water attack damage \r\n{EffectValue1}% increase to Ice attack damage \r\n{EffectValue1}% increase to defense.",
+    "rank": 3,
+    "weight": 100,
+    "effects": [
+      {
+        "type": "ElementBoost_Water",
+        "value": 5.0
+      },
+      {
+        "type": "ElementBoost_Ice",
+        "value": 5.0
+      },
+      {
+        "type": "Defense",
+        "value": 5.0
+      }
+    ],
+    "flags": {
+      "add_pal": false,
+      "add_rare_pal": false,
+      "add_world_tree_pal": false,
+      "add_mutation_pal": false
+    }
   }
 }
