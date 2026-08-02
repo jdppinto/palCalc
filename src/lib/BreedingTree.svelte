@@ -416,15 +416,15 @@
   }
 
   .passive-chip {
-    fill: rgba(255, 255, 255, 0.08);
-    stroke: rgba(255, 255, 255, 0.15);
+    fill: rgba(255, 255, 255, 0.06);
+    stroke: rgba(255, 255, 255, 0.1);
     stroke-width: 0.5;
   }
 
   .passive-chip.desired {
     fill: var(--accent-soft, rgba(99, 102, 241, 0.2));
     stroke: var(--accent, #6366f1);
-    stroke-width: 0.8;
+    stroke-width: 1.2;
   }
 
   .passive-chip.covered {
