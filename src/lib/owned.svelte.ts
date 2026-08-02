@@ -33,3 +33,8 @@ export function removeOwnedAt(i: number) {
   ownedStore.list = ownedStore.list.filter((_, j) => j !== i);
   save();
 }
+
+export function clearAllOwned() {
+  ownedStore.list = [];
+  save();
+}

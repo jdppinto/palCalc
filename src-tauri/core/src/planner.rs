@@ -62,6 +62,12 @@ pub struct RouteNode {
     pub owned: Option<String>,
     /// Display names of desired passives this leaf contributes (leaves only).
     pub passives: Vec<String>,
+    /// All passives on this pal (owned leaves only, empty for bred/wild).
+    pub all_passives: Vec<String>,
+    /// Desired passives covered by this subtree (all nodes).
+    pub covered_passives: Vec<String>,
+    /// The pal's own gender (owned leaves only).
+    pub gender: Option<Gender>,
     /// Gender requirements for parents[0] / parents[1] (gendered specials).
     pub gender_a: Option<Gender>,
     pub gender_b: Option<Gender>,
@@ -450,7 +456,7 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
                 covered,
                 missing,
                 reversers_used: s.reversed_mask.count_ones() as u32,
-                root: build_node(gd, &keys, &states, &req.owned, &passive_bit, id),
+                root: build_node(gd, &keys, &states, &req.owned, &passive_bit, &desired_names, id),
             }
         })
         .collect();
@@ -552,17 +558,25 @@ fn build_node(
     states: &[St],
     owned: &[OwnedPal],
     passive_bit: &HashMap<&str, u16>,
+    desired_display: &[String],
     id: u32,
 ) -> RouteNode {
     let s = &states[id as usize];
     let species = keys[s.species as usize].clone();
     let info = &gd.pals[&species];
+    let covered_passives: Vec<String> = (0..desired_display.len())
+        .filter(|i| s.mask & (1 << *i as u16) != 0)
+        .map(|i| desired_display[i].clone())
+        .collect();
     let mut node = RouteNode {
         name: info.name.clone(),
         icon: gd.icons.get(&species).cloned(),
         species,
         owned: None,
         passives: Vec::new(),
+        all_passives: Vec::new(),
+        covered_passives,
+        gender: None,
         gender_a: None,
         gender_b: None,
         parents: Vec::new(),
@@ -571,11 +585,17 @@ fn build_node(
         Prov::Wild => node.owned = Some("wild".into()),
         Prov::Owned(oi, _) => {
             let o = &owned[oi as usize];
+            node.gender = o.gender;
             node.owned = Some(if o.label.is_empty() {
                 info.name.clone()
             } else {
                 o.label.clone()
             });
+            node.all_passives = o
+                .passives
+                .iter()
+                .filter_map(|p| gd.passives.get(p.as_str()).map(|ps| ps.name.clone()))
+                .collect();
             node.passives = o
                 .passives
                 .iter()
@@ -592,8 +612,8 @@ fn build_node(
             node.gender_a = gender_a;
             node.gender_b = gender_b;
             node.parents = vec![
-                build_node(gd, keys, states, owned, passive_bit, a),
-                build_node(gd, keys, states, owned, passive_bit, b),
+                build_node(gd, keys, states, owned, passive_bit, desired_display, a),
+                build_node(gd, keys, states, owned, passive_bit, desired_display, b),
             ];
         }
     }

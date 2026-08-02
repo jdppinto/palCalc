@@ -5,10 +5,10 @@
 
   let { route }: { route: Route | null } = $props();
 
-  const NODE_W = 168;
-  const NODE_H = 48;
+  const NODE_W = 172;
+  const NODE_H = 68;
   const GAP_X = 26;
-  const GAP_Y = 90;
+  const GAP_Y = 110;
 
   interface Laid {
     node: RouteNode;
@@ -209,7 +209,7 @@
                 />
               {/if}
               <text x="48" y={l.node.owned || l.collapsed ? 20 : 29} class="name">
-                {l.node.name}{genderSymbol(l.gender)}
+                {l.node.name}{genderSymbol(l.node.gender)}
               </text>
               {#if l.collapsed}
                 <text x="48" y="38" class="sub">▸ collapsed</text>
@@ -217,6 +217,74 @@
                 <text x="48" y="38" class="sub">wild catch</text>
               {:else if l.node.owned !== null}
                 <text x="48" y="38" class="sub">{l.node.owned}</text>
+              {/if}
+              {#if l.node.all_passives.length > 0}
+                {@const desiredSet = new Set(l.node.passives)}
+                {@const chips = l.node.all_passives}
+                <g class="passives-row">
+                  {#each chips as p, i}
+                    {@const x = 8 + i * 40}
+                    {#if x + 38 <= NODE_W}
+                      {@const clipId = `clip-${l.id}-${i}`}
+                      <defs>
+                        <clipPath id={clipId}>
+                          <rect x={x - 10} y={NODE_H - 18} width={NODE_W - x + 10} height={14} rx={2} />
+                        </clipPath>
+                      </defs>
+                      <g>
+                        <title>{p}</title>
+                        <rect
+                          x={x}
+                          y={NODE_H - 18}
+                          width={36}
+                          height={14}
+                          rx={3}
+                          class="passive-chip"
+                          class:desired={desiredSet.has(p)}
+                        />
+                        <text
+                          x={x + 18}
+                          y={NODE_H - 8}
+                          clip-path={`url(#${clipId})`}
+                          class="passive-label"
+                          class:desired={desiredSet.has(p)}
+                        >{p.length > 7 ? p.slice(0, 7) + '…' : p}</text>
+                      </g>
+                    {/if}
+                  {/each}
+                </g>
+              {:else if l.node.covered_passives.length > 0}
+                {@const chips = l.node.covered_passives}
+                <g class="passives-row">
+                  {#each chips as p, i}
+                    {@const x = 8 + i * 40}
+                    {#if x + 38 <= NODE_W}
+                      {@const clipId = `clip-${l.id}-${i}`}
+                      <defs>
+                        <clipPath id={clipId}>
+                          <rect x={x - 10} y={NODE_H - 18} width={NODE_W - x + 10} height={14} rx={2} />
+                        </clipPath>
+                      </defs>
+                      <g>
+                        <title>{p}</title>
+                        <rect
+                          x={x}
+                          y={NODE_H - 18}
+                          width={36}
+                          height={14}
+                          rx={3}
+                          class="passive-chip covered"
+                        />
+                        <text
+                          x={x + 18}
+                          y={NODE_H - 8}
+                          clip-path={`url(#${clipId})`}
+                          class="passive-label covered"
+                        >{p.length > 7 ? p.slice(0, 7) + '…' : p}</text>
+                      </g>
+                    {/if}
+                  {/each}
+                </g>
               {/if}
             </g>
           {/each}
@@ -345,5 +413,41 @@
   .sub {
     fill: var(--text-dim);
     font-size: 11px;
+  }
+
+  .passive-chip {
+    fill: rgba(156, 163, 175, 0.12);
+    stroke: #9ca3af;
+    stroke-width: 0.5;
+  }
+
+  .passive-chip.desired {
+    fill: rgba(34, 197, 94, 0.18);
+    stroke: #22c55e;
+    stroke-width: 1.2;
+  }
+
+  .passive-chip.covered {
+    fill: rgba(34, 197, 94, 0.15);
+    stroke: #22c55e;
+    stroke-width: 0.8;
+  }
+
+  .passive-label {
+    fill: #9ca3af;
+    font-size: 8px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+
+  .passive-label.desired {
+    fill: #22c55e;
+    font-weight: 600;
+  }
+
+  .passive-label.covered {
+    fill: #22c55e;
+    font-weight: 600;
   }
 </style>

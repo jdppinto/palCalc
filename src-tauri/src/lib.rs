@@ -104,20 +104,25 @@ struct ScannerStatus {
     backend: Option<String>,
     error: Option<String>,
     calibration: Option<GridCalibration>,
+    valid: bool,
 }
 
 #[tauri::command]
 fn scanner_status() -> ScannerStatus {
+    let calib = GridCalibration::load();
+    let valid = calib.as_ref().map_or(false, |c| c.is_valid());
     match platform::detect() {
         Ok(b) => ScannerStatus {
             backend: Some(b.name().to_string()),
             error: None,
-            calibration: GridCalibration::load(),
+            calibration: calib,
+            valid,
         },
         Err(e) => ScannerStatus {
             backend: None,
             error: Some(e),
-            calibration: GridCalibration::load(),
+            calibration: calib,
+            valid,
         },
     }
 }
@@ -134,6 +139,9 @@ fn get_cursor_pos() -> Result<(i32, i32), String> {
 
 #[tauri::command]
 fn save_calibration(calib: GridCalibration) -> Result<(), String> {
+    if !calib.is_valid() {
+        return Err("calibration has no grid corner positions set".into());
+    }
     // Fresh calibration invalidates any discovered panel layout.
     let _ = std::fs::remove_file(scanner::panel::PanelLayout::cache_path());
     calib.save()

@@ -160,6 +160,13 @@ impl GridCalibration {
         Some(())
     }
 
+    /// Returns `true` when the calibration has enough data to actually scan.
+    /// Both grid corner positions must be non-zero; zones have computed defaults
+    /// so they aren't required.
+    pub fn is_valid(&self) -> bool {
+        self.slot_tl != (0, 0) || self.slot_br != (0, 0)
+    }
+
     pub fn save(&self) -> Result<(), String> {
         let path = Self::config_path();
         if let Some(dir) = path.parent() {

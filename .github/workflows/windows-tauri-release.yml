@@ -34,6 +34,11 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
+      - name: Read app version
+        id: version
+        shell: bash
+        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
       - name: Build Tauri app
         run: npm run tauri build
 
@@ -41,7 +46,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          name: palcalc ${{ steps.version.outputs.value }}
           files: |
             src-tauri/target/release/palcalc.exe
 
