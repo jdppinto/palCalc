@@ -209,7 +209,7 @@
                 />
               {/if}
               <text x="48" y={l.node.owned || l.collapsed ? 20 : 29} class="name">
-                {l.node.name}{genderSymbol(l.gender)}
+                {l.node.name}{genderSymbol(l.node.gender)}
               </text>
               {#if l.collapsed}
                 <text x="48" y="38" class="sub">▸ collapsed</text>
@@ -228,7 +228,7 @@
                       {@const clipId = `clip-${l.id}-${i}`}
                       <defs>
                         <clipPath id={clipId}>
-                          <rect x={x + 1} y={NODE_H - 18} width={34} height={14} rx={2} />
+                          <rect x={x - 10} y={NODE_H - 18} width={NODE_W - x + 10} height={14} rx={2} />
                         </clipPath>
                       </defs>
                       <g>
@@ -262,7 +262,7 @@
                       {@const clipId = `clip-${l.id}-${i}`}
                       <defs>
                         <clipPath id={clipId}>
-                          <rect x={x + 1} y={NODE_H - 18} width={34} height={14} rx={2} />
+                          <rect x={x - 10} y={NODE_H - 18} width={NODE_W - x + 10} height={14} rx={2} />
                         </clipPath>
                       </defs>
                       <g>

@@ -47,6 +47,7 @@ export interface RouteNode {
   passives: string[];
   all_passives: string[];
   covered_passives: string[];
+  gender: Gender | null;
   gender_a: Gender | null;
   gender_b: Gender | null;
   parents: RouteNode[];

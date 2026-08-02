@@ -2,7 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
   import { onMount } from "svelte";
-  import { addManyOwned } from "./owned.svelte";
+  import { addManyOwned, clearAllOwned, ownedStore } from "./owned.svelte";
   import type { Gender, PalEntry, PassiveEntry } from "./types";
 
   type Rect = [number, number, number, number];
@@ -32,6 +32,7 @@
     backend: string | null;
     error: string | null;
     calibration: Calib | null;
+    valid: boolean;
   }
 
   interface SlotResult {
@@ -452,7 +453,10 @@
     }
   }
   const scan = () => runScan("scan_current_box");
-  const scanAll = () => runScan("scan_all_boxes");
+  function scanAll() {
+    if (ownedStore.list.length > 0 && !confirm(`You have ${ownedStore.list.length} owned pals. Scanning will replace them. Continue?`)) return;
+    runScan("scan_all_boxes");
+  }
 
   const found = $derived(results?.filter((r) => r.species !== null) ?? []);
 
@@ -665,12 +669,17 @@
   </details>
 
   <div class="row scan-row">
-    <button class="scan" onclick={scan} disabled={scanning || !calibSaved || !status?.backend}>
+    <button class="scan" onclick={scan} disabled={scanning || !calibSaved || !status?.backend || !status?.valid}>
       {scanning ? "Scanning…" : "Scan current box"}
     </button>
-    <button class="scan" onclick={scanAll} disabled={scanning || !calibSaved || !status?.backend}>
+    <button class="scan" onclick={scanAll} disabled={scanning || !calibSaved || !status?.backend || !status?.valid}>
       Scan all 32 boxes
     </button>
+    {#if ownedStore.list.length > 0}
+      <button class="remove-all" onclick={() => { if (confirm("Remove all owned pals? This cannot be undone.")) clearAllOwned(); }} disabled={scanning}>
+        Remove all pals
+      </button>
+    {/if}
     {#if scanning}
       <button onclick={() => invoke("abort_scan").catch(() => {})}>Abort</button>
       {#if progress}
@@ -938,6 +947,12 @@
     gap: 0.6rem;
     flex-wrap: wrap;
     margin-top: 0.75rem;
+  }
+
+  .remove-all {
+    margin-left: auto;
+    color: #ef4444;
+    border-color: #ef444444;
   }
 
   button {

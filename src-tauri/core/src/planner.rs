@@ -66,6 +66,8 @@ pub struct RouteNode {
     pub all_passives: Vec<String>,
     /// Desired passives covered by this subtree (all nodes).
     pub covered_passives: Vec<String>,
+    /// The pal's own gender (owned leaves only).
+    pub gender: Option<Gender>,
     /// Gender requirements for parents[0] / parents[1] (gendered specials).
     pub gender_a: Option<Gender>,
     pub gender_b: Option<Gender>,
@@ -574,6 +576,7 @@ fn build_node(
         passives: Vec::new(),
         all_passives: Vec::new(),
         covered_passives,
+        gender: None,
         gender_a: None,
         gender_b: None,
         parents: Vec::new(),
@@ -582,6 +585,7 @@ fn build_node(
         Prov::Wild => node.owned = Some("wild".into()),
         Prov::Owned(oi, _) => {
             let o = &owned[oi as usize];
+            node.gender = o.gender;
             node.owned = Some(if o.label.is_empty() {
                 info.name.clone()
             } else {
