@@ -45,6 +45,8 @@ export interface RouteNode {
   icon: string | null;
   owned: string | null;
   passives: string[];
+  all_passives: string[];
+  covered_passives: string[];
   gender_a: Gender | null;
   gender_b: Gender | null;
   parents: RouteNode[];

@@ -6,9 +6,9 @@
   let { route }: { route: Route | null } = $props();
 
   const NODE_W = 168;
-  const NODE_H = 48;
+  const NODE_H = 68;
   const GAP_X = 26;
-  const GAP_Y = 90;
+  const GAP_Y = 110;
 
   interface Laid {
     node: RouteNode;
@@ -218,6 +218,54 @@
               {:else if l.node.owned !== null}
                 <text x="48" y="38" class="sub">{l.node.owned}</text>
               {/if}
+              {#if l.node.all_passives.length > 0}
+                {@const desiredSet = new Set(l.node.passives)}
+                {@const chips = l.node.all_passives}
+                <g class="passives-row">
+                  {#each chips as p, i}
+                    {@const x = 8 + i * 40}
+                    {#if x + 38 <= NODE_W}
+                      <rect
+                        x={x}
+                        y={NODE_H - 18}
+                        width={36}
+                        height={14}
+                        rx={3}
+                        class:passive-chip={true}
+                        class:desired={desiredSet.has(p)}
+                      />
+                      <text
+                        x={x + 18}
+                        y={NODE_H - 8}
+                        class="passive-label"
+                        class:desired={desiredSet.has(p)}
+                      >{p.length > 5 ? p.slice(0, 5) + '…' : p}</text>
+                    {/if}
+                  {/each}
+                </g>
+              {:else if l.node.covered_passives.length > 0}
+                {@const chips = l.node.covered_passives}
+                <g class="passives-row">
+                  {#each chips as p, i}
+                    {@const x = 8 + i * 40}
+                    {#if x + 38 <= NODE_W}
+                      <rect
+                        x={x}
+                        y={NODE_H - 18}
+                        width={36}
+                        height={14}
+                        rx={3}
+                        class="passive-chip covered"
+                      />
+                      <text
+                        x={x + 18}
+                        y={NODE_H - 8}
+                        class="passive-label covered"
+                      >{p.length > 5 ? p.slice(0, 5) + '…' : p}</text>
+                    {/if}
+                  {/each}
+                </g>
+              {/if}
             </g>
           {/each}
         </g>
@@ -345,5 +393,41 @@
   .sub {
     fill: var(--text-dim);
     font-size: 11px;
+  }
+
+  .passive-chip {
+    fill: rgba(255, 255, 255, 0.08);
+    stroke: rgba(255, 255, 255, 0.15);
+    stroke-width: 0.5;
+  }
+
+  .passive-chip.desired {
+    fill: var(--accent-soft, rgba(99, 102, 241, 0.2));
+    stroke: var(--accent, #6366f1);
+    stroke-width: 0.8;
+  }
+
+  .passive-chip.covered {
+    fill: rgba(34, 197, 94, 0.15);
+    stroke: #22c55e;
+    stroke-width: 0.8;
+  }
+
+  .passive-label {
+    fill: var(--text-dim);
+    font-size: 8px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+
+  .passive-label.desired {
+    fill: var(--accent, #6366f1);
+    font-weight: 600;
+  }
+
+  .passive-label.covered {
+    fill: #22c55e;
+    font-weight: 600;
   }
 </style>
