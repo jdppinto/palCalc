@@ -225,6 +225,12 @@
                   {#each chips as p, i}
                     {@const x = 8 + i * 40}
                     {#if x + 38 <= NODE_W}
+                      {@const clipId = `clip-${l.id}-${i}`}
+                      <defs>
+                        <clipPath id={clipId}>
+                          <rect x={x + 1} y={NODE_H - 18} width={34} height={14} rx={2} />
+                        </clipPath>
+                      </defs>
                       <g>
                         <title>{p}</title>
                         <rect
@@ -239,6 +245,7 @@
                         <text
                           x={x + 18}
                           y={NODE_H - 8}
+                          clip-path={`url(#${clipId})`}
                           class="passive-label"
                           class:desired={desiredSet.has(p)}
                         >{p.length > 7 ? p.slice(0, 7) + '…' : p}</text>
@@ -252,6 +259,12 @@
                   {#each chips as p, i}
                     {@const x = 8 + i * 40}
                     {#if x + 38 <= NODE_W}
+                      {@const clipId = `clip-${l.id}-${i}`}
+                      <defs>
+                        <clipPath id={clipId}>
+                          <rect x={x + 1} y={NODE_H - 18} width={34} height={14} rx={2} />
+                        </clipPath>
+                      </defs>
                       <g>
                         <title>{p}</title>
                         <rect
@@ -265,6 +278,7 @@
                         <text
                           x={x + 18}
                           y={NODE_H - 8}
+                          clip-path={`url(#${clipId})`}
                           class="passive-label covered"
                         >{p.length > 7 ? p.slice(0, 7) + '…' : p}</text>
                       </g>
