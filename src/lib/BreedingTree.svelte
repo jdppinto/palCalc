@@ -416,8 +416,8 @@
   }
 
   .passive-chip {
-    fill: rgba(239, 68, 68, 0.12);
-    stroke: #ef4444;
+    fill: rgba(156, 163, 175, 0.12);
+    stroke: #9ca3af;
     stroke-width: 0.5;
   }
 
@@ -434,7 +434,7 @@
   }
 
   .passive-label {
-    fill: #f87171;
+    fill: #9ca3af;
     font-size: 8px;
     text-anchor: middle;
     dominant-baseline: middle;
