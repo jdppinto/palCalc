@@ -416,14 +416,14 @@
   }
 
   .passive-chip {
-    fill: rgba(255, 255, 255, 0.06);
-    stroke: rgba(255, 255, 255, 0.1);
+    fill: rgba(239, 68, 68, 0.12);
+    stroke: #ef4444;
     stroke-width: 0.5;
   }
 
   .passive-chip.desired {
-    fill: var(--accent-soft, rgba(99, 102, 241, 0.2));
-    stroke: var(--accent, #6366f1);
+    fill: rgba(34, 197, 94, 0.18);
+    stroke: #22c55e;
     stroke-width: 1.2;
   }
 
@@ -434,7 +434,7 @@
   }
 
   .passive-label {
-    fill: var(--text-dim);
+    fill: #f87171;
     font-size: 8px;
     text-anchor: middle;
     dominant-baseline: middle;
@@ -442,7 +442,7 @@
   }
 
   .passive-label.desired {
-    fill: var(--accent, #6366f1);
+    fill: #22c55e;
     font-weight: 600;
   }
 
