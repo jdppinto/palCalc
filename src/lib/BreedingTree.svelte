@@ -5,7 +5,7 @@
 
   let { route }: { route: Route | null } = $props();
 
-  const NODE_W = 168;
+  const NODE_W = 172;
   const NODE_H = 68;
   const GAP_X = 26;
   const GAP_Y = 110;
@@ -225,21 +225,24 @@
                   {#each chips as p, i}
                     {@const x = 8 + i * 40}
                     {#if x + 38 <= NODE_W}
-                      <rect
-                        x={x}
-                        y={NODE_H - 18}
-                        width={36}
-                        height={14}
-                        rx={3}
-                        class:passive-chip={true}
-                        class:desired={desiredSet.has(p)}
-                      />
-                      <text
-                        x={x + 18}
-                        y={NODE_H - 8}
-                        class="passive-label"
-                        class:desired={desiredSet.has(p)}
-                      >{p.length > 5 ? p.slice(0, 5) + '…' : p}</text>
+                      <g>
+                        <title>{p}</title>
+                        <rect
+                          x={x}
+                          y={NODE_H - 18}
+                          width={36}
+                          height={14}
+                          rx={3}
+                          class="passive-chip"
+                          class:desired={desiredSet.has(p)}
+                        />
+                        <text
+                          x={x + 18}
+                          y={NODE_H - 8}
+                          class="passive-label"
+                          class:desired={desiredSet.has(p)}
+                        >{p.length > 7 ? p.slice(0, 7) + '…' : p}</text>
+                      </g>
                     {/if}
                   {/each}
                 </g>
@@ -249,19 +252,22 @@
                   {#each chips as p, i}
                     {@const x = 8 + i * 40}
                     {#if x + 38 <= NODE_W}
-                      <rect
-                        x={x}
-                        y={NODE_H - 18}
-                        width={36}
-                        height={14}
-                        rx={3}
-                        class="passive-chip covered"
-                      />
-                      <text
-                        x={x + 18}
-                        y={NODE_H - 8}
-                        class="passive-label covered"
-                      >{p.length > 5 ? p.slice(0, 5) + '…' : p}</text>
+                      <g>
+                        <title>{p}</title>
+                        <rect
+                          x={x}
+                          y={NODE_H - 18}
+                          width={36}
+                          height={14}
+                          rx={3}
+                          class="passive-chip covered"
+                        />
+                        <text
+                          x={x + 18}
+                          y={NODE_H - 8}
+                          class="passive-label covered"
+                        >{p.length > 7 ? p.slice(0, 7) + '…' : p}</text>
+                      </g>
                     {/if}
                   {/each}
                 </g>
