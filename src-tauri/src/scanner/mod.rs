@@ -8,6 +8,7 @@
 //! read by `ocrs`/`rten` neural OCR with closed-vocabulary correction, backed
 //! by learned crops (`textlib`) and a synthesized-glyph NCC fallback (`synth`).
 
+pub mod config;
 pub mod matcher;
 pub mod palbox;
 pub mod panel;

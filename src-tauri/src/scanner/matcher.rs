@@ -71,12 +71,7 @@ pub struct IconTemplates {
 /// drift" turned out to be UNRELEASED dev pals spawned via a cheat menu —
 /// they have no icon, placeholder names, zukan -1, and aren't breedable.)
 pub fn user_templates_dir() -> std::path::PathBuf {
-    let base = std::env::var_os("XDG_CONFIG_HOME")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(|| {
-            std::path::PathBuf::from(std::env::var_os("HOME").unwrap_or_default()).join(".config")
-        });
-    base.join("palcalc").join("pal_templates")
+    super::config::palcalc_dir().join("pal_templates")
 }
 
 impl IconTemplates {

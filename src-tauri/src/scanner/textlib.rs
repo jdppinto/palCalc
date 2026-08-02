@@ -36,12 +36,7 @@ pub struct TextLib {
 
 impl TextLib {
     pub fn default_dir() -> PathBuf {
-        let base = std::env::var_os("XDG_CONFIG_HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| {
-                PathBuf::from(std::env::var_os("HOME").unwrap_or_default()).join(".config")
-            });
-        base.join("palcalc").join("passive_templates")
+        super::config::palcalc_dir().join("passive_templates")
     }
 
     /// Load all stored templates. Filenames are `<label>__<n>.png`.

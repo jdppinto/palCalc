@@ -72,13 +72,7 @@ pub struct PanelLayout {
 
 impl PanelLayout {
     pub fn cache_path() -> std::path::PathBuf {
-        let base = std::env::var_os("XDG_CONFIG_HOME")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|| {
-                std::path::PathBuf::from(std::env::var_os("HOME").unwrap_or_default())
-                    .join(".config")
-            });
-        base.join("palcalc").join("panel_layout.json")
+        super::config::palcalc_dir().join("panel_layout.json")
     }
 
     pub fn load_cache() -> Option<Self> {
