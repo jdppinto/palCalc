@@ -300,6 +300,10 @@ fn pal_bbox(img: &RgbaImage) -> Option<((u32, u32, u32, u32), [f32; 3])> {
         samples[c].sort_by(f32::total_cmp);
         bg[c] = samples[c][samples[c].len() / 2];
     }
+    // Per-channel max difference: pixels in the disc interior that differ from
+    // the corner-sampled background by >18.0 in any RGB channel are counted as
+    // "content." Real pal sprites create large coherent regions above this
+    // threshold; bare discs are uniform and stay below it.
     let bbox = bbox_of(img, |p| {
         p[3] > 25
             && (0..3)

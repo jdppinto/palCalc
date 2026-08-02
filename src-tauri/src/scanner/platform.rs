@@ -202,7 +202,12 @@ mod windows_impl {
                 return Err("CreateCompatibleBitmap failed".into());
             }
             SelectObject(mem_dc, hbmp);
-            BitBlt(mem_dc, 0, 0, w as i32, h as i32, hdc, x, y, SRCCOPY);
+            if BitBlt(mem_dc, 0, 0, w as i32, h as i32, hdc, x, y, SRCCOPY) == 0 {
+                DeleteObject(hbmp);
+                DeleteDC(mem_dc);
+                ReleaseDC(0, hdc);
+                return Err("BitBlt failed".into());
+            }
 
             let mut bmi = BITMAPINFOHEADER {
                 bi_size: std::mem::size_of::<BITMAPINFOHEADER>() as u32,

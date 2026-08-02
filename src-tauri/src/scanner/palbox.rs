@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use palcalc_core::Gender;
 use serde::{Deserialize, Serialize};
@@ -382,6 +382,7 @@ pub fn scan_box(
     let mut results: Vec<SlotResult> = Vec::with_capacity(pre.len());
     let mut done = 0u32;
     for (i, p) in pre.iter().enumerate() {
+        let slot_start = Instant::now();
         if !occupied.contains(&i) {
             results.push(SlotResult {
                 box_index: 0,
@@ -402,6 +403,9 @@ pub fn scan_box(
         }
         backend.move_cursor(p.cx, p.cy)?;
         std::thread::sleep(Duration::from_millis(calib.delay_ms));
+        if SCAN_ABORT.load(Ordering::Relaxed) {
+            return Err("scan aborted".into());
+        }
 
         // Panel layout discovery (once; give up after repeated failures).
         // Species identification is name-text only — the icon check proved
@@ -412,6 +416,9 @@ pub fn scan_box(
                 Some(pr) => PanelLayout::name_search_rect(pr),
                 None => PanelLayout::discovery_rect(monitor),
             };
+            if slot_start.elapsed() > Duration::from_secs(3) {
+                return Err("slot capture timed out".into());
+            }
             let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
             let px_range = match calib.panel {
                 Some(panel) => super::panel::name_px_range(panel),
@@ -442,6 +449,9 @@ pub fn scan_box(
                     None => l.name_band,
                 },
             );
+            if slot_start.elapsed() > Duration::from_secs(3) {
+                return Err("slot capture timed out".into());
+            }
             let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
@@ -470,6 +480,9 @@ pub fn scan_box(
             gender = match calib.panel {
                 Some(panel) => {
                     let (gr, _) = calib.zone_or("gender", PanelLayout::gender_rect(panel));
+                    if slot_start.elapsed() > Duration::from_secs(3) {
+                        return Err("slot capture timed out".into());
+                    }
                     let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
                     classify_gender(&gimg)
                 }
@@ -483,6 +496,9 @@ pub fn scan_box(
                     None => l.passives_rect(),
                 },
             );
+            if slot_start.elapsed() > Duration::from_secs(3) {
+                return Err("slot capture timed out".into());
+            }
             let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
             if let Some(dir) = debug_dir {
                 let _ = pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
