@@ -306,6 +306,8 @@ async fn scan_current_box(
     SCAN_ABORT.store(false, Ordering::Relaxed);
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
+        // Give the user 2 seconds to alt-tab into the game.
+        std::thread::sleep(std::time::Duration::from_secs(2));
         // Rebuilt per scan so freshly learned templates apply immediately.
         let templates = IconTemplates::load(
             &pal_icons,
@@ -363,6 +365,8 @@ async fn scan_all_boxes(
     SCAN_ABORT.store(false, Ordering::Relaxed);
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
+        // Give the user 2 seconds to alt-tab into the game.
+        std::thread::sleep(std::time::Duration::from_secs(2));
         let templates =
             IconTemplates::load(&pal_icons, Some(&scanner::matcher::user_templates_dir()))?;
         let synth = TextSynth::new()?;
