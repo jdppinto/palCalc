@@ -645,9 +645,14 @@ pub fn scan_box(
     }
     let occupied_count = occupied.len();
     let log: Vec<String> = report.lines().map(String::from).collect();
-    eprintln!(
+    let timing_msg = format!(
         "[timing] {occupied_count} slots | move={:?} capture={:?} ocr={:?} png={:?}",
         timing_move, timing_capture, timing_ocr, timing_png
+    );
+    eprintln!("{timing_msg}");
+    let _ = std::fs::write(
+        super::config::palcalc_dir().join("timing.log"),
+        &timing_msg,
     );
     if let Some(dir) = debug_dir {
         let _ = std::fs::write(dir.join("report.txt"), &report);
