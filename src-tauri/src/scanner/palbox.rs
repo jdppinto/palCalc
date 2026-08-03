@@ -740,7 +740,7 @@ pub fn scan_box_parallel(
         return Err("scan aborted".into());
     }
 
-    // ---- Phase 2: parallel OCR processing ----
+    // ---- Phase 2: parallel OCR processing (batched to cap memory) ----
     let phase2_start = Instant::now();
     let layout = Arc::new(layout);
     let synth = Arc::new(synth);
@@ -748,113 +748,121 @@ pub fn scan_box_parallel(
     let species_names = Arc::new(species_names.to_vec());
     let passive_names = Arc::new(passive_names.to_vec());
 
-    let slot_results: Vec<(SlotResult, String)> = captured
-        .par_iter()
-        .enumerate()
-        .map(|(_idx, cs)| {
-            // Short-circuit if abort was pressed between Phase 1 and Phase 2.
-            if SCAN_ABORT.load(Ordering::Relaxed) {
+    const BATCH_SIZE: usize = 5;
+    let mut all_results: Vec<(SlotResult, String)> = Vec::with_capacity(captured.len());
+    for chunk in captured.chunks(BATCH_SIZE) {
+        if SCAN_ABORT.load(Ordering::Relaxed) {
+            break;
+        }
+        let batch: Vec<(SlotResult, String)> = chunk
+            .par_iter()
+            .enumerate()
+            .map(|(_idx, cs)| {
+                if SCAN_ABORT.load(Ordering::Relaxed) {
+                    let crop_png = png_base64(&cs.crop).unwrap_or_default();
+                    return (
+                        SlotResult {
+                            box_index: 0,
+                            row: cs.row,
+                            col: cs.col,
+                            unidentified: false,
+                            species: None,
+                            score: 0.0,
+                            gender: None,
+                            passives: Vec::new(),
+                            passive_unknowns: Vec::new(),
+                            crop_png,
+                        },
+                        String::new(),
+                    );
+                }
+                let mut species: Option<String> = None;
+                let mut score = 0.0f32;
+                let mut gender = None;
+                let mut passives = Vec::new();
+                let mut passive_unknowns = Vec::new();
+
+                if let Some(l) = layout.as_ref() {
+                    let name_read = l.read_name(&synth, &cs.name_img, &species_names);
+                    if let Some((key, s)) = name_read {
+                        if s >= NAME_CONFIDENCE {
+                            species = Some(key);
+                            score = s;
+                        }
+                    }
+                    gender = match &cs.gender_img {
+                        Some(gimg) => classify_gender(gimg),
+                        None => classify_gender(&cs.name_img),
+                    };
+                    if let Some(pimg) = &cs.passives_img {
+                        let expected = calib.panel.map(super::panel::row_px_expected);
+                        let (keys, unknowns, _found_px) = l.read_passive_rows(
+                            &synth,
+                            &textlib,
+                            pimg,
+                            &passive_names,
+                            None,
+                            expected,
+                        );
+                        passives = keys;
+                        passive_unknowns = unknowns;
+                    }
+                }
+
+                let log_line = format!(
+                    "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
+                    cs.row,
+                    cs.col,
+                    species.as_deref().unwrap_or("<none>"),
+                    score,
+                    gender,
+                    passives,
+                    if passive_unknowns.is_empty() {
+                        String::new()
+                    } else {
+                        format!(" +{} unknown row(s)", passive_unknowns.len())
+                    },
+                );
+
+                if let Some(dir) = debug_dir {
+                    use base64::Engine;
+                    for (j, (_, b64)) in passive_unknowns.iter().enumerate() {
+                        if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(b64) {
+                            let _ = std::fs::write(
+                                dir.join(format!("unknown_{}_{}_{}.png", cs.row, cs.col, j)),
+                                bytes,
+                            );
+                        }
+                    }
+                }
+
                 let crop_png = png_base64(&cs.crop).unwrap_or_default();
-                return (
+                (
                     SlotResult {
                         box_index: 0,
                         row: cs.row,
                         col: cs.col,
-                        unidentified: false,
-                        species: None,
-                        score: 0.0,
-                        gender: None,
-                        passives: Vec::new(),
-                        passive_unknowns: Vec::new(),
+                        unidentified: species.is_none(),
+                        species,
+                        score,
+                        gender,
+                        passives,
+                        passive_unknowns,
                         crop_png,
                     },
-                    String::new(),
-                );
-            }
-            let mut species: Option<String> = None;
-            let mut score = 0.0f32;
-            let mut gender = None;
-            let mut passives = Vec::new();
-            let mut passive_unknowns = Vec::new();
-
-            if let Some(l) = layout.as_ref() {
-                // Name
-                let name_read = l.read_name(&synth, &cs.name_img, &species_names);
-                if let Some((key, s)) = name_read {
-                    if s >= NAME_CONFIDENCE {
-                        species = Some(key);
-                        score = s;
-                    }
-                }
-                // Gender
-                gender = match &cs.gender_img {
-                    Some(gimg) => classify_gender(gimg),
-                    None => classify_gender(&cs.name_img),
-                };
-                // Passives
-                if let Some(pimg) = &cs.passives_img {
-                    let expected = calib.panel.map(super::panel::row_px_expected);
-                    let (keys, unknowns, _found_px) = l.read_passive_rows(
-                        &synth,
-                        &textlib,
-                        pimg,
-                        &passive_names,
-                        None,
-                        expected,
-                    );
-                    passives = keys;
-                    passive_unknowns = unknowns;
-                }
-            }
-
-            // Emit progress from the main thread via channel is not possible
-            // in par_iter; we'll report progress after phase 2 instead.
-            let log_line = format!(
-                "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
-                cs.row,
-                cs.col,
-                species.as_deref().unwrap_or("<none>"),
-                score,
-                gender,
-                passives,
-                if passive_unknowns.is_empty() {
-                    String::new()
-                } else {
-                    format!(" +{} unknown row(s)", passive_unknowns.len())
-                },
-            );
-
-            // Dump unknown passive crops
-            if let Some(dir) = debug_dir {
-                use base64::Engine;
-                for (j, (_, b64)) in passive_unknowns.iter().enumerate() {
-                    if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(b64) {
-                        let _ = std::fs::write(
-                            dir.join(format!("unknown_{}_{}_{}.png", cs.row, cs.col, j)),
-                            bytes,
-                        );
-                    }
-                }
-            }
-
-            let crop_png = png_base64(&cs.crop).unwrap_or_default();
-            (
-                SlotResult {
-                    box_index: 0,
-                    row: cs.row,
-                    col: cs.col,
-                    unidentified: species.is_none(),
-                    species,
-                    score,
-                    gender,
-                    passives,
-                    passive_unknowns,
-                    crop_png,
-                },
-                log_line,
-            )
-        })
-        .collect();
+                    log_line,
+                )
+            })
+            .collect();
+        all_results.extend(batch);
+    }
+    let captured_count = captured.len();
+    drop(captured);
+    drop(textlib);
+    drop(species_names);
+    drop(passive_names);
+    drop(layout);
+    drop(synth);
     let phase2_ms = phase2_start.elapsed().as_millis();
     let total_ms = phase1_start.elapsed().as_millis();
 
@@ -867,17 +875,16 @@ pub fn scan_box_parallel(
         box_total: 1,
     });
 
-    let mut results: Vec<SlotResult> = Vec::with_capacity(slot_results.len());
-    let mut log: Vec<String> = Vec::with_capacity(slot_results.len());
-    for (r, l) in slot_results {
+    let mut results: Vec<SlotResult> = Vec::with_capacity(all_results.len());
+    let mut log: Vec<String> = Vec::with_capacity(all_results.len());
+    for (r, l) in all_results {
         log.push(l.trim().to_string());
         results.push(r);
     }
 
     // Add timing summary to log
     log.push(format!(
-        "Phase 1 capture: {phase1_ms}ms ({} slots)",
-        captured.len()
+        "Phase 1 capture: {phase1_ms}ms ({captured_count} slots)",
     ));
     log.push(format!("Phase 2 process: {phase2_ms}ms"));
     log.push(format!("Total: {total_ms}ms"));
