@@ -420,6 +420,10 @@ pub fn scan_box(
     let mut results: Vec<SlotResult> = Vec::with_capacity(pre.len());
     let mut done = 0u32;
     let mut first_occupied = true;
+    let mut timing_move = Duration::ZERO;
+    let mut timing_capture = Duration::ZERO;
+    let mut timing_ocr = Duration::ZERO;
+    let mut timing_png = Duration::ZERO;
     for (i, p) in pre.iter().enumerate() {
         let slot_start = Instant::now();
         if !occupied.contains(&i) {
@@ -440,7 +444,9 @@ pub fn scan_box(
         if SCAN_ABORT.load(Ordering::Relaxed) {
             return Err("scan aborted".into());
         }
+        let t0 = Instant::now();
         backend.move_cursor(p.cx, p.cy)?;
+        timing_move += t0.elapsed();
         std::thread::sleep(Duration::from_millis(if first_occupied {
             first_occupied = false;
             calib.first_slot_ms.max(calib.delay_ms)
@@ -514,6 +520,7 @@ pub fn scan_box(
             // Single-capture optimisation: when the panel rect is calibrated,
             // grab the full panel once and crop zones in memory, saving 2
             // IPC/subprocess round-trips per occupied slot.
+            let t0 = Instant::now();
             let (band, gimg, pimg) = if let Some(panel) = calib.panel {
                 let panel_img =
                     backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
@@ -527,11 +534,13 @@ pub fn scan_box(
                 let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
                 (band, None, pimg)
             };
+            timing_capture += t0.elapsed();
 
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
             }
             let band_key = img_hash(&band);
+            let t0 = Instant::now();
             let name_read = match name_from_discovery.take() {
                 Some(r) => {
                     name_cache.insert(band_key, Some(r.clone()));
@@ -578,6 +587,7 @@ pub fn scan_box(
                     (keys, unknowns)
                 }
             };
+            timing_ocr += t0.elapsed();
         }
 
         done += 1;
@@ -625,10 +635,20 @@ pub fn scan_box(
             gender,
             passives,
             passive_unknowns,
-            crop_png: png_base64(&p.crop)?,
+            crop_png: {
+                let t = Instant::now();
+                let s = png_base64(&p.crop)?;
+                timing_png += t.elapsed();
+                s
+            },
         });
     }
+    let occupied_count = occupied.len();
     let log: Vec<String> = report.lines().map(String::from).collect();
+    eprintln!(
+        "[timing] {occupied_count} slots | move={:?} capture={:?} ocr={:?} png={:?}",
+        timing_move, timing_capture, timing_ocr, timing_png
+    );
     if let Some(dir) = debug_dir {
         let _ = std::fs::write(dir.join("report.txt"), &report);
     }
