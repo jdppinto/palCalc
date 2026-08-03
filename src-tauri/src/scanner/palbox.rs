@@ -63,7 +63,7 @@ impl Default for GridCalibration {
             cols: 6,
             rows: 5,
             slot_size: 90,
-            delay_ms: 1,
+            delay_ms: 20,
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
@@ -424,6 +424,7 @@ pub fn scan_box(
     let mut timing_capture = Duration::ZERO;
     let mut timing_ocr = Duration::ZERO;
     let mut timing_png = Duration::ZERO;
+    let mut prev_panel_hash: Option<u64> = None;
     for (i, p) in pre.iter().enumerate() {
         let slot_start = Instant::now();
         if !occupied.contains(&i) {
@@ -521,7 +522,7 @@ pub fn scan_box(
             // grab the full panel once and crop zones in memory, saving 2
             // IPC/subprocess round-trips per occupied slot.
             let t0 = Instant::now();
-            let (band, gimg, pimg) = if let Some(panel) = calib.panel {
+            let (mut band, mut gimg, mut pimg) = if let Some(panel) = calib.panel {
                 let panel_img =
                     backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
                 (
@@ -534,6 +535,24 @@ pub fn scan_box(
                 let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
                 (band, None, pimg)
             };
+            // Stale-panel detector: if the passives panel image is
+            // identical to the previous slot's, the game hasn't repainted
+            // the hover panel yet. Sleep an extra 50 ms and re-capture.
+            let raw_pkey = img_hash(&pimg);
+            if prev_panel_hash == Some(raw_pkey) && prev_panel_hash.is_some() {
+                std::thread::sleep(Duration::from_millis(50));
+                if let Some(panel) = calib.panel {
+                    let panel_img =
+                        backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
+                    band = crop_from_panel(&panel_img, panel, nb);
+                    gimg = Some(crop_from_panel(&panel_img, panel, gr));
+                    pimg = crop_from_panel(&panel_img, panel, pr);
+                } else {
+                    band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
+                    pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
+                }
+            }
+            prev_panel_hash = Some(img_hash(&pimg));
             timing_capture += t0.elapsed();
 
             if let Some(dir) = debug_dir {
