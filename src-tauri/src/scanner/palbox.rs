@@ -752,6 +752,25 @@ pub fn scan_box_parallel(
         .par_iter()
         .enumerate()
         .map(|(_idx, cs)| {
+            // Short-circuit if abort was pressed between Phase 1 and Phase 2.
+            if SCAN_ABORT.load(Ordering::Relaxed) {
+                let crop_png = png_base64(&cs.crop).unwrap_or_default();
+                return (
+                    SlotResult {
+                        box_index: 0,
+                        row: cs.row,
+                        col: cs.col,
+                        unidentified: false,
+                        species: None,
+                        score: 0.0,
+                        gender: None,
+                        passives: Vec::new(),
+                        passive_unknowns: Vec::new(),
+                        crop_png,
+                    },
+                    String::new(),
+                );
+            }
             let mut species: Option<String> = None;
             let mut score = 0.0f32;
             let mut gender = None;
@@ -838,6 +857,15 @@ pub fn scan_box_parallel(
         .collect();
     let phase2_ms = phase2_start.elapsed().as_millis();
     let total_ms = phase1_start.elapsed().as_millis();
+
+    // Final progress emit — signals completion to the UI.
+    on_progress(ScanProgress {
+        current: total,
+        total,
+        species: None,
+        box_current: 1,
+        box_total: 1,
+    });
 
     let mut results: Vec<SlotResult> = Vec::with_capacity(slot_results.len());
     let mut log: Vec<String> = Vec::with_capacity(slot_results.len());
