@@ -352,27 +352,15 @@ impl PanelLayout {
                     TextMatch::Known(label) if label == EMPTY_LABEL => continue,
                     TextMatch::Known(label) => {
                         known.push(label);
+                        if known.len() >= MAX_PASSIVES {
+                            break;
+                        }
                         continue;
                     }
                     _ => {}
                 }
-                // OCR + dictionary (Inventory Kamera recipe) on the cell
-                // crop FIRST: it physically can't merge text across columns.
-                // (The region pass merges "Unstable Musclehead" into one
-                // line, defeating x-gating and duplicating the right cell.)
-                let cell_lines = ocr::read_lines(&cell).unwrap_or_default();
-                let cell_match = cell_lines
-                    .iter()
-                    .filter_map(|t| ocr::best_vocab_match(t, passive_names, OCR_MIN_SIM_PASSIVE))
-                    .max_by(|a, b| a.1.total_cmp(&b.1));
-                if let Some((key, _)) = cell_match {
-                    if !known.iter().any(|k| k == key) {
-                        known.push(key.to_string());
-                    }
-                    continue;
-                }
-                // Fallback: region-pass lines whose center falls inside THIS
-                // cell (catches text the tight cell crop clips).
+                // Region-pass lines whose center falls inside THIS cell
+                // (catches text the tight cell clip would miss).
                 let region_cell_lines: Vec<&(String, (i32, i32, u32, u32))> = ocr_lines
                     .iter()
                     .filter(|(_, (lx, ly, lw, lh))| {
@@ -413,7 +401,7 @@ impl PanelLayout {
                 // band spans the full region width, so a single-passive row
                 // produces a textless partner cell). Nothing to read, nothing
                 // to label.
-                if cell_lines.is_empty() && region_cell_lines.is_empty() {
+                if region_cell_lines.is_empty() {
                     continue;
                 }
                 // Synth hit within this cell?
@@ -441,6 +429,9 @@ impl PanelLayout {
                         }
                     }
                 }
+            }
+            if known.len() >= MAX_PASSIVES {
+                break;
             }
         }
         (known, unknown, found_px)
