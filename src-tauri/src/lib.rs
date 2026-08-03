@@ -6,7 +6,7 @@ use std::sync::atomic::Ordering;
 use tauri::{Emitter, State};
 
 use scanner::matcher::IconTemplates;
-use scanner::palbox::{scan_box, scan_boxes, GridCalibration, SCAN_ABORT};
+use scanner::palbox::{scan_box, scan_box_parallel, scan_boxes, GridCalibration, SCAN_ABORT};
 #[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
 use scanner::platform::{self, WindowInfo};
@@ -282,6 +282,7 @@ fn save_pal_template(
 struct ScanResult {
     slots: Vec<scanner::palbox::SlotResult>,
     report_path: String,
+    timing: Option<String>,
 }
 
 #[tauri::command]
@@ -289,6 +290,7 @@ async fn scan_current_box(
     app: tauri::AppHandle,
     data: State<'_, GameData>,
     #[allow(unused_variables)] threshold: Option<f32>,
+    parallel: Option<bool>,
 ) -> Result<ScanResult, String> {
     let calib = GridCalibration::load().ok_or("not calibrated yet")?;
     let pal_icons = scanner::matcher::pal_icon_map(&data);
@@ -304,6 +306,7 @@ async fn scan_current_box(
         .map(|(k, p)| (k.clone(), p.name.clone()))
         .collect();
     SCAN_ABORT.store(false, Ordering::Relaxed);
+    let use_parallel = parallel.unwrap_or(false);
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
         // Rebuilt per scan so freshly learned templates apply immediately.
@@ -315,20 +318,43 @@ async fn scan_current_box(
         // Dump captures into the shareable debug-report bundle, same as the
         // other debug actions, so a full scan can be handed over for tuning.
         let report_dir = scanner::palbox::reset_report_dir()?;
-        let (slots, log) = scan_box(
-            backend.as_mut(),
-            &templates,
-            &synth,
-            &species_names,
-            &passive_names,
-            &calib,
-            Some(&report_dir),
-            |p| {
-                let _ = app.emit("scan-progress", &p);
-            },
-        )?;
+        let (slots, log) = if use_parallel {
+            scan_box_parallel(
+                backend.as_mut(),
+                &templates,
+                &synth,
+                &species_names,
+                &passive_names,
+                &calib,
+                Some(&report_dir),
+                |p| {
+                    let _ = app.emit("scan-progress", &p);
+                },
+            )?
+        } else {
+            scan_box(
+                backend.as_mut(),
+                &templates,
+                &synth,
+                &species_names,
+                &passive_names,
+                &calib,
+                Some(&report_dir),
+                |p| {
+                    let _ = app.emit("scan-progress", &p);
+                },
+            )?
+        };
+        let timing = log
+            .iter()
+            .find(|l| l.starts_with("Total:"))
+            .cloned();
         let report_path = scanner::palbox::write_report_meta("scan", &log)?;
-        Ok(ScanResult { slots, report_path })
+        Ok(ScanResult {
+            slots,
+            report_path,
+            timing,
+        })
     })
     .await
     .map_err(|e| format!("scan task panicked: {e}"))?
@@ -343,6 +369,7 @@ const PALBOX_PAGES: u32 = 32;
 async fn scan_all_boxes(
     app: tauri::AppHandle,
     data: State<'_, GameData>,
+    parallel: Option<bool>,
 ) -> Result<ScanResult, String> {
     let calib = GridCalibration::load().ok_or("not calibrated yet")?;
     let pal_icons = scanner::matcher::pal_icon_map(&data);
@@ -358,6 +385,7 @@ async fn scan_all_boxes(
         .map(|(k, p)| (k.clone(), p.name.clone()))
         .collect();
     SCAN_ABORT.store(false, Ordering::Relaxed);
+    let use_parallel = parallel.unwrap_or(false);
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
         let templates =
@@ -372,13 +400,22 @@ async fn scan_all_boxes(
             &passive_names,
             &calib,
             PALBOX_PAGES,
+            use_parallel,
             Some(&report_dir),
             |p| {
                 let _ = app.emit("scan-progress", &p);
             },
         )?;
+        let timing = log
+            .iter()
+            .find(|l| l.starts_with("Total:"))
+            .cloned();
         let report_path = scanner::palbox::write_report_meta("scan-all", &log)?;
-        Ok(ScanResult { slots, report_path })
+        Ok(ScanResult {
+            slots,
+            report_path,
+            timing,
+        })
     })
     .await
     .map_err(|e| format!("scan task panicked: {e}"))?

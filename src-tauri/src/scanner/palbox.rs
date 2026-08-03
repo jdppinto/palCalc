@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use palcalc_core::Gender;
@@ -201,6 +202,16 @@ pub struct SlotResult {
     /// The raw slot capture — lets the UI submit a species correction, which
     /// becomes a learned template of the user's own game rendering.
     pub crop_png: String,
+}
+
+/// A slot whose zone images have been captured but not yet OCR-processed.
+struct CapturedSlot {
+    row: u32,
+    col: u32,
+    crop: image::RgbaImage,
+    name_img: image::RgbaImage,
+    gender_img: Option<image::RgbaImage>,
+    passives_img: Option<image::RgbaImage>,
 }
 
 /// Test-visible wrapper.
@@ -581,6 +592,276 @@ pub fn scan_box(
     Ok((results, log))
 }
 
+/// Two-phase scan: capture all zone images sequentially, then OCR-process them
+/// in parallel with rayon. Same signature as `scan_box` — drop-in replacement
+/// when `parallel` is true.
+#[allow(clippy::too_many_arguments)]
+pub fn scan_box_parallel(
+    backend: &mut dyn Backend,
+    templates: &IconTemplates,
+    synth: &TextSynth,
+    species_names: &[(String, String)],
+    passive_names: &[(String, String)],
+    calib: &GridCalibration,
+    debug_dir: Option<&std::path::Path>,
+    mut on_progress: impl FnMut(ScanProgress),
+) -> Result<(Vec<SlotResult>, Vec<String>), String> {
+    use rayon::prelude::*;
+
+    if SCAN_ABORT.load(Ordering::Relaxed) {
+        return Err("scan aborted".into());
+    }
+    if let Some(dir) = debug_dir {
+        let _ = std::fs::remove_dir_all(dir);
+        let _ = std::fs::create_dir_all(dir);
+    }
+
+    // ---- Pass 1: unhovered grid capture ----
+    let mut report = String::new();
+    let pre = classify_grid(backend, calib, debug_dir, &mut report, Some(templates))?;
+
+    let monitor = backend.focused_monitor_rect()?;
+    let mut layout = PanelLayout::load_validated(calib.panel, monitor);
+    let mut discovery_failures = 0u32;
+    let occupied: Vec<usize> = pre
+        .iter()
+        .enumerate()
+        .filter(|(_, p)| p.occupied)
+        .map(|(i, _)| i)
+        .collect();
+    let total = occupied.len() as u32;
+
+    // ---- Phase 1: sequential capture of all zone images ----
+    let phase1_start = Instant::now();
+    let mut captured: Vec<CapturedSlot> = Vec::with_capacity(occupied.len());
+    for &i in &occupied {
+        let p = &pre[i];
+        if SCAN_ABORT.load(Ordering::Relaxed) {
+            return Err("scan aborted".into());
+        }
+        backend.move_cursor(p.cx, p.cy)?;
+        std::thread::sleep(Duration::from_millis(calib.delay_ms));
+        if SCAN_ABORT.load(Ordering::Relaxed) {
+            return Err("scan aborted".into());
+        }
+
+        // Panel layout discovery (once; give up after repeated failures).
+        if layout.is_none() && discovery_failures < 3 {
+            let drect = match calib.panel {
+                Some(pr) => PanelLayout::name_search_rect(pr),
+                None => PanelLayout::discovery_rect(monitor),
+            };
+            let img = backend.capture_region(drect.0, drect.1, drect.2, drect.3)?;
+            let px_range = match calib.panel {
+                Some(panel) => super::panel::name_px_range(panel),
+                None => (26.0, 46.0),
+            };
+            match PanelLayout::discover(
+                synth,
+                &img,
+                (drect.0, drect.1),
+                species_names,
+                px_range,
+            ) {
+                Some((l, _key, _score)) => {
+                    layout = Some(l);
+                }
+                None => discovery_failures += 1,
+            }
+        }
+
+        let Some(l) = &layout else {
+            // No layout discovered — record empty and skip captures.
+            on_progress(ScanProgress {
+                current: captured.len() as u32 + 1,
+                total,
+                species: None,
+                box_current: 1,
+                box_total: 1,
+            });
+            continue;
+        };
+
+        // Capture name zone
+        let (nb, _) = calib.zone_or(
+            "name",
+            match calib.panel {
+                Some(panel) => PanelLayout::name_rect(panel),
+                None => l.name_band,
+            },
+        );
+        let name_img = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
+        if let Some(dir) = debug_dir {
+            let _ = name_img.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
+        }
+
+        // Capture gender zone (only if panel has a dedicated zone)
+        let gender_img = match calib.panel {
+            Some(panel) => {
+                let (gr, _) = calib.zone_or("gender", PanelLayout::gender_rect(panel));
+                Some(backend.capture_region(gr.0, gr.1, gr.2, gr.3)?)
+            }
+            None => None,
+        };
+
+        // Capture passives zone
+        let (pr, _) = calib.zone_or(
+            "passives",
+            match calib.panel {
+                Some(panel) => PanelLayout::passives_search_rect(panel),
+                None => l.passives_rect(),
+            },
+        );
+        let passives_img = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
+        if let Some(dir) = debug_dir {
+            let _ = passives_img.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
+        }
+
+        on_progress(ScanProgress {
+            current: captured.len() as u32 + 1,
+            total,
+            species: None,
+            box_current: 1,
+            box_total: 1,
+        });
+
+        captured.push(CapturedSlot {
+            row: p.row,
+            col: p.col,
+            crop: p.crop.clone(),
+            name_img,
+            gender_img,
+            passives_img: Some(passives_img),
+        });
+    }
+    let phase1_ms = phase1_start.elapsed().as_millis();
+
+    if SCAN_ABORT.load(Ordering::Relaxed) {
+        return Err("scan aborted".into());
+    }
+
+    // ---- Phase 2: parallel OCR processing ----
+    let phase2_start = Instant::now();
+    let layout = Arc::new(layout);
+    let synth = Arc::new(synth);
+    let textlib = Arc::new(TextLib::load(TextLib::default_dir()));
+    let species_names = Arc::new(species_names.to_vec());
+    let passive_names = Arc::new(passive_names.to_vec());
+
+    let slot_results: Vec<(SlotResult, String)> = captured
+        .par_iter()
+        .enumerate()
+        .map(|(_idx, cs)| {
+            let mut species: Option<String> = None;
+            let mut score = 0.0f32;
+            let mut gender = None;
+            let mut passives = Vec::new();
+            let mut passive_unknowns = Vec::new();
+
+            if let Some(l) = layout.as_ref() {
+                // Name
+                let name_read = l.read_name(&synth, &cs.name_img, &species_names);
+                if let Some((key, s)) = name_read {
+                    if s >= NAME_CONFIDENCE {
+                        species = Some(key);
+                        score = s;
+                    }
+                }
+                // Gender
+                gender = match &cs.gender_img {
+                    Some(gimg) => classify_gender(gimg),
+                    None => classify_gender(&cs.name_img),
+                };
+                // Passives
+                if let Some(pimg) = &cs.passives_img {
+                    let expected = calib.panel.map(super::panel::row_px_expected);
+                    let (keys, unknowns, _found_px) = l.read_passive_rows(
+                        &synth,
+                        &textlib,
+                        pimg,
+                        &passive_names,
+                        None,
+                        expected,
+                    );
+                    passives = keys;
+                    passive_unknowns = unknowns;
+                }
+            }
+
+            // Emit progress from the main thread via channel is not possible
+            // in par_iter; we'll report progress after phase 2 instead.
+            let log_line = format!(
+                "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
+                cs.row,
+                cs.col,
+                species.as_deref().unwrap_or("<none>"),
+                score,
+                gender,
+                passives,
+                if passive_unknowns.is_empty() {
+                    String::new()
+                } else {
+                    format!(" +{} unknown row(s)", passive_unknowns.len())
+                },
+            );
+
+            // Dump unknown passive crops
+            if let Some(dir) = debug_dir {
+                use base64::Engine;
+                for (j, (_, b64)) in passive_unknowns.iter().enumerate() {
+                    if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(b64) {
+                        let _ = std::fs::write(
+                            dir.join(format!("unknown_{}_{}_{}.png", cs.row, cs.col, j)),
+                            bytes,
+                        );
+                    }
+                }
+            }
+
+            let crop_png = png_base64(&cs.crop).unwrap_or_default();
+            (
+                SlotResult {
+                    box_index: 0,
+                    row: cs.row,
+                    col: cs.col,
+                    unidentified: species.is_none(),
+                    species,
+                    score,
+                    gender,
+                    passives,
+                    passive_unknowns,
+                    crop_png,
+                },
+                log_line,
+            )
+        })
+        .collect();
+    let phase2_ms = phase2_start.elapsed().as_millis();
+    let total_ms = phase1_start.elapsed().as_millis();
+
+    let mut results: Vec<SlotResult> = Vec::with_capacity(slot_results.len());
+    let mut log: Vec<String> = Vec::with_capacity(slot_results.len());
+    for (r, l) in slot_results {
+        log.push(l.trim().to_string());
+        results.push(r);
+    }
+
+    // Add timing summary to log
+    log.push(format!(
+        "Phase 1 capture: {phase1_ms}ms ({} slots)",
+        captured.len()
+    ));
+    log.push(format!("Phase 2 process: {phase2_ms}ms"));
+    log.push(format!("Total: {total_ms}ms"));
+
+    if let Some(dir) = debug_dir {
+        let report = log.join("\n");
+        let _ = std::fs::write(dir.join("report.txt"), &report);
+    }
+    results.sort_by_key(|r| (r.row, r.col));
+    Ok((results, log))
+}
+
 /// Sweep `box_count` palbox pages: scan the open box, press E to advance, scan
 /// the next, and so on. Results from every box are concatenated with each
 /// slot tagged by `box_index`; the merged debug bundle keeps each box's
@@ -596,6 +877,7 @@ pub fn scan_boxes(
     passive_names: &[(String, String)],
     calib: &GridCalibration,
     box_count: u32,
+    parallel: bool,
     debug_dir: Option<&std::path::Path>,
     mut on_progress: impl FnMut(ScanProgress),
 ) -> Result<(Vec<SlotResult>, Vec<String>), String> {
@@ -618,22 +900,41 @@ pub fn scan_boxes(
             std::thread::sleep(settle);
         }
         let box_dir = debug_dir.map(|d| d.join(format!("box_{b}")));
-        let (mut slots, log) = scan_box(
-            backend,
-            templates,
-            synth,
-            species_names,
-            passive_names,
-            calib,
-            box_dir.as_deref(),
-            |p| {
-                on_progress(ScanProgress {
-                    box_current: b + 1,
-                    box_total: box_count,
-                    ..p
-                });
-            },
-        )?;
+        let (mut slots, log) = if parallel {
+            scan_box_parallel(
+                backend,
+                templates,
+                synth,
+                species_names,
+                passive_names,
+                calib,
+                box_dir.as_deref(),
+                |p| {
+                    on_progress(ScanProgress {
+                        box_current: b + 1,
+                        box_total: box_count,
+                        ..p
+                    });
+                },
+            )?
+        } else {
+            scan_box(
+                backend,
+                templates,
+                synth,
+                species_names,
+                passive_names,
+                calib,
+                box_dir.as_deref(),
+                |p| {
+                    on_progress(ScanProgress {
+                        box_current: b + 1,
+                        box_total: box_count,
+                        ..p
+                    });
+                },
+            )?
+        };
         for s in &mut slots {
             s.box_index = b;
         }

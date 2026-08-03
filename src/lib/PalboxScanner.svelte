@@ -67,6 +67,8 @@
   let countdown = $state(0);
   let capturing = $state<0 | 1 | 2 | 3 | 4>(0);
   let scanning = $state(false);
+  let parallelScan = $state(false);
+  let scanTiming = $state<string | null>(null);
   let progress = $state<{
     current: number;
     total: number;
@@ -452,14 +454,17 @@
     error = null;
     results = null;
     scanReportPath = null;
+    scanTiming = null;
     progress = null;
     try {
-      const r = await invoke<{ slots: SlotResult[]; report_path: string }>(
-        command,
-        {},
-      );
+      const r = await invoke<{
+        slots: SlotResult[];
+        report_path: string;
+        timing?: string;
+      }>(command, { parallel: parallelScan });
       results = r.slots;
       scanReportPath = r.report_path;
+      scanTiming = r.timing ?? null;
     } catch (e) {
       error = String(e);
     } finally {
@@ -683,6 +688,10 @@
   </details>
 
   <div class="row scan-row">
+    <label class="parallel-toggle">
+      <input type="checkbox" bind:checked={parallelScan} disabled={scanning} />
+      Parallel scan
+    </label>
     <button class="scan" onclick={scan} disabled={scanning || !calibSaved || !status?.backend || !status?.valid}>
       {scanning ? "Scanning…" : "Scan current box"}
     </button>
@@ -711,6 +720,10 @@
       and keep Palworld focused. Results accumulate in Owned Pals.
     </span>
   </div>
+
+  {#if scanTiming}
+    <p class="dim-text scan-timing">{scanTiming}</p>
+  {/if}
 
   {#if scanReportPath}
     <p class="dim-text">
@@ -1014,6 +1027,21 @@
 
   .hint-inline {
     color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+
+  .parallel-toggle {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .scan-timing {
+    margin: 0;
+    padding: 0.3rem 0.6rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 6px;
+    font-family: monospace;
     font-size: 0.85rem;
   }
 
