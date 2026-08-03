@@ -741,104 +741,109 @@ pub fn scan_box_parallel(
     // ---- Phase 2: OCR processing ----
     let phase2_start = Instant::now();
     let captured_count = captured.len();
+    const BATCH_SIZE: usize = 5;
 
     let mut all_results: Vec<(SlotResult, String)> = Vec::with_capacity(captured.len());
-    for cs in &captured {
+    for chunk in captured.chunks(BATCH_SIZE) {
         if SCAN_ABORT.load(Ordering::Relaxed) {
+            for cs in chunk {
+                let crop_png = png_base64(&cs.crop).unwrap_or_default();
+                all_results.push((
+                    SlotResult {
+                        box_index: 0,
+                        row: cs.row,
+                        col: cs.col,
+                        unidentified: false,
+                        species: None,
+                        score: 0.0,
+                        gender: None,
+                        passives: Vec::new(),
+                        passive_unknowns: Vec::new(),
+                        crop_png,
+                    },
+                    String::new(),
+                ));
+            }
+            break;
+        }
+        for cs in chunk {
+            let mut species: Option<String> = None;
+            let mut score = 0.0f32;
+            let mut gender = None;
+            let mut passives = Vec::new();
+            let mut passive_unknowns = Vec::new();
+
+            if let Some(l) = &layout {
+                let name_read = l.read_name(synth, &cs.name_img, species_names);
+                if let Some((key, s)) = name_read {
+                    if s >= NAME_CONFIDENCE {
+                        species = Some(key);
+                        score = s;
+                    }
+                }
+                gender = match &cs.gender_img {
+                    Some(gimg) => classify_gender(gimg),
+                    None => classify_gender(&cs.name_img),
+                };
+                if let Some(pimg) = &cs.passives_img {
+                    let expected = calib.panel.map(super::panel::row_px_expected);
+                    let (keys, unknowns, _found_px) = l.read_passive_rows(
+                        synth,
+                        textlib,
+                        pimg,
+                        passive_names,
+                        None,
+                        expected,
+                    );
+                    passives = keys;
+                    passive_unknowns = unknowns;
+                }
+            }
+
+            let log_line = format!(
+                "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
+                cs.row,
+                cs.col,
+                species.as_deref().unwrap_or("<none>"),
+                score,
+                gender,
+                passives,
+                if passive_unknowns.is_empty() {
+                    String::new()
+                } else {
+                    format!(" +{} unknown row(s)", passive_unknowns.len())
+                },
+            );
+
+            if let Some(dir) = debug_dir {
+                use base64::Engine;
+                for (j, (_, b64)) in passive_unknowns.iter().enumerate() {
+                    if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(b64) {
+                        let _ = std::fs::write(
+                            dir.join(format!("unknown_{}_{}_{}.png", cs.row, cs.col, j)),
+                            bytes,
+                        );
+                    }
+                }
+            }
+
             let crop_png = png_base64(&cs.crop).unwrap_or_default();
             all_results.push((
                 SlotResult {
                     box_index: 0,
                     row: cs.row,
                     col: cs.col,
-                    unidentified: false,
-                    species: None,
-                    score: 0.0,
-                    gender: None,
-                    passives: Vec::new(),
-                    passive_unknowns: Vec::new(),
+                    unidentified: species.is_none(),
+                    species,
+                    score,
+                    gender,
+                    passives,
+                    passive_unknowns,
                     crop_png,
                 },
-                String::new(),
+                log_line,
             ));
-            continue;
         }
-        let mut species: Option<String> = None;
-        let mut score = 0.0f32;
-        let mut gender = None;
-        let mut passives = Vec::new();
-        let mut passive_unknowns = Vec::new();
-
-        if let Some(l) = &layout {
-            let name_read = l.read_name(synth, &cs.name_img, species_names);
-            if let Some((key, s)) = name_read {
-                if s >= NAME_CONFIDENCE {
-                    species = Some(key);
-                    score = s;
-                }
-            }
-            gender = match &cs.gender_img {
-                Some(gimg) => classify_gender(gimg),
-                None => classify_gender(&cs.name_img),
-            };
-            if let Some(pimg) = &cs.passives_img {
-                let expected = calib.panel.map(super::panel::row_px_expected);
-                let (keys, unknowns, _found_px) = l.read_passive_rows(
-                    synth,
-                    textlib,
-                    pimg,
-                    passive_names,
-                    None,
-                    expected,
-                );
-                passives = keys;
-                passive_unknowns = unknowns;
-            }
-        }
-
-        let log_line = format!(
-            "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
-            cs.row,
-            cs.col,
-            species.as_deref().unwrap_or("<none>"),
-            score,
-            gender,
-            passives,
-            if passive_unknowns.is_empty() {
-                String::new()
-            } else {
-                format!(" +{} unknown row(s)", passive_unknowns.len())
-            },
-        );
-
-        if let Some(dir) = debug_dir {
-            use base64::Engine;
-            for (j, (_, b64)) in passive_unknowns.iter().enumerate() {
-                if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(b64) {
-                    let _ = std::fs::write(
-                        dir.join(format!("unknown_{}_{}_{}.png", cs.row, cs.col, j)),
-                        bytes,
-                    );
-                }
-            }
-        }
-
-        let crop_png = png_base64(&cs.crop).unwrap_or_default();
-        all_results.push((
-            SlotResult {
-                box_index: 0,
-                row: cs.row,
-                col: cs.col,
-                unidentified: species.is_none(),
-                species,
-                score,
-                gender,
-                passives,
-                passive_unknowns,
-                crop_png,
-            },
-            log_line,
-        ));
     }
     drop(captured);
     #[cfg(target_os = "linux")]
