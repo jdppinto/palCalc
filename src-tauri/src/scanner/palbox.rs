@@ -539,7 +539,7 @@ pub fn scan_box(
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
             }
-            let band_key = img_hash(&band);
+            let band_key = img_hash(&band) ^ ((p.row as u64) << 32) ^ ((p.col as u64) << 48);
             let t0 = Instant::now();
             let name_read = match name_from_discovery.take() {
                 Some(r) => {
@@ -567,7 +567,7 @@ pub fn scan_box(
                 let _ =
                     pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
             }
-            let pkey = img_hash(&pimg);
+            let pkey = img_hash(&pimg) ^ ((p.row as u64) << 32) ^ ((p.col as u64) << 48);
             (passives, passive_unknowns) = match passive_cache.get(&pkey) {
                 Some(cached) => cached.clone(),
                 None => {
