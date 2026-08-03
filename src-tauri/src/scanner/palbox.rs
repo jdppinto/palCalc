@@ -447,6 +447,15 @@ pub fn scan_box(
         } else {
             calib.delay_ms
         }));
+        // If the user grabbed the mouse and moved it significantly, abort
+        // instead of fighting over cursor control.
+        if let Ok((mx, my)) = backend.cursor_pos() {
+            let dx = (mx - p.cx).unsigned_abs();
+            let dy = (my - p.cy).unsigned_abs();
+            if dx > 50 || dy > 50 {
+                return Err("scan aborted: cursor moved by user".into());
+            }
+        }
         if SCAN_ABORT.load(Ordering::Relaxed) {
             return Err("scan aborted".into());
         }
