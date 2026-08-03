@@ -312,6 +312,7 @@ async fn scan_current_box(
             Some(&scanner::matcher::user_templates_dir()),
         )?;
         let synth = TextSynth::new()?;
+        let textlib = TextLib::load(TextLib::default_dir());
         // Dump captures into the shareable debug-report bundle, same as the
         // other debug actions, so a full scan can be handed over for tuning.
         let report_dir = scanner::palbox::reset_report_dir()?;
@@ -319,9 +320,11 @@ async fn scan_current_box(
             backend.as_mut(),
             &templates,
             &synth,
+            &textlib,
             &species_names,
             &passive_names,
             &calib,
+            false,
             Some(&report_dir),
             |p| {
                 let _ = app.emit("scan-progress", &p);
@@ -363,11 +366,13 @@ async fn scan_all_boxes(
         let templates =
             IconTemplates::load(&pal_icons, Some(&scanner::matcher::user_templates_dir()))?;
         let synth = TextSynth::new()?;
+        let textlib = TextLib::load(TextLib::default_dir());
         let report_dir = scanner::palbox::reset_report_dir()?;
         let (slots, log) = scan_boxes(
             backend.as_mut(),
             &templates,
             &synth,
+            &textlib,
             &species_names,
             &passive_names,
             &calib,
@@ -418,6 +423,7 @@ async fn debug_grid_capture(data: State<'_, GameData>) -> Result<DebugGridResult
             Some(&report_dir),
             &mut report,
             Some(&templates),
+            false,
         )?;
         let log: Vec<String> = report.lines().map(String::from).collect();
         let report_path = scanner::palbox::write_report_meta("grid", &log)?;
@@ -520,7 +526,10 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         cols: 6,
         rows: 5,
         slot_size: ((96.0 * sx) as u32).max(40),
-        delay_ms: 100,
+        delay_ms: 1,
+        grid_unhover_ms: 20,
+        first_slot_ms: 50,
+        box_settle_ms: 50,
         panel: Some(panel),
         zones,
     };

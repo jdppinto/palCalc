@@ -29,6 +29,16 @@ pub struct GridCalibration {
     pub slot_size: u32,
     /// Hover delay before capturing, ms.
     pub delay_ms: u64,
+    /// Milliseconds to wait after parking cursor off-grid before grid capture.
+    #[serde(default = "default_grid_unhover")]
+    pub grid_unhover_ms: u64,
+    /// Milliseconds to wait after moving to the first occupied slot per box
+    /// (panel must appear from scratch — longer than slot-to-slot delay).
+    #[serde(default = "default_first_slot")]
+    pub first_slot_ms: u64,
+    /// Milliseconds to wait after pressing E to switch boxes.
+    #[serde(default = "default_box_settle")]
+    pub box_settle_ms: u64,
     /// The hover-panel ("pal sheet") bounds, absolute screen rect. All text
     /// reads are constrained inside it — nothing else on screen is processed.
     #[serde(default)]
@@ -41,6 +51,10 @@ pub struct GridCalibration {
     pub zones: HashMap<String, (f32, f32, f32, f32)>,
 }
 
+fn default_grid_unhover() -> u64 { 20 }
+fn default_first_slot() -> u64 { 50 }
+fn default_box_settle() -> u64 { 50 }
+
 impl Default for GridCalibration {
     fn default() -> Self {
         Self {
@@ -49,7 +63,10 @@ impl Default for GridCalibration {
             cols: 6,
             rows: 5,
             slot_size: 90,
-            delay_ms: 100,
+            delay_ms: 1,
+            grid_unhover_ms: 20,
+            first_slot_ms: 50,
+            box_settle_ms: 50,
             panel: None,
             zones: HashMap::new(),
         }
@@ -242,6 +259,23 @@ fn classify_gender(img: &image::RgbaImage) -> Option<Gender> {
     }
 }
 
+/// Crop a zone from a full-panel image. Zones are absolute screen rects;
+/// this converts them to panel-relative coordinates for in-memory cropping.
+fn crop_from_panel(
+    panel_img: &image::RgbaImage,
+    panel: (i32, i32, u32, u32),
+    zone: (i32, i32, u32, u32),
+) -> image::RgbaImage {
+    let x = (zone.0 - panel.0).max(0) as u32;
+    let y = (zone.1 - panel.1).max(0) as u32;
+    let w = zone.2.min(panel.2.saturating_sub(x));
+    let h = zone.3.min(panel.3.saturating_sub(y));
+    if w == 0 || h == 0 {
+        return image::RgbaImage::new(1, 1);
+    }
+    image::imageops::crop_imm(panel_img, x, y, w, h).to_image()
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ScanProgress {
     pub current: u32,
@@ -273,6 +307,7 @@ pub fn classify_grid(
     debug_dir: Option<&std::path::Path>,
     report: &mut String,
     templates: Option<&IconTemplates>,
+    cursor_off_grid: bool,
 ) -> Result<Vec<PreSlot>, String> {
     let slot = calib.slot_size;
     let half = (slot / 2) as i32;
@@ -285,8 +320,10 @@ pub fn classify_grid(
     report.push_str(&format!("grid rect: ({gx}, {gy}) {gw}x{gh}\n"));
 
     // Park away from the grid so no slot is hover-highlighted.
-    backend.move_cursor(gx - slot as i32, gy - slot as i32)?;
-    std::thread::sleep(Duration::from_millis(calib.delay_ms.max(250)));
+    if !cursor_off_grid {
+        backend.move_cursor(gx - slot as i32, gy - slot as i32)?;
+        std::thread::sleep(Duration::from_millis(calib.grid_unhover_ms));
+    }
     let grid_img = backend.capture_region(gx, gy, gw, gh)?;
     if let Some(dir) = debug_dir {
         let _ = grid_img.save(dir.join("grid.png"));
@@ -342,9 +379,11 @@ pub fn scan_box(
     backend: &mut dyn Backend,
     templates: &IconTemplates,
     synth: &TextSynth,
+    textlib: &TextLib,
     species_names: &[(String, String)],
     passive_names: &[(String, String)],
     calib: &GridCalibration,
+    cursor_off_grid: bool,
     debug_dir: Option<&std::path::Path>,
     mut on_progress: impl FnMut(ScanProgress),
 ) -> Result<(Vec<SlotResult>, Vec<String>), String> {
@@ -358,7 +397,7 @@ pub fn scan_box(
     }
 
     // ---- Pass 1: unhovered grid capture ----
-    let pre = classify_grid(backend, calib, debug_dir, &mut report, Some(templates))?;
+    let pre = classify_grid(backend, calib, debug_dir, &mut report, Some(templates), cursor_off_grid)?;
 
     // ---- Pass 2: hover occupied slots, read the panel ----
     let monitor = backend.focused_monitor_rect()?;
@@ -368,7 +407,6 @@ pub fn scan_box(
     #[allow(clippy::type_complexity)]
     let mut passive_cache: HashMap<u64, (Vec<String>, Vec<(String, String)>)> = HashMap::new();
     let mut layout = PanelLayout::load_validated(calib.panel, monitor);
-    let textlib = TextLib::load(TextLib::default_dir());
     let mut discovery_failures = 0u32;
     let mut row_px: Option<f32> = None;
     let occupied: Vec<usize> = pre
@@ -381,6 +419,7 @@ pub fn scan_box(
 
     let mut results: Vec<SlotResult> = Vec::with_capacity(pre.len());
     let mut done = 0u32;
+    let mut first_occupied = true;
     for (i, p) in pre.iter().enumerate() {
         let slot_start = Instant::now();
         if !occupied.contains(&i) {
@@ -394,7 +433,7 @@ pub fn scan_box(
                 gender: None,
                 passives: Vec::new(),
                 passive_unknowns: Vec::new(),
-                crop_png: png_base64(&p.crop)?,
+                crop_png: String::new(),
             });
             continue;
         }
@@ -402,7 +441,12 @@ pub fn scan_box(
             return Err("scan aborted".into());
         }
         backend.move_cursor(p.cx, p.cy)?;
-        std::thread::sleep(Duration::from_millis(calib.delay_ms));
+        std::thread::sleep(Duration::from_millis(if first_occupied {
+            first_occupied = false;
+            calib.first_slot_ms.max(calib.delay_ms)
+        } else {
+            calib.delay_ms
+        }));
         if SCAN_ABORT.load(Ordering::Relaxed) {
             return Err("scan aborted".into());
         }
@@ -440,19 +484,41 @@ pub fn scan_box(
         let mut passives = Vec::new();
         let mut passive_unknowns = Vec::new();
         if let Some(l) = &layout {
-            // Name: authoritative when confident. Try the cheap staged reads
-            // unless discovery already produced it this iteration.
             let (nb, _) = calib.zone_or(
                 "name",
-                match calib.panel {
-                    Some(panel) => PanelLayout::name_rect(panel),
-                    None => l.name_band,
-                },
+                calib.panel.map_or(l.name_band, PanelLayout::name_rect),
+            );
+            let (gr, _) = calib.zone_or(
+                "gender",
+                calib.panel.map_or((0, 0, 0, 0), PanelLayout::gender_rect),
+            );
+            let (pr, _) = calib.zone_or(
+                "passives",
+                calib
+                    .panel
+                    .map_or(l.passives_rect(), PanelLayout::passives_search_rect),
             );
             if slot_start.elapsed() > Duration::from_secs(3) {
                 return Err("slot capture timed out".into());
             }
-            let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
+
+            // Single-capture optimisation: when the panel rect is calibrated,
+            // grab the full panel once and crop zones in memory, saving 2
+            // IPC/subprocess round-trips per occupied slot.
+            let (band, gimg, pimg) = if let Some(panel) = calib.panel {
+                let panel_img =
+                    backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
+                (
+                    crop_from_panel(&panel_img, panel, nb),
+                    Some(crop_from_panel(&panel_img, panel, gr)),
+                    crop_from_panel(&panel_img, panel, pr),
+                )
+            } else {
+                let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
+                let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
+                (band, None, pimg)
+            };
+
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
             }
@@ -477,31 +543,11 @@ pub fn scan_box(
                     score = s;
                 }
             }
-            gender = match calib.panel {
-                Some(panel) => {
-                    let (gr, _) = calib.zone_or("gender", PanelLayout::gender_rect(panel));
-                    if slot_start.elapsed() > Duration::from_secs(3) {
-                        return Err("slot capture timed out".into());
-                    }
-                    let gimg = backend.capture_region(gr.0, gr.1, gr.2, gr.3)?;
-                    classify_gender(&gimg)
-                }
-                None => classify_gender(&band),
-            };
+            gender = classify_gender(gimg.as_ref().unwrap_or(&band));
 
-            let (pr, _) = calib.zone_or(
-                "passives",
-                match calib.panel {
-                    Some(panel) => PanelLayout::passives_search_rect(panel),
-                    None => l.passives_rect(),
-                },
-            );
-            if slot_start.elapsed() > Duration::from_secs(3) {
-                return Err("slot capture timed out".into());
-            }
-            let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
             if let Some(dir) = debug_dir {
-                let _ = pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
+                let _ =
+                    pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
             }
             let pkey = img_hash(&pimg);
             (passives, passive_unknowns) = match passive_cache.get(&pkey) {
@@ -510,7 +556,7 @@ pub fn scan_box(
                     let expected = calib.panel.map(super::panel::row_px_expected);
                     let (keys, unknowns, found_px) = l.read_passive_rows(
                         synth,
-                        &textlib,
+                        textlib,
                         &pimg,
                         passive_names,
                         row_px,
@@ -578,6 +624,11 @@ pub fn scan_box(
         let _ = std::fs::write(dir.join("report.txt"), &report);
     }
     results.sort_by_key(|r| (r.row, r.col));
+    // Park cursor off-grid so the next box's classify_grid can skip unhover settle.
+    let _ = backend.move_cursor(
+        calib.slot_center(0, 0).0 - calib.slot_size as i32,
+        calib.slot_center(0, 0).1 - calib.slot_size as i32,
+    );
     Ok((results, log))
 }
 
@@ -592,6 +643,7 @@ pub fn scan_boxes(
     backend: &mut dyn Backend,
     templates: &IconTemplates,
     synth: &TextSynth,
+    textlib: &TextLib,
     species_names: &[(String, String)],
     passive_names: &[(String, String)],
     calib: &GridCalibration,
@@ -607,8 +659,9 @@ pub fn scan_boxes(
     let mut merged_log: Vec<String> = Vec::new();
     // Box-switch settle: the page change animates; capturing too soon grabs a
     // mid-transition frame.
-    let settle = Duration::from_millis(calib.delay_ms.max(400));
+    let settle = Duration::from_millis(calib.box_settle_ms);
 
+    let mut cursor_parked = false;
     for b in 0..box_count {
         if SCAN_ABORT.load(Ordering::Relaxed) {
             break;
@@ -622,9 +675,11 @@ pub fn scan_boxes(
             backend,
             templates,
             synth,
+            textlib,
             species_names,
             passive_names,
             calib,
+            cursor_parked,
             box_dir.as_deref(),
             |p| {
                 on_progress(ScanProgress {
@@ -640,6 +695,7 @@ pub fn scan_boxes(
         merged_log.push(format!("=== box {b} ==="));
         merged_log.extend(log);
         all.extend(slots);
+        cursor_parked = true; // scan_box parks off-grid at the end
     }
     Ok((all, merged_log))
 }
@@ -960,9 +1016,11 @@ mod tests {
             &mut backend,
             &templates,
             &synth,
+            &textlib::TextLib::load(textlib::TextLib::default_dir()),
             &[],
             &[],
             &calib,
+            false,
             None,
             |_| {
                 progress_events += 1;
@@ -1066,7 +1124,7 @@ mod tests {
             ..Default::default()
         };
         let synth = TextSynth::new().unwrap();
-        let out = scan_box(&mut backend, &templates, &synth, &[], &[], &calib, None, |_| {});
+        let out = scan_box(&mut backend, &templates, &synth, &textlib::TextLib::load(textlib::TextLib::default_dir()), &[], &[], &calib, false, None, |_| {});
         assert!(out.is_err());
         SCAN_ABORT.store(false, Ordering::Relaxed);
     }

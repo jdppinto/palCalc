@@ -505,7 +505,7 @@ mod linux {
         /// to the game, which is the whole reason ydotool is here.
         fn move_relative_closed_loop(&mut self, x: i32, y: i32) -> Result<(), String> {
             const TOLERANCE: i32 = 4;
-            const CHUNK_PX: f64 = 16.0;
+            const CHUNK_PX: f64 = 80.0;
             for _ in 0..5 {
                 let (cx, cy) = self.query_cursor()?;
                 let (dx, dy) = (x - cx, y - cy);
@@ -530,11 +530,11 @@ mod linux {
                     if !status.success() {
                         return Err("ydotool mousemove failed".into());
                     }
-                    std::thread::sleep(std::time::Duration::from_millis(10));
+                    std::thread::sleep(std::time::Duration::from_millis(2));
                 }
                 // Let the events propagate before measuring, or the correction
                 // works from stale coordinates.
-                std::thread::sleep(std::time::Duration::from_millis(40));
+                std::thread::sleep(std::time::Duration::from_millis(8));
             }
             Err(
                 "cursor did not settle on the target slot — pointer acceleration may be \
