@@ -111,13 +111,16 @@ pub fn best_vocab_match_in_cell<'a>(
     let line_w = line_rect.2 as f32;
     let cell_l = cx as f32;
     let cell_r = (cx + cw) as f32;
-    let mut char_offset: f32 = 0.0;
     let mut best: Option<(&str, f64, usize)> = None;
+    // Single-token pass.
+    let mut char_offset: f32 = 0.0;
+    let mut token_offsets: Vec<f32> = Vec::with_capacity(tokens.len());
     for token in &tokens {
         let tlen = token.len() as f32;
         let token_l = line_left + char_offset / total_chars as f32 * line_w;
         let token_r = line_left + (char_offset + tlen) / total_chars as f32 * line_w;
         let token_cx = (token_l + token_r) / 2.0;
+        token_offsets.push(char_offset);
         char_offset += tlen;
         if token_cx < cell_l || token_cx >= cell_r {
             continue;
@@ -133,6 +136,33 @@ pub fn best_vocab_match_in_cell<'a>(
                 && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
             {
                 best = Some((key.as_str(), sim, v.len()));
+            }
+        }
+    }
+    // Contiguous window pass (2..=tokens.len()) — handles multi-word
+    // passives like "Remarkable Craftsmanship" as one match.
+    for w in 2..=tokens.len() {
+        for (i, win) in tokens.windows(w).enumerate() {
+            let start_offset = token_offsets[i];
+            let end_offset = start_offset + win.iter().map(|t| t.len()).sum::<usize>() as f32;
+            let win_l = line_left + start_offset / total_chars as f32 * line_w;
+            let win_r = line_left + end_offset / total_chars as f32 * line_w;
+            let win_cx = (win_l + win_r) / 2.0;
+            if win_cx < cell_l || win_cx >= cell_r {
+                continue;
+            }
+            let n = norm(&win.join(" "));
+            if n.len() < 3 {
+                continue;
+            }
+            for (key, name) in vocab {
+                let v = norm(name);
+                let sim = strsim::normalized_levenshtein(&n, &v);
+                if sim >= min_sim
+                    && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
+                {
+                    best = Some((key.as_str(), sim, v.len()));
+                }
             }
         }
     }

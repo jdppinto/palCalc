@@ -351,7 +351,9 @@ impl PanelLayout {
                 match textlib.identify(&cell) {
                     TextMatch::Known(label) if label == EMPTY_LABEL => continue,
                     TextMatch::Known(label) => {
-                        known.push(label);
+                        if !known.iter().any(|k| k == &label) {
+                            known.push(label);
+                        }
                         if known.len() >= MAX_PASSIVES {
                             break;
                         }
@@ -421,7 +423,11 @@ impl PanelLayout {
                     .find(|(_, hx, hy)| {
                         *hy >= y0 && *hy < y0 + h && *hx >= cx && *hx < cx + cw
                     }) {
-                    Some((k, _, _)) => known.push(k.clone()),
+                    Some((k, _, _)) => {
+                        if !known.iter().any(|kk| kk == k) {
+                            known.push(k.clone());
+                        }
+                    }
                     None => {
                         if let Ok(b64) = png_base64(&cell) {
                             let id = format!("{:016x}", fx(&cell));
