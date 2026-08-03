@@ -862,6 +862,10 @@ pub fn scan_box_parallel(
     drop(passive_names);
     drop(layout);
     drop(synth);
+    #[cfg(target_os = "linux")]
+    unsafe {
+        libc::malloc_trim(0);
+    }
     let phase2_ms = phase2_start.elapsed().as_millis();
     let total_ms = phase1_start.elapsed().as_millis();
 
@@ -977,6 +981,11 @@ pub fn scan_boxes(
         merged_log.push(format!("=== box {b} ==="));
         merged_log.extend(log);
         all.extend(slots);
+        // Hint the allocator to return freed pages to the OS.
+        #[cfg(target_os = "linux")]
+        unsafe {
+            libc::malloc_trim(0);
+        }
     }
     Ok((all, merged_log))
 }
