@@ -603,6 +603,7 @@ pub fn scan_box_parallel(
     species_names: &[(String, String)],
     passive_names: &[(String, String)],
     calib: &GridCalibration,
+    textlib: &Arc<TextLib>,
     debug_dir: Option<&std::path::Path>,
     mut on_progress: impl FnMut(ScanProgress),
 ) -> Result<(Vec<SlotResult>, Vec<String>), String> {
@@ -744,7 +745,6 @@ pub fn scan_box_parallel(
     let phase2_start = Instant::now();
     let layout = Arc::new(layout);
     let synth = Arc::new(synth);
-    let textlib = Arc::new(TextLib::load(TextLib::default_dir()));
     let species_names = Arc::new(species_names.to_vec());
     let passive_names = Arc::new(passive_names.to_vec());
 
@@ -858,7 +858,6 @@ pub fn scan_box_parallel(
     }
     let captured_count = captured.len();
     drop(captured);
-    drop(textlib);
     drop(species_names);
     drop(passive_names);
     drop(layout);
@@ -920,11 +919,12 @@ pub fn scan_boxes(
         let _ = std::fs::remove_dir_all(dir);
         let _ = std::fs::create_dir_all(dir);
     }
-    let mut all: Vec<SlotResult> = Vec::new();
-    let mut merged_log: Vec<String> = Vec::new();
+    let mut all: Vec<SlotResult> = Vec::with_capacity(box_count as usize * 30);
+    let mut merged_log: Vec<String> = Vec::with_capacity(box_count as usize * 32);
     // Box-switch settle: the page change animates; capturing too soon grabs a
     // mid-transition frame.
     let settle = Duration::from_millis(calib.delay_ms.max(400));
+    let textlib = Arc::new(TextLib::load(TextLib::default_dir()));
 
     for b in 0..box_count {
         if SCAN_ABORT.load(Ordering::Relaxed) {
@@ -943,6 +943,7 @@ pub fn scan_boxes(
                 species_names,
                 passive_names,
                 calib,
+                &textlib,
                 box_dir.as_deref(),
                 |p| {
                     on_progress(ScanProgress {

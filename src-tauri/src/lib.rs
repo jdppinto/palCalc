@@ -7,6 +7,7 @@ use tauri::{Emitter, State};
 
 use scanner::matcher::IconTemplates;
 use scanner::palbox::{scan_box, scan_box_parallel, scan_boxes, GridCalibration, SCAN_ABORT};
+use std::sync::Arc;
 #[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
 use scanner::platform::{self, WindowInfo};
@@ -318,6 +319,9 @@ async fn scan_current_box(
         // Dump captures into the shareable debug-report bundle, same as the
         // other debug actions, so a full scan can be handed over for tuning.
         let report_dir = scanner::palbox::reset_report_dir()?;
+        let textlib = Arc::new(scanner::textlib::TextLib::load(
+            scanner::textlib::TextLib::default_dir(),
+        ));
         let (slots, log) = if use_parallel {
             scan_box_parallel(
                 backend.as_mut(),
@@ -326,6 +330,7 @@ async fn scan_current_box(
                 &species_names,
                 &passive_names,
                 &calib,
+                &textlib,
                 Some(&report_dir),
                 |p| {
                     let _ = app.emit("scan-progress", &p);
