@@ -175,6 +175,57 @@
   let dumpLabels = $state<Record<string, SlotLabel>>({});
   let savingDump = $state(false);
 
+  // Passive dropdown state
+  let passiveSearch = $state("");
+  let activePassiveSlot = $state<string | null>(null);
+  let passiveIdx = $state(-1);
+
+  $effect(() => {
+    passiveIdx = passiveSearch ? 0 : -1;
+  });
+
+  function filteredPassives(exclude: string[]): PassiveEntry[] {
+    const q = passiveSearch.toLowerCase();
+    return passiveList.filter(
+      (p) => !exclude.includes(p.name) && (!q || p.name.toLowerCase().includes(q)),
+    );
+  }
+
+  function addPassive(slotKey: string, name: string) {
+    const lbl = dumpLabels[slotKey];
+    if (lbl && !lbl.passives.includes(name)) {
+      dumpLabels[slotKey] = { ...lbl, passives: [...lbl.passives, name] };
+    }
+    passiveSearch = "";
+    passiveIdx = -1;
+  }
+
+  function removePassive(slotKey: string, idx: number) {
+    const lbl = dumpLabels[slotKey];
+    if (!lbl) return;
+    dumpLabels[slotKey] = {
+      ...lbl,
+      passives: lbl.passives.filter((_, i) => i !== idx),
+    };
+  }
+
+  function passiveDropdownKeydown(e: KeyboardEvent, slotKey: string) {
+    const opts = filteredPassives(dumpLabels[slotKey]?.passives ?? []);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      passiveIdx = Math.min(passiveIdx + 1, opts.length - 1);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      passiveIdx = Math.max(passiveIdx - 1, 0);
+    } else if (e.key === "Enter" && passiveIdx >= 0 && passiveIdx < opts.length) {
+      e.preventDefault();
+      addPassive(slotKey, opts[passiveIdx].name);
+    } else if (e.key === "Escape") {
+      passiveSearch = "";
+      passiveIdx = -1;
+    }
+  }
+
   function speciesDisplayName(key: string | null): string {
     if (!key) return "";
     return pals.find(p => p.key === key)?.name ?? key;
@@ -221,7 +272,16 @@
   async function loadDumpLabels(path: string) {
     selectedDump = path;
     try {
-      dumpLabels = await invoke<Record<string, SlotLabel>>("load_dump_labels", { path });
+      const raw = await invoke<Record<string, SlotLabel>>("load_dump_labels", { path });
+      // Convert internal passive keys to display names for the editor.
+      const converted: Record<string, SlotLabel> = {};
+      for (const [k, lbl] of Object.entries(raw)) {
+        converted[k] = {
+          ...lbl,
+          passives: lbl.passives.map((key) => passiveName(key)),
+        };
+      }
+      dumpLabels = converted;
     } catch (e) {
       error = String(e);
     }
@@ -229,8 +289,19 @@
 
   async function saveDumpLabels() {
     if (!selectedDump) return;
+    // Convert passive display names back to internal keys for storage.
+    const toSave: Record<string, SlotLabel> = {};
+    for (const [k, lbl] of Object.entries(dumpLabels)) {
+      toSave[k] = {
+        ...lbl,
+        passives: lbl.passives.map((name) => {
+          const match = passiveList.find((p) => p.name === name);
+          return match ? match.key : name;
+        }),
+      };
+    }
     try {
-      await invoke("save_dump_labels", { path: selectedDump, labels: dumpLabels });
+      await invoke("save_dump_labels", { path: selectedDump, labels: toSave });
     } catch (e) {
       error = String(e);
     }
@@ -937,11 +1008,39 @@
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
-              <input
-                value={lbl.passives.join(", ")}
-                placeholder="passives"
-                oninput={(e) => { dumpLabels[slotKey] = { ...lbl, passives: (e.target as HTMLInputElement).value.split(",").map(s => s.trim()).filter(Boolean) }; }}
-              />
+              <div class="passive-editor">
+                {#each lbl.passives as name, i (name + i)}
+                  <span class="passive-tag">
+                    {name}
+                    <button class="passive-rm" onclick={() => removePassive(slotKey, i)}>×</button>
+                  </span>
+                {/each}
+                <input
+                  class="passive-input"
+                  placeholder={lbl.passives.length === 0 ? "add passive…" : ""}
+                  bind:value={passiveSearch}
+                  onfocus={() => { activePassiveSlot = slotKey; }}
+                  onblur={() => { setTimeout(() => { activePassiveSlot = null; passiveSearch = ""; }, 150); }}
+                  onkeydown={(e) => passiveDropdownKeydown(e, slotKey)}
+                />
+                {#if activePassiveSlot === slotKey && passiveSearch}
+                  {@const opts = filteredPassives(lbl.passives)}
+                  {#if opts.length > 0}
+                    <ul class="passive-options">
+                      {#each opts as p, i (p.key)}
+                        <li
+                          class="passive-opt"
+                          class:active={i === passiveIdx}
+                          role="option"
+                          aria-selected={i === passiveIdx}
+                          onmousedown={() => addPassive(slotKey, p.name)}
+                          onmouseenter={() => { passiveIdx = i; }}
+                        >{p.name}</li>
+                      {/each}
+                    </ul>
+                  {/if}
+                {/if}
+              </div>
             </div>
           {/each}
         </div>
@@ -1428,5 +1527,82 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .passive-editor {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+    padding: 0.25rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    min-height: 1.6rem;
+    position: relative;
+  }
+
+  .passive-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.1rem 0.35rem;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    color: var(--text);
+  }
+
+  .passive-rm {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  .passive-rm:hover {
+    color: #ef4444;
+  }
+
+  .passive-input {
+    flex: 1;
+    min-width: 4rem;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.7rem;
+    padding: 0.15rem 0.2rem;
+    outline: none;
+  }
+
+  .passive-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    max-height: 8rem;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .passive-opt {
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--text);
+  }
+
+  .passive-opt:hover,
+  .passive-opt.active {
+    background: var(--bg-hover);
   }
 </style>
