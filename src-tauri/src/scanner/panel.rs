@@ -195,7 +195,7 @@ impl PanelLayout {
         synth: &TextSynth,
         region: &RgbaImage,
         region_origin: (i32, i32),
-        hints: &[(String, String)],
+        hints_idx: &ocr::VocabIndex<'_>,
         px_range: (f32, f32),
     ) -> Option<(Self, String, f32)> {
         // OCR + dictionary first: reads the real game font directly, so it
@@ -204,7 +204,8 @@ impl PanelLayout {
             let best = lines
                 .iter()
                 .filter_map(|(text, rect)| {
-                    ocr::best_vocab_match(text, hints, OCR_MIN_SIM).map(|(k, s)| (k, s, *rect))
+                    ocr::best_vocab_match(text, hints_idx, OCR_MIN_SIM)
+                        .map(|(k, s)| (k, s, *rect))
                 })
                 .max_by(|a, b| a.1.total_cmp(&b.1));
             if let Some((key, sim, (rx, ry, rw, rh))) = best {
@@ -229,7 +230,7 @@ impl PanelLayout {
             }
         }
         let (key, hit) = synth
-            .best_label(region, hints, true, px_range.0, px_range.1)
+            .best_label(region, hints_idx.vocab, true, px_range.0, px_range.1)
             .filter(|(_, h)| h.score >= NAME_CONFIDENCE)?;
         let layout = Self {
             // Tight around the name text only: longest names run ~13 chars
@@ -252,14 +253,14 @@ impl PanelLayout {
         &self,
         synth: &TextSynth,
         band: &RgbaImage,
-        all_names: &[(String, String)],
+        names_idx: &ocr::VocabIndex<'_>,
     ) -> Option<(String, f32)> {
-        if let Ok(Some((key, sim))) = ocr::read_and_match(band, all_names, OCR_MIN_SIM) {
+        if let Ok(Some((key, sim))) = ocr::read_and_match(band, names_idx, OCR_MIN_SIM) {
             return Some((key.to_string(), sim as f32));
         }
         let (key, hit) = synth.best_label(
             band,
-            all_names,
+            names_idx.vocab,
             true,
             self.px_name - 2.0,
             self.px_name + 2.0,
@@ -289,7 +290,7 @@ impl PanelLayout {
         synth: &TextSynth,
         textlib: &TextLib,
         region: &RgbaImage,
-        passive_names: &[(String, String)],
+        passive_idx: &ocr::VocabIndex<'_>,
         px_hint: Option<f32>,
         expected_px: Option<f32>,
     ) -> (Vec<String>, Vec<(String, String)>, Option<f32>) {
@@ -301,7 +302,7 @@ impl PanelLayout {
         if bands.is_empty() {
             // No band structure — trust whatever synth found.
             let (synth_keys_hits, found_px) =
-                self.read_passives_hits(synth, region, passive_names, px_hint, expected_px);
+                self.read_passives_hits(synth, region, passive_idx.vocab, px_hint, expected_px);
             known.extend(synth_keys_hits.iter().map(|(k, _, _)| k.clone()));
             return (known, unknown, found_px);
         }
@@ -315,9 +316,10 @@ impl PanelLayout {
         // box borders fade with whatever the world renders behind them).
         let ocr_lines = ocr::read_lines_boxed(region).unwrap_or_default();
         let header_vocab = [("header".to_string(), "Passive Skills".to_string())];
+        let header_idx = ocr::VocabIndex::build(&header_vocab);
         let header_bottom = ocr_lines
             .iter()
-            .filter(|(t, _)| ocr::best_vocab_match(t, &header_vocab, 0.7).is_some())
+            .filter(|(t, _)| ocr::best_vocab_match(t, &header_idx, 0.7).is_some())
             .map(|(_, (_, ly, _, lh))| *ly + *lh as i32)
             .min();
         let (area_top, area_bottom) = match header_bottom {
@@ -388,7 +390,7 @@ impl PanelLayout {
                             *rect,
                             cx,
                             cw,
-                            passive_names,
+                            passive_idx,
                             OCR_MIN_SIM_PASSIVE,
                         )
                     })
@@ -411,7 +413,7 @@ impl PanelLayout {
                     let (hits, px) = self.read_passives_hits(
                         synth,
                         region,
-                        passive_names,
+                        passive_idx.vocab,
                         px_hint,
                         expected_px,
                     );
@@ -552,12 +554,13 @@ mod tests {
                 eprintln!("hint {}: {:?}", h.1, r.map(|(k, hit)| (k, hit.score, hit.x, hit.y, hit.px)));
             }
         }
+        let hints_idx = ocr::VocabIndex::build(&hints);
         let (layout, key, score) =
             PanelLayout::discover(
                 &synth,
                 &crop(&shot, drect),
                 (drect.0, drect.1),
-                &hints,
+                &hints_idx,
                 name_px_range(panel),
             )
             .expect("name discovered");
@@ -569,9 +572,12 @@ mod tests {
             .iter()
             .map(|(k, p)| (k.clone(), p.name.clone()))
             .collect();
-        let (key, score) = layout
-            .read_name(&synth, &crop(&shot, layout.name_band), &all_names)
-            .expect("band read");
+        let (key, score) = {
+            let idx = ocr::VocabIndex::build(&all_names);
+            layout
+                .read_name(&synth, &crop(&shot, layout.name_band), &idx)
+                .expect("band read")
+        };
         assert_eq!(key, "Carbunclo", "band read wrong name ({score})");
 
         // Gender zone: the screenshot's Lifmunk shows the male symbol.
@@ -677,8 +683,9 @@ mod field_fixtures {
             .map(|(k, p)| (k.clone(), p.name.clone()))
             .collect();
         let panel = (1644, 180, 633, 1055);
+        let names_idx = ocr::VocabIndex::build(&names);
         let (layout, key, score) =
-            PanelLayout::discover(&synth, &region, (1644, 180), &names, name_px_range(panel))
+            PanelLayout::discover(&synth, &region, (1644, 180), &names_idx, name_px_range(panel))
                 .expect("discovery");
         eprintln!("discovered {key} at {score} band {:?}", layout.name_band);
         assert_eq!(key, "SheepBall", "score {score}");
@@ -706,11 +713,12 @@ mod field_fixtures {
         let dir = std::env::temp_dir().join(format!("palcalc-grid-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let lib = crate::scanner::textlib::TextLib::load(dir.clone());
+        let idx = ocr::VocabIndex::build(&names);
         let (mut keys, unknowns, _) = layout.read_passive_rows(
             &synth,
             &lib,
             &region,
-            &names,
+            &idx,
             None,
             Some(row_px_expected(panel)),
         );
@@ -748,11 +756,12 @@ mod field_fixtures {
         let dir = std::env::temp_dir().join(format!("palcalc-gridc-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let lib = crate::scanner::textlib::TextLib::load(dir.clone());
+        let idx = ocr::VocabIndex::build(&names);
         let (mut keys, unknowns, _) = layout.read_passive_rows(
             &synth,
             &lib,
             &region,
-            &names,
+            &idx,
             None,
             Some(row_px_expected(panel)),
         );
@@ -789,11 +798,12 @@ mod field_fixtures {
         let dir = std::env::temp_dir().join(format!("palcalc-gridb-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         let lib = crate::scanner::textlib::TextLib::load(dir.clone());
+        let idx = ocr::VocabIndex::build(&names);
         let (mut keys, unknowns, _) = layout.read_passive_rows(
             &synth,
             &lib,
             &region,
-            &names,
+            &idx,
             None,
             Some(row_px_expected(panel)),
         );
@@ -961,7 +971,8 @@ mod field_name {
             name_band: (0, 0, band.width(), band.height()),
             px_name: 40.76,
         };
-        let (key, score) = layout.read_name(&synth, &band, &names).expect("name read");
+        let idx = ocr::VocabIndex::build(&names);
+        let (key, score) = layout.read_name(&synth, &band, &idx).expect("name read");
         assert_eq!(key, "Monkey", "score {score}"); // Tanzee's tribe key
         assert!(score >= NAME_CONFIDENCE);
     }
@@ -1006,8 +1017,9 @@ mod learned_rows {
         // OCR reads the row directly — no unknown surfaces, no synth needed.
         // The "Passive Skills" header is filtered out structurally (no box
         // border).
+        let idx = ocr::VocabIndex::build(&names);
         let (keys, unknowns, _) =
-            layout.read_passive_rows(&synth, &lib, &region, &names, None, expected);
+            layout.read_passive_rows(&synth, &lib, &region, &idx, None, expected);
         assert_eq!(keys, vec!["Deffence_down1"], "OCR row read");
         assert!(unknowns.is_empty(), "{unknowns:?}");
         let _ = &mut lib; // learned-crop precedence is covered by textlib tests

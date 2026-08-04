@@ -8,6 +8,7 @@
 use image::RgbaImage;
 use ocrs::{ImageSource, OcrEngine, OcrEngineParams, TextItem};
 use rten::Model;
+use std::collections::HashMap;
 use std::sync::OnceLock;
 
 static DETECTION: &[u8] = include_bytes!("../../../data/ocr/text-detection.rten");
@@ -31,15 +32,101 @@ fn engine() -> Result<&'static OcrEngine, String> {
         .map_err(|e| e.clone())
 }
 
+// ---------------------------------------------------------------------------
+// VocabIndex — fast first-character lookup
+// ---------------------------------------------------------------------------
+
+/// Pre-built index for fast vocab lookup: groups entries by first character
+/// of their normalized name so matching only compares against a small subset.
+pub struct VocabIndex<'a> {
+    pub vocab: &'a [(String, String)],
+    by_first: HashMap<char, Vec<usize>>,
+}
+
+impl<'a> VocabIndex<'a> {
+    pub fn build(vocab: &'a [(String, String)]) -> Self {
+        let mut by_first: HashMap<char, Vec<usize>> = HashMap::new();
+        for (i, (_key, name)) in vocab.iter().enumerate() {
+            let n = norm(name);
+            if let Some(fc) = n.chars().next() {
+                by_first.entry(fc).or_default().push(i);
+            }
+        }
+        Self { vocab, by_first }
+    }
+
+    /// Return indices of vocab entries whose normalized name starts with
+    /// `c` or any OCR-confusable neighbor of `c`.
+    fn candidates_for(&self, c: char) -> impl Iterator<Item = usize> + '_ {
+        ocr_neighbors(c)
+            .iter()
+            .flat_map(move |&nc| {
+                self.by_first
+                    .get(&nc)
+                    .map_or(&[] as &[usize], |v| v.as_slice())
+            })
+            .copied()
+    }
+}
+
+/// Common OCR first-character confusions. Maps a character to the set of
+/// chars it might be confused with by the OCR engine.
+fn ocr_neighbors(c: char) -> &'static [char] {
+    match c {
+        'a' => &['a', 'o', 'e', 'u'],
+        'b' => &['b', 'd', 'h', 'l'],
+        'c' => &['c', 'e', 'o', 'k'],
+        'd' => &['d', 'b', 'c'],
+        'e' => &['e', 'c', 'o'],
+        'f' => &['f', 't', 'p'],
+        'g' => &['g', 'q', '9'],
+        'h' => &['h', 'b', 'n'],
+        'i' => &['i', 'l', '1', 'j', 't'],
+        'j' => &['j', 'i', 'l'],
+        'k' => &['k', 'r', 'h'],
+        'l' => &['l', 'i', '1', 'k', 't'],
+        'm' => &['m', 'n', 'r'],
+        'n' => &['n', 'm', 'r'],
+        'o' => &['o', '0', 'a', 'c', 'e'],
+        'p' => &['p', 'f', 'b'],
+        'q' => &['q', 'g', 'o', '9'],
+        'r' => &['r', 'k', 'n', 'v'],
+        's' => &['s', '5', '8'],
+        't' => &['t', 'l', 'i', 'f'],
+        'u' => &['u', 'v', 'o'],
+        'v' => &['v', 'u', 'r'],
+        'w' => &['w', 'v'],
+        'x' => &['x', 'k'],
+        'y' => &['y', 'v'],
+        'z' => &['z', '2'],
+        '0' => &['0', 'o', 'd'],
+        '1' => &['1', 'l', 'i'],
+        '2' => &['2', 'z'],
+        '5' => &['5', 's'],
+        '8' => &['8', 's', 'b'],
+        '9' => &['9', 'g', 'q'],
+        _ => &[],
+    }
+}
+
+// ---------------------------------------------------------------------------
+// OCR engine wrappers
+// ---------------------------------------------------------------------------
+
 /// OCR all text lines in an image. Small captures are upscaled first
 /// (Inventory Kamera retries at growing scale factors; one 2x step covers
 /// our 20-40px UI text).
 pub fn read_lines(img: &RgbaImage) -> Result<Vec<String>, String> {
-    Ok(read_lines_boxed(img)?.into_iter().map(|(t, _)| t).collect())
+    Ok(read_lines_boxed(img)?
+        .into_iter()
+        .map(|(t, _)| t)
+        .collect())
 }
 
 /// OCR all text lines with their bounding rects in original-image pixels.
-pub fn read_lines_boxed(img: &RgbaImage) -> Result<Vec<(String, (i32, i32, u32, u32))>, String> {
+pub fn read_lines_boxed(
+    img: &RgbaImage,
+) -> Result<Vec<(String, (i32, i32, u32, u32))>, String> {
     let engine = engine()?;
     let scaled;
     let (img, scale) = if img.height() < 128 {
@@ -84,9 +171,10 @@ pub fn read_lines_boxed(img: &RgbaImage) -> Result<Vec<(String, (i32, i32, u32, 
         .collect())
 }
 
-/// Inventory-Kamera-style dictionary correction: the vocabulary entry most
-/// similar to `line` (normalized Levenshtein over lowercased alphanumerics),
-/// if it clears `min_sim`. Returns (key, similarity).
+// ---------------------------------------------------------------------------
+// Vocab matching — index-accelerated
+// ---------------------------------------------------------------------------
+
 /// Like `best_vocab_match` but tokenizes a merged OCR line and only returns
 /// matches for tokens whose estimated bounding box falls within `(cx, cw)`.
 /// This handles lines that span two passive columns (e.g. "Insomia Swift")
@@ -96,15 +184,15 @@ pub fn best_vocab_match_in_cell<'a>(
     line_rect: (i32, i32, u32, u32),
     cx: u32,
     cw: u32,
-    vocab: &'a [(String, String)],
+    idx: &VocabIndex<'a>,
     min_sim: f64,
 ) -> Option<(&'a str, f64)> {
     if line_rect.2 < 1 {
-        return best_vocab_match(line, vocab, min_sim);
+        return best_vocab_match(line, idx, min_sim);
     }
     let tokens: Vec<&str> = line.split_whitespace().collect();
     if tokens.is_empty() {
-        return best_vocab_match(line, vocab, min_sim);
+        return best_vocab_match(line, idx, min_sim);
     }
     let total_chars: usize = tokens.iter().map(|t| t.len()).sum();
     let line_left = line_rect.0 as f32;
@@ -129,13 +217,20 @@ pub fn best_vocab_match_in_cell<'a>(
         if n.len() < 3 {
             continue;
         }
-        for (key, name) in vocab {
-            let v = norm(name);
-            let sim = strsim::normalized_levenshtein(&n, &v);
-            if sim >= min_sim
-                && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
-            {
-                best = Some((key.as_str(), sim, v.len()));
+        let max_len_diff = n.len() / 3;
+        if let Some(fc) = n.chars().next() {
+            for vi in idx.candidates_for(fc) {
+                let (key, name) = &idx.vocab[vi];
+                let v = norm(name);
+                if (n.len() as isize - v.len() as isize).unsigned_abs() > max_len_diff {
+                    continue;
+                }
+                let sim = strsim::normalized_levenshtein(&n, &v);
+                if sim >= min_sim
+                    && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
+                {
+                    best = Some((key.as_str(), sim, v.len()));
+                }
             }
         }
     }
@@ -144,7 +239,8 @@ pub fn best_vocab_match_in_cell<'a>(
     for w in 2..=tokens.len() {
         for (i, win) in tokens.windows(w).enumerate() {
             let start_offset = token_offsets[i];
-            let end_offset = start_offset + win.iter().map(|t| t.len()).sum::<usize>() as f32;
+            let end_offset =
+                start_offset + win.iter().map(|t| t.len()).sum::<usize>() as f32;
             let win_l = line_left + start_offset / total_chars as f32 * line_w;
             let win_r = line_left + end_offset / total_chars as f32 * line_w;
             let win_cx = (win_l + win_r) / 2.0;
@@ -155,13 +251,22 @@ pub fn best_vocab_match_in_cell<'a>(
             if n.len() < 3 {
                 continue;
             }
-            for (key, name) in vocab {
-                let v = norm(name);
-                let sim = strsim::normalized_levenshtein(&n, &v);
-                if sim >= min_sim
-                    && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
-                {
-                    best = Some((key.as_str(), sim, v.len()));
+            let max_len_diff = n.len() / 3;
+            if let Some(fc) = n.chars().next() {
+                for vi in idx.candidates_for(fc) {
+                    let (key, name) = &idx.vocab[vi];
+                    let v = norm(name);
+                    if (n.len() as isize - v.len() as isize).unsigned_abs() > max_len_diff {
+                        continue;
+                    }
+                    let sim = strsim::normalized_levenshtein(&n, &v);
+                    if sim >= min_sim
+                        && best.is_none_or(|(_, bs, bl)| {
+                            sim > bs || (sim == bs && v.len() > bl)
+                        })
+                    {
+                        best = Some((key.as_str(), sim, v.len()));
+                    }
                 }
             }
         }
@@ -176,10 +281,10 @@ fn norm(s: &str) -> String {
         .collect()
 }
 
-/// OCR → best-match pipeline (original, used by cell crops).
+/// OCR → best-match pipeline (original, used by cell crops and species).
 pub fn best_vocab_match<'a>(
     line: &str,
-    vocab: &'a [(String, String)],
+    idx: &VocabIndex<'a>,
     min_sim: f64,
 ) -> Option<(&'a str, f64)> {
     // OCR often merges neighbouring UI text into one line ("LEVEL Lamball"),
@@ -200,14 +305,21 @@ pub fn best_vocab_match<'a>(
     // "Fuack" (via the token window) and "Fuack Ignis" at 1.0 — the
     // subspecies must win over its base name.
     let mut best: Option<(&str, f64, usize)> = None;
-    for (key, name) in vocab {
-        let n = norm(name);
-        for c in &candidates {
-            let sim = strsim::normalized_levenshtein(c, &n);
-            if sim >= min_sim
-                && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && n.len() > bl))
-            {
-                best = Some((key.as_str(), sim, n.len()));
+    for c in &candidates {
+        if let Some(fc) = c.chars().next() {
+            let max_len_diff = c.len() / 3;
+            for vi in idx.candidates_for(fc) {
+                let (key, name) = &idx.vocab[vi];
+                let v = norm(name);
+                if (c.len() as isize - v.len() as isize).unsigned_abs() > max_len_diff {
+                    continue;
+                }
+                let sim = strsim::normalized_levenshtein(c, &v);
+                if sim >= min_sim
+                    && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
+                {
+                    best = Some((key.as_str(), sim, v.len()));
+                }
             }
         }
     }
@@ -227,12 +339,13 @@ pub fn best_vocab_match<'a>(
         if full_candidate.len() <= *best_len {
             return None;
         }
-        let best_name = &vocab
+        let best_name = &idx
+            .vocab
             .iter()
             .find(|(k, _)| k.as_str() == *best_key)?
             .1;
-        let best_norm = norm(&best_name);
-        for (key, name) in vocab {
+        let best_norm = norm(best_name);
+        for (key, name) in idx.vocab {
             let v = norm(name);
             if v.len() > *best_len && v.starts_with(&best_norm) {
                 let sim = strsim::normalized_levenshtein(full_candidate, &v);
@@ -253,13 +366,13 @@ pub fn best_vocab_match<'a>(
 /// OCR an image and return the best vocabulary match across its lines.
 pub fn read_and_match<'a>(
     img: &RgbaImage,
-    vocab: &'a [(String, String)],
+    idx: &VocabIndex<'a>,
     min_sim: f64,
 ) -> Result<Option<(&'a str, f64)>, String> {
     let lines = read_lines(img)?;
     let mut best: Option<(&str, f64)> = None;
     for line in &lines {
-        if let Some((key, sim)) = best_vocab_match(line, vocab, min_sim) {
+        if let Some((key, sim)) = best_vocab_match(line, idx, min_sim) {
             if best.is_none_or(|(_, b)| sim > b) {
                 best = Some((key, sim));
             }
@@ -307,10 +420,11 @@ mod tests {
             ("Blueplatypus".to_string(), "Fuack".to_string()),
             ("BluePlatypus_Fire".to_string(), "Fuack Ignis".to_string()),
         ];
-        let (key, sim) = best_vocab_match("Fuack Ignis", &vocab, 0.72).unwrap();
+        let idx = VocabIndex::build(&vocab);
+        let (key, sim) = best_vocab_match("Fuack Ignis", &idx, 0.72).unwrap();
         assert_eq!(key, "BluePlatypus_Fire", "sim {sim}");
         // Plain base name still resolves to the base.
-        let (key, _) = best_vocab_match("Fuack", &vocab, 0.72).unwrap();
+        let (key, _) = best_vocab_match("Fuack", &idx, 0.72).unwrap();
         assert_eq!(key, "Blueplatypus");
     }
 
@@ -325,7 +439,8 @@ mod tests {
             ("Blueplatypus".to_string(), "Fuack".to_string()),
             ("BluePlatypus_Fire".to_string(), "Fuack Ignis".to_string()),
         ];
-        let (key, sim) = best_vocab_match("Fuack lgns", &vocab, 0.72).unwrap();
+        let idx = VocabIndex::build(&vocab);
+        let (key, sim) = best_vocab_match("Fuack lgns", &idx, 0.72).unwrap();
         assert_eq!(key, "BluePlatypus_Fire", "sim {sim}");
     }
 
@@ -336,7 +451,8 @@ mod tests {
             ("Blueplatypus".to_string(), "Fuack".to_string()),
             ("BluePlatypus_Fire".to_string(), "Fuack Ignis".to_string()),
         ];
-        let (key, _) = best_vocab_match("Fuack", &vocab, 0.72).unwrap();
+        let idx = VocabIndex::build(&vocab);
+        let (key, _) = best_vocab_match("Fuack", &idx, 0.72).unwrap();
         assert_eq!(key, "Blueplatypus");
     }
 
@@ -348,7 +464,8 @@ mod tests {
             ("Monkey".to_string(), "Tanzee".to_string()),
             ("Monkey_Fire".to_string(), "Tanzee Ignis".to_string()),
         ];
-        let (key, _) = best_vocab_match("Tanzee Level", &vocab, 0.72).unwrap();
+        let idx = VocabIndex::build(&vocab);
+        let (key, _) = best_vocab_match("Tanzee Level", &idx, 0.72).unwrap();
         assert_eq!(key, "Monkey");
     }
 
@@ -359,19 +476,29 @@ mod tests {
     fn ocr_reads_all_field_fixtures() {
         let sp = species();
         let pv = passives();
-        let cases: &[(&str, &[(String, String)], &str)] = &[
-            ("field_name_tanzee.png", &sp, "Monkey"),
-            ("name_lifmunk.png", &sp, "Carbunclo"),
-            ("field_discovery.png", &sp, "SheepBall"),
-            ("field_passives_downtrodden.png", &pv, "Deffence_down1"),
-            ("field_passives.png", &pv, "ElementBoost_Leaf_1_PAL"),
-            ("zone_1_4_passive1.png", &pv, "CraftSpeed_up2"),
-            ("zone_1_4_passive3.png", &pv, "MoveSpeed_up_3"),
+        let sp_idx = VocabIndex::build(&sp);
+        let pv_idx = VocabIndex::build(&pv);
+        let cases: &[(&str, &VocabIndex<'_>, &str)] = &[
+            ("field_name_tanzee.png", &sp_idx, "Monkey"),
+            ("name_lifmunk.png", &sp_idx, "Carbunclo"),
+            ("field_discovery.png", &sp_idx, "SheepBall"),
+            (
+                "field_passives_downtrodden.png",
+                &pv_idx,
+                "Deffence_down1",
+            ),
+            (
+                "field_passives.png",
+                &pv_idx,
+                "ElementBoost_Leaf_1_PAL",
+            ),
+            ("zone_1_4_passive1.png", &pv_idx, "CraftSpeed_up2"),
+            ("zone_1_4_passive3.png", &pv_idx, "MoveSpeed_up_3"),
         ];
         let mut failures = Vec::new();
-        for (file, vocab, expected) in cases {
+        for (file, idx, expected) in cases {
             let img = fixture(file);
-            match read_and_match(&img, vocab, 0.72).unwrap() {
+            match read_and_match(&img, idx, 0.72).unwrap() {
                 Some((key, sim)) if key == *expected => {
                     eprintln!("{file}: OK {key} ({sim:.2})");
                 }

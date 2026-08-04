@@ -8,6 +8,7 @@ use palcalc_core::Gender;
 use serde::{Deserialize, Serialize};
 
 use super::matcher::IconTemplates;
+use super::ocr;
 use super::panel::{PanelLayout, NAME_CONFIDENCE};
 use super::platform::Backend;
 use super::synth::TextSynth;
@@ -417,6 +418,10 @@ pub fn scan_box(
         .collect();
     let total = occupied.len() as u32;
 
+    // Build vocab indices for fast first-character lookup.
+    let species_idx = ocr::VocabIndex::build(species_names);
+    let passive_idx = ocr::VocabIndex::build(passive_names);
+
     let mut results: Vec<SlotResult> = Vec::with_capacity(pre.len());
     let mut done = 0u32;
     let mut first_occupied = true;
@@ -484,7 +489,7 @@ pub fn scan_box(
                 Some(panel) => super::panel::name_px_range(panel),
                 None => (26.0, 46.0),
             };
-            match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names, px_range)
+            match PanelLayout::discover(synth, &img, (drect.0, drect.1), &species_idx, px_range)
             {
                 Some((l, key, score)) => {
                     name_from_discovery = Some((key, score));
@@ -568,7 +573,7 @@ pub fn scan_box(
                 None => match name_cache.get(&band_key) {
                     Some(cached) => cached.clone(),
                     None => {
-                        let r = l.read_name(synth, &band, species_names);
+                        let r = l.read_name(synth, &band, &species_idx);
                         name_cache.insert(band_key, r.clone());
                         r
                     }
@@ -595,7 +600,7 @@ pub fn scan_box(
                         synth,
                         textlib,
                         &pimg,
-                        passive_names,
+                        &passive_idx,
                         row_px,
                         expected,
                     );
@@ -832,6 +837,10 @@ pub fn debug_read_sheet(
     out.log.push(format!("monitor: {monitor:?}"));
     out.log.push(format!("panel rect: {:?}", calib.panel));
 
+    // Build vocab indices for fast first-character lookup.
+    let species_idx = ocr::VocabIndex::build(species_names);
+    let passive_idx = ocr::VocabIndex::build(passive_names);
+
     let mut layout = PanelLayout::load_validated(calib.panel, monitor);
     out.log.push(format!(
         "cached layout (validated): {}",
@@ -855,7 +864,7 @@ pub fn debug_read_sheet(
             None => (26.0, 46.0),
         };
         out.log.push(format!("name px range: {px_range:?}"));
-        match PanelLayout::discover(synth, &img, (drect.0, drect.1), species_names, px_range) {
+        match PanelLayout::discover(synth, &img, (drect.0, drect.1), &species_idx, px_range) {
             Some((l, key, score)) => {
                 out.log.push(format!(
                     "discovery: {key} at {score:.3} px {} in {:?} -> band {:?}",
@@ -899,7 +908,7 @@ pub fn debug_read_sheet(
     let band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
     let _ = band.save(report_dir.join("name_band.png"));
     out.name_band_png = Some(png_base64(&band)?);
-    match l.read_name(synth, &band, species_names) {
+    match l.read_name(synth, &band, &species_idx) {
         Some((key, score)) => {
             out.log
                 .push(format!("name read: {key} at {score:.3} in {:?}", t.elapsed()));
@@ -939,7 +948,7 @@ pub fn debug_read_sheet(
     let expected = calib.panel.map(super::panel::row_px_expected);
     let textlib = TextLib::load(TextLib::default_dir());
     let (keys, unknowns, px) =
-        l.read_passive_rows(synth, &textlib, &pimg, passive_names, None, expected);
+        l.read_passive_rows(synth, &textlib, &pimg, &passive_idx, None, expected);
     out.log.push(format!(
         "passives: {keys:?} + {} unknown row(s) (row px {px:?}) in {:?}",
         unknowns.len(),
@@ -971,6 +980,7 @@ fn img_hash(img: &image::RgbaImage) -> u64 {
 mod tests {
     use super::*;
     use crate::scanner::platform::WindowInfo;
+    use crate::scanner::textlib::TextLib;
     use image::RgbaImage;
     use palcalc_core::GameData;
 
@@ -1052,6 +1062,9 @@ mod tests {
             rows: 2,
             slot_size: 110,
             delay_ms: 0,
+            grid_unhover_ms: 20,
+            first_slot_ms: 50,
+            box_settle_ms: 50,
             panel: None,
             zones: HashMap::new(),
         };
@@ -1069,7 +1082,7 @@ mod tests {
             &mut backend,
             &templates,
             &synth,
-            &textlib::TextLib::load(textlib::TextLib::default_dir()),
+            &TextLib::load(TextLib::default_dir()),
             &[],
             &[],
             &calib,
@@ -1119,6 +1132,9 @@ mod tests {
             rows: 1,
             slot_size: 110,
             delay_ms: 0,
+            grid_unhover_ms: 20,
+            first_slot_ms: 50,
+            box_settle_ms: 50,
             panel: None,
             zones: HashMap::new(),
         };
@@ -1134,6 +1150,7 @@ mod tests {
             &mut backend,
             &templates,
             &synth,
+            &TextLib::load(TextLib::default_dir()),
             &[],
             &[],
             &calib,
@@ -1177,7 +1194,7 @@ mod tests {
             ..Default::default()
         };
         let synth = TextSynth::new().unwrap();
-        let out = scan_box(&mut backend, &templates, &synth, &textlib::TextLib::load(textlib::TextLib::default_dir()), &[], &[], &calib, false, None, |_| {});
+        let out = scan_box(&mut backend, &templates, &synth, &TextLib::load(TextLib::default_dir()), &[], &[], &calib, false, None, |_| {});
         assert!(out.is_err());
         SCAN_ABORT.store(false, Ordering::Relaxed);
     }
