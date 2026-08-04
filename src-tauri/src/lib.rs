@@ -485,12 +485,6 @@ async fn debug_sheet_read(
     .map_err(|e| format!("debug task panicked: {e}"))?
 }
 
-/// Returns true when the binary was compiled in debug mode (dev builds).
-#[tauri::command]
-fn is_debug_build() -> bool {
-    cfg!(debug_assertions)
-}
-
 /// Save the last scan's debug crops + labels as a timestamped dump for replay
 /// testing. The crops are already in `debug-report/` from the last scan — this
 /// just copies them to a persistent dump dir and writes `labels.json`.
@@ -641,7 +635,6 @@ pub fn run() {
             apply_default_calibration,
             debug_grid_capture,
             debug_sheet_read,
-            is_debug_build,
             save_last_scan_for_replay,
             list_dumps,
             save_dump_labels,
