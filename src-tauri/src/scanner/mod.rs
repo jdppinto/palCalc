@@ -9,6 +9,7 @@
 //! by learned crops (`textlib`) and a synthesized-glyph NCC fallback (`synth`).
 
 pub mod config;
+pub mod dump;
 pub mod matcher;
 pub mod palbox;
 pub mod panel;

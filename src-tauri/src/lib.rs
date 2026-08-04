@@ -1,4 +1,4 @@
-mod scanner;
+pub mod scanner;
 
 use palcalc_core::{plan_routes, GameData, Gender, OwnedPal, PlanOutcome, PlanRequest};
 use serde::Serialize;
@@ -485,6 +485,91 @@ async fn debug_sheet_read(
     .map_err(|e| format!("debug task panicked: {e}"))?
 }
 
+#[derive(Serialize)]
+struct DumpSheetResult {
+    path: String,
+    labels: scanner::dump::Labels,
+}
+
+/// Run a full scan with debug captures saved to a timestamped dump directory.
+/// Pre-populates labels.json from the scan results for user verification.
+#[tauri::command]
+async fn dump_sheet(data: State<'_, GameData>) -> Result<DumpSheetResult, String> {
+    let calib = GridCalibration::load().ok_or("not calibrated yet")?;
+    let pal_icons = scanner::matcher::pal_icon_map(&data);
+    let species_names: Vec<(String, String)> = data
+        .pals
+        .iter()
+        .filter(|(k, _)| data.icons.contains_key(*k))
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    let passive_names: Vec<(String, String)> = data
+        .passives
+        .iter()
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    SCAN_ABORT.store(false, Ordering::Relaxed);
+    tauri::async_runtime::spawn_blocking(move || {
+        let dump_dir = scanner::dump::create_dump_dir()?;
+        let mut backend = platform::detect()?;
+        let synth = TextSynth::new()?;
+        let textlib =
+            scanner::textlib::TextLib::load(scanner::textlib::TextLib::default_dir());
+        let templates = scanner::matcher::IconTemplates::load(
+            &pal_icons,
+            Some(&scanner::matcher::user_templates_dir()),
+        )?;
+        let (slots, _log) = scanner::palbox::scan_box(
+            backend.as_mut(),
+            &templates,
+            &synth,
+            &textlib,
+            &species_names,
+            &passive_names,
+            &calib,
+            false,
+            Some(&dump_dir),
+            |_| {},
+        )?;
+        let labels = scanner::dump::labels_from_results(&slots, calib.rows, calib.cols);
+        scanner::dump::save_labels(&dump_dir, &labels)?;
+        Ok(DumpSheetResult {
+            path: dump_dir.display().to_string(),
+            labels,
+        })
+    })
+    .await
+    .map_err(|e| format!("dump task panicked: {e}"))?
+}
+
+/// List all available dump directories.
+#[tauri::command]
+fn list_dumps() -> Vec<scanner::dump::DumpInfo> {
+    scanner::dump::list_dumps()
+}
+
+/// Save/update labels for a dump directory.
+#[tauri::command]
+fn save_dump_labels(path: String, labels: scanner::dump::Labels) -> Result<(), String> {
+    let dir = std::path::Path::new(&path);
+    if !dir.is_dir() {
+        return Err(format!("not a directory: {path}"));
+    }
+    scanner::dump::save_labels(dir, &labels)
+}
+
+/// Delete a dump directory.
+#[tauri::command]
+fn delete_dump(path: String) -> Result<(), String> {
+    scanner::dump::delete_dump(std::path::Path::new(&path))
+}
+
+/// Load labels from a dump directory.
+#[tauri::command]
+fn load_dump_labels(path: String) -> Result<scanner::dump::Labels, String> {
+    scanner::dump::load_labels(std::path::Path::new(&path))
+}
+
 /// One-click calibration: grid geometry measured on the 2560x1440 reference
 /// screenshot, scaled to the focused monitor. Panel reading needs no setup at
 /// all (auto-discovered), so this is the entire calibration for 16:9 layouts.
@@ -586,6 +671,11 @@ pub fn run() {
             apply_default_calibration,
             debug_grid_capture,
             debug_sheet_read,
+            dump_sheet,
+            list_dumps,
+            save_dump_labels,
+            delete_dump,
+            load_dump_labels,
             load_owned_pals,
             save_owned_pals
         ])

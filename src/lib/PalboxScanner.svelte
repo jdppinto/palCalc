@@ -167,6 +167,50 @@
     }
   }
 
+  // Dump & label system for replay testing
+  interface DumpInfo { path: string; timestamp: string; has_labels: boolean; slot_count: number }
+  interface SlotLabel { species: string | null; passives: string[]; gender: string | null }
+  let dumps = $state<DumpInfo[]>([]);
+  let selectedDump = $state<string | null>(null);
+  let dumpLabels = $state<Record<string, SlotLabel>>({});
+  let dumpRunning = $state(false);
+
+  async function refreshDumps() {
+    dumps = await invoke<DumpInfo[]>("list_dumps");
+  }
+
+  async function runDump() {
+    dumpRunning = true;
+    try {
+      const r = await invoke<{ path: string; labels: Record<string, SlotLabel> }>("dump_sheet");
+      selectedDump = r.path;
+      dumpLabels = r.labels;
+      await refreshDumps();
+    } catch (e) {
+      error = String(e);
+    } finally {
+      dumpRunning = false;
+    }
+  }
+
+  async function loadDumpLabels(path: string) {
+    selectedDump = path;
+    try {
+      dumpLabels = await invoke<Record<string, SlotLabel>>("load_dump_labels", { path });
+    } catch (e) {
+      error = String(e);
+    }
+  }
+
+  async function saveDumpLabels() {
+    if (!selectedDump) return;
+    try {
+      await invoke("save_dump_labels", { path: selectedDump, labels: dumpLabels });
+    } catch (e) {
+      error = String(e);
+    }
+  }
+
   // Zone override editor: drag a rect on the panel capture, assign it to an
   // aspect, save, then re-run the sheet test to see reads with the override.
   const ZONE_COLORS: Record<string, string> = {
@@ -825,6 +869,64 @@
         {/if}
       </div>
     {/if}
+
+    <!-- Dump & replay testing -->
+    <hr />
+    <h4>Dump & replay testing</h4>
+    <p class="dim-text">Scan a full sheet and save every crop + label for offline replay testing.</p>
+    <div class="row">
+      <button onclick={runDump} disabled={dumpRunning}>
+        {dumpRunning ? "Scanning…" : "Dump current sheet"}
+      </button>
+      <button onclick={refreshDumps} disabled={dumpRunning}>Refresh list</button>
+    </div>
+    {#if selectedDump}
+      <p class="dim-text">Saved to <code>{selectedDump}</code></p>
+    {/if}
+    {#if dumps.length > 0}
+      <details>
+        <summary>Saved dumps ({dumps.length})</summary>
+        {#each dumps as d (d.path)}
+          <div class="row" style="align-items:center; gap:0.5rem;">
+            <code style="font-size:0.75rem;">{d.timestamp}</code>
+            <span class="dim-text">{d.slot_count} slots · {d.has_labels ? "labeled" : "needs labels"}</span>
+            <button onclick={() => loadDumpLabels(d.path)}>Load</button>
+            <button class="danger" onclick={() => { invoke("delete_dump", { path: d.path }).then(refreshDumps) }}>Delete</button>
+          </div>
+        {/each}
+      </details>
+    {/if}
+    {#if Object.keys(dumpLabels).length > 0}
+      <details open>
+        <summary>Edit labels ({Object.keys(dumpLabels).length} slots)</summary>
+        <div class="label-grid" style="grid-template-columns: repeat(6, 1fr);">
+          {#each Object.entries(dumpLabels) as [slotKey, lbl] (slotKey)}
+            <div class="label-slot">
+              <span class="dim-text" style="font-size:0.65rem;">{slotKey}</span>
+              <input
+                value={lbl.species ?? ""}
+                placeholder="species"
+                oninput={(e) => { dumpLabels[slotKey] = { ...lbl, species: (e.target as HTMLInputElement).value || null }; }}
+              />
+              <select
+                value={lbl.gender ?? ""}
+                onchange={(e) => { const v = (e.target as HTMLSelectElement).value; dumpLabels[slotKey] = { ...lbl, gender: v || null }; }}
+              >
+                <option value="">gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              <input
+                value={lbl.passives.join(", ")}
+                placeholder="passives"
+                oninput={(e) => { dumpLabels[slotKey] = { ...lbl, passives: (e.target as HTMLInputElement).value.split(",").map(s => s.trim()).filter(Boolean) }; }}
+              />
+            </div>
+          {/each}
+        </div>
+        <button onclick={saveDumpLabels}>Save labels</button>
+      </details>
+    {/if}
   </details>
 
   {#if unknownRows.length > 0}
@@ -1248,5 +1350,50 @@
     color: #1a1408;
     font-weight: 600;
     border: none;
+  }
+
+  .danger {
+    color: #ef4444;
+    border-color: #ef444444;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0.5rem 0;
+  }
+
+  .label-grid {
+    display: grid;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .label-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.35rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .label-slot input {
+    padding: 0.25rem 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 0.75rem;
+  }
+
+  .label-slot select {
+    padding: 0.25rem 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 0.75rem;
   }
 </style>

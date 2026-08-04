@@ -588,6 +588,9 @@ pub fn scan_box(
             gender = classify_gender(gimg.as_ref().unwrap_or(&band));
 
             if let Some(dir) = debug_dir {
+                if let Some(ref gi) = gimg {
+                    let _ = gi.save(dir.join(format!("gender_{}_{}.png", p.row, p.col)));
+                }
                 let _ =
                     pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
             }
