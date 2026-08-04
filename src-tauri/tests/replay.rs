@@ -140,3 +140,23 @@ fn replay_latest_dump() {
         failures.len()
     );
 }
+
+#[test]
+fn replay_gaming_debug() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("gaming-debug")
+        .join("dump_1785863907672");
+    assert!(dir.is_dir(), "gaming-debug dump not found at {dir:?}");
+    let failures = replay_dump(&dir);
+    assert!(
+        failures.is_empty(),
+        "{} failures:\n{}",
+        failures.len(),
+        failures
+            .iter()
+            .map(|(s, e, g, sc)| format!("  {s}: expected={e}, got={g:?}, sim={sc:.3}"))
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
+}
