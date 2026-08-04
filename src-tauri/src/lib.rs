@@ -530,7 +530,7 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         cols: 6,
         rows: 5,
         slot_size: ((96.0 * sx) as u32).max(40),
-        delay_ms: 1,
+        delay_ms: 50,
         grid_unhover_ms: 20,
         first_slot_ms: 50,
         box_settle_ms: 50,
