@@ -167,29 +167,50 @@
     }
   }
 
-  // Dump & label system for replay testing
+  // Dump & label system for replay testing (dev builds only)
   interface DumpInfo { path: string; timestamp: string; has_labels: boolean; slot_count: number }
   interface SlotLabel { species: string | null; passives: string[]; gender: string | null }
   let dumps = $state<DumpInfo[]>([]);
   let selectedDump = $state<string | null>(null);
   let dumpLabels = $state<Record<string, SlotLabel>>({});
-  let dumpRunning = $state(false);
+  let isDev = $state(false);
+  let savingDump = $state(false);
+
+  function computeLabels(results: SlotResult[], rows: number, cols: number): Record<string, SlotLabel> {
+    const labels: Record<string, SlotLabel> = {};
+    for (const r of results) {
+      labels[`${r.row},${r.col}`] = {
+        species: r.species,
+        passives: r.passives,
+        gender: r.gender ? String(r.gender) : null,
+      };
+    }
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const key = `${row},${col}`;
+        if (!labels[key]) labels[key] = { species: null, passives: [], gender: null };
+      }
+    }
+    return labels;
+  }
 
   async function refreshDumps() {
     dumps = await invoke<DumpInfo[]>("list_dumps");
   }
 
-  async function runDump() {
-    dumpRunning = true;
+  async function saveForReplay() {
+    if (!results || results.length === 0) return;
+    savingDump = true;
     try {
-      const r = await invoke<{ path: string; labels: Record<string, SlotLabel> }>("dump_sheet");
-      selectedDump = r.path;
-      dumpLabels = r.labels;
+      const labels = computeLabels(results, calib.rows, calib.cols);
+      const path = await invoke<string>("save_last_scan_for_replay", { labels });
+      selectedDump = path;
+      dumpLabels = labels;
       await refreshDumps();
     } catch (e) {
       error = String(e);
     } finally {
-      dumpRunning = false;
+      savingDump = false;
     }
   }
 
@@ -404,6 +425,7 @@
       pals = await invoke<PalEntry[]>("list_pals");
       passiveList = await invoke<PassiveEntry[]>("list_passives");
       status = await invoke<ScannerStatus>("scanner_status");
+      isDev = await invoke<boolean>("is_debug_build");
     if (status.calibration) {
       calib = status.calibration;
       calibSaved = true;
@@ -727,10 +749,10 @@
   </details>
 
   <div class="row scan-row">
-    <button class="scan" onclick={scan} disabled={scanning || !calibSaved || !status?.backend || !status?.valid}>
+    <button class="scan" onclick={scan} disabled={scanning || savingDump || !calibSaved || !status?.backend || !status?.valid}>
       {scanning ? "Scanning…" : "Scan current box"}
     </button>
-    <button class="scan" onclick={scanAll} disabled={scanning || !calibSaved || !status?.backend || !status?.valid}>
+    <button class="scan" onclick={scanAll} disabled={scanning || savingDump || !calibSaved || !status?.backend || !status?.valid}>
       Scan all 32 boxes
     </button>
     {#if ownedStore.list.length > 0}
@@ -774,10 +796,10 @@
   <details>
     <summary>Debug tools</summary>
     <div class="row">
-      <button onclick={() => runDebug("grid")} disabled={debugRunning}>
+      <button onclick={() => runDebug("grid")} disabled={debugRunning || savingDump}>
         Test empty detection (2s)
       </button>
-      <button onclick={() => runDebug("sheet")} disabled={debugRunning}>
+      <button onclick={() => runDebug("sheet")} disabled={debugRunning || savingDump}>
         Test sheet read (2s) — hover a pal first
       </button>
     </div>
@@ -870,62 +892,64 @@
       </div>
     {/if}
 
-    <!-- Dump & replay testing -->
-    <hr />
-    <h4>Dump & replay testing</h4>
-    <p class="dim-text">Scan a full sheet and save every crop + label for offline replay testing.</p>
-    <div class="row">
-      <button onclick={runDump} disabled={dumpRunning}>
-        {dumpRunning ? "Scanning…" : "Dump current sheet"}
-      </button>
-      <button onclick={refreshDumps} disabled={dumpRunning}>Refresh list</button>
-    </div>
-    {#if selectedDump}
-      <p class="dim-text">Saved to <code>{selectedDump}</code></p>
-    {/if}
-    {#if dumps.length > 0}
-      <details>
-        <summary>Saved dumps ({dumps.length})</summary>
-        {#each dumps as d (d.path)}
-          <div class="row" style="align-items:center; gap:0.5rem;">
-            <code style="font-size:0.75rem;">{d.timestamp}</code>
-            <span class="dim-text">{d.slot_count} slots · {d.has_labels ? "labeled" : "needs labels"}</span>
-            <button onclick={() => loadDumpLabels(d.path)}>Load</button>
-            <button class="danger" onclick={() => { invoke("delete_dump", { path: d.path }).then(refreshDumps) }}>Delete</button>
-          </div>
-        {/each}
-      </details>
-    {/if}
-    {#if Object.keys(dumpLabels).length > 0}
-      <details open>
-        <summary>Edit labels ({Object.keys(dumpLabels).length} slots)</summary>
-        <div class="label-grid" style="grid-template-columns: repeat(6, 1fr);">
-          {#each Object.entries(dumpLabels) as [slotKey, lbl] (slotKey)}
-            <div class="label-slot">
-              <span class="dim-text" style="font-size:0.65rem;">{slotKey}</span>
-              <input
-                value={lbl.species ?? ""}
-                placeholder="species"
-                oninput={(e) => { dumpLabels[slotKey] = { ...lbl, species: (e.target as HTMLInputElement).value || null }; }}
-              />
-              <select
-                value={lbl.gender ?? ""}
-                onchange={(e) => { const v = (e.target as HTMLSelectElement).value; dumpLabels[slotKey] = { ...lbl, gender: v || null }; }}
-              >
-                <option value="">gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-              <input
-                value={lbl.passives.join(", ")}
-                placeholder="passives"
-                oninput={(e) => { dumpLabels[slotKey] = { ...lbl, passives: (e.target as HTMLInputElement).value.split(",").map(s => s.trim()).filter(Boolean) }; }}
-              />
+    <!-- Dump & replay testing (dev builds only) -->
+    {#if isDev}
+      <hr />
+      <h4>Dump & replay testing</h4>
+      <p class="dim-text">Save the last scan's crops + labels for offline replay testing.</p>
+      <div class="row">
+        <button onclick={saveForReplay} disabled={savingDump || !results || results.length === 0}>
+          {savingDump ? "Saving…" : "Save scan for replay"}
+        </button>
+        <button onclick={refreshDumps} disabled={savingDump}>Refresh list</button>
+      </div>
+      {#if selectedDump}
+        <p class="dim-text">Saved to <code>{selectedDump}</code></p>
+      {/if}
+      {#if dumps.length > 0}
+        <details>
+          <summary>Saved dumps ({dumps.length})</summary>
+          {#each dumps as d (d.path)}
+            <div class="row" style="align-items:center; gap:0.5rem;">
+              <code style="font-size:0.75rem;">{d.timestamp}</code>
+              <span class="dim-text">{d.slot_count} slots · {d.has_labels ? "labeled" : "needs labels"}</span>
+              <button onclick={() => loadDumpLabels(d.path)}>Load</button>
+              <button class="danger" onclick={() => { invoke("delete_dump", { path: d.path }).then(refreshDumps) }}>Delete</button>
             </div>
           {/each}
-        </div>
-        <button onclick={saveDumpLabels}>Save labels</button>
-      </details>
+        </details>
+      {/if}
+      {#if Object.keys(dumpLabels).length > 0}
+        <details open>
+          <summary>Edit labels ({Object.keys(dumpLabels).length} slots)</summary>
+          <div class="label-grid" style="grid-template-columns: repeat(6, 1fr);">
+            {#each Object.entries(dumpLabels) as [slotKey, lbl] (slotKey)}
+              <div class="label-slot">
+                <span class="dim-text" style="font-size:0.65rem;">{slotKey}</span>
+                <input
+                  value={lbl.species ?? ""}
+                  placeholder="species"
+                  oninput={(e) => { dumpLabels[slotKey] = { ...lbl, species: (e.target as HTMLInputElement).value || null }; }}
+                />
+                <select
+                  value={lbl.gender ?? ""}
+                  onchange={(e) => { const v = (e.target as HTMLSelectElement).value; dumpLabels[slotKey] = { ...lbl, gender: v || null }; }}
+                >
+                  <option value="">gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+                <input
+                  value={lbl.passives.join(", ")}
+                  placeholder="passives"
+                  oninput={(e) => { dumpLabels[slotKey] = { ...lbl, passives: (e.target as HTMLInputElement).value.split(",").map(s => s.trim()).filter(Boolean) }; }}
+                />
+              </div>
+            {/each}
+          </div>
+          <button onclick={saveDumpLabels}>Save labels</button>
+        </details>
+      {/if}
     {/if}
   </details>
 

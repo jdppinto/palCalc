@@ -485,61 +485,31 @@ async fn debug_sheet_read(
     .map_err(|e| format!("debug task panicked: {e}"))?
 }
 
-#[derive(Serialize)]
-struct DumpSheetResult {
-    path: String,
-    labels: scanner::dump::Labels,
+/// Returns true when the binary was compiled in debug mode (dev builds).
+#[tauri::command]
+fn is_debug_build() -> bool {
+    cfg!(debug_assertions)
 }
 
-/// Run a full scan with debug captures saved to a timestamped dump directory.
-/// Pre-populates labels.json from the scan results for user verification.
+/// Save the last scan's debug crops + labels as a timestamped dump for replay
+/// testing. The crops are already in `debug-report/` from the last scan — this
+/// just copies them to a persistent dump dir and writes `labels.json`.
 #[tauri::command]
-async fn dump_sheet(data: State<'_, GameData>) -> Result<DumpSheetResult, String> {
-    let calib = GridCalibration::load().ok_or("not calibrated yet")?;
-    let pal_icons = scanner::matcher::pal_icon_map(&data);
-    let species_names: Vec<(String, String)> = data
-        .pals
-        .iter()
-        .filter(|(k, _)| data.icons.contains_key(*k))
-        .map(|(k, p)| (k.clone(), p.name.clone()))
-        .collect();
-    let passive_names: Vec<(String, String)> = data
-        .passives
-        .iter()
-        .map(|(k, p)| (k.clone(), p.name.clone()))
-        .collect();
-    SCAN_ABORT.store(false, Ordering::Relaxed);
-    tauri::async_runtime::spawn_blocking(move || {
-        let dump_dir = scanner::dump::create_dump_dir()?;
-        let mut backend = platform::detect()?;
-        let synth = TextSynth::new()?;
-        let textlib =
-            scanner::textlib::TextLib::load(scanner::textlib::TextLib::default_dir());
-        let templates = scanner::matcher::IconTemplates::load(
-            &pal_icons,
-            Some(&scanner::matcher::user_templates_dir()),
-        )?;
-        let (slots, _log) = scanner::palbox::scan_box(
-            backend.as_mut(),
-            &templates,
-            &synth,
-            &textlib,
-            &species_names,
-            &passive_names,
-            &calib,
-            false,
-            Some(&dump_dir),
-            |_| {},
-        )?;
-        let labels = scanner::dump::labels_from_results(&slots, calib.rows, calib.cols);
-        scanner::dump::save_labels(&dump_dir, &labels)?;
-        Ok(DumpSheetResult {
-            path: dump_dir.display().to_string(),
-            labels,
-        })
-    })
-    .await
-    .map_err(|e| format!("dump task panicked: {e}"))?
+fn save_last_scan_for_replay(labels: scanner::dump::Labels) -> Result<String, String> {
+    let src = scanner::palbox::debug_report_dir();
+    if !src.is_dir() {
+        return Err("no scan data — run a scan first".into());
+    }
+    let dump_dir = scanner::dump::create_dump_dir()?;
+    // Copy all files from report dir to dump dir.
+    for entry in std::fs::read_dir(&src).map_err(|e| format!("read report dir: {e}"))? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let file_name = entry.file_name();
+        let dst = dump_dir.join(&file_name);
+        std::fs::copy(entry.path(), &dst).map_err(|e| format!("copy {file_name:?}: {e}"))?;
+    }
+    scanner::dump::save_labels(&dump_dir, &labels)?;
+    Ok(dump_dir.display().to_string())
 }
 
 /// List all available dump directories.
@@ -671,7 +641,8 @@ pub fn run() {
             apply_default_calibration,
             debug_grid_capture,
             debug_sheet_read,
-            dump_sheet,
+            is_debug_build,
+            save_last_scan_for_replay,
             list_dumps,
             save_dump_labels,
             delete_dump,

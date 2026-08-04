@@ -1,9 +1,10 @@
 //! Dump-and-replay testing infrastructure.
 //!
-//! `dump_sheet` runs a full scan with `debug_dir` saving per-slot captures,
-//! then writes a `labels.json` pre-filled from the scan results. The user
-//! can verify/correct labels in the frontend. `replay_dump` (in tests/replay.rs)
-//! loads saved crops and validates OCR against the verified labels.
+//! Normal scans save per-slot captures to `debug-report/`. `save_last_scan_for_replay`
+//! copies those crops to a persistent timestamped dump dir and writes `labels.json`
+//! pre-filled from scan results. The user can verify/correct labels in the frontend.
+//! `replay_dump` (in tests/replay.rs) loads saved crops and validates OCR against
+//! the verified labels.
 
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -53,7 +54,10 @@ pub fn labels_from_results(results: &[SlotResult], rows: u32, cols: u32) -> Labe
     let mut labels = Labels::new();
     for r in results {
         let key = format!("{},{}", r.row, r.col);
-        let gender_str = r.gender.as_ref().map(|g| format!("{g:?}"));
+        let gender_str = r.gender.as_ref().map(|g| match g {
+            palcalc_core::Gender::Male => "Male",
+            palcalc_core::Gender::Female => "Female",
+        }).map(String::from);
         labels.insert(
             key,
             SlotLabel {

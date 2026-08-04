@@ -38,7 +38,8 @@ fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
         if expected.species.is_none() {
             continue; // empty slot
         }
-        let name_file = format!("name_{}.png", slot_key);
+        let (r, c) = slot_key.split_once(',').unwrap();
+        let name_file = format!("name_{r}_{c}.png");
         let name_path = dir.join(&name_file);
         if !name_path.exists() {
             eprintln!("  {slot_key}: no {name_file}, skipping");
@@ -79,7 +80,7 @@ fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
 fn replay_all_dumps() {
     let dumps = dump::list_dumps();
     if dumps.is_empty() {
-        eprintln!("No dumps found — run dump_sheet first");
+        eprintln!("No dumps found — save a scan for replay first");
         return;
     }
     let mut total_failures = 0;
