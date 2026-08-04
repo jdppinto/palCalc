@@ -70,20 +70,21 @@ impl<'a> VocabIndex<'a> {
 }
 
 /// Common OCR first-character confusions. Maps a character to the set of
-/// chars it might be confused with by the OCR engine.
+/// chars it might be confused with by the OCR engine. The table must be
+/// symmetric: if Y ∈ ocr_neighbors(X), then X ∈ ocr_neighbors(Y).
 fn ocr_neighbors(c: char) -> &'static [char] {
     match c {
         'a' => &['a', 'o', 'e', 'u'],
-        'b' => &['b', 'd', 'h', 'l'],
-        'c' => &['c', 'e', 'o', 'k'],
+        'b' => &['b', 'd', 'h', 'l', 'p'],
+        'c' => &['c', 'e', 'o', 'k', 'd'],
         'd' => &['d', 'b', 'c'],
-        'e' => &['e', 'c', 'o'],
+        'e' => &['e', 'c', 'o', 'a'],
         'f' => &['f', 't', 'p'],
         'g' => &['g', 'q', '9'],
-        'h' => &['h', 'b', 'n'],
+        'h' => &['h', 'b', 'n', 'k'],
         'i' => &['i', 'l', '1', 'j', 't'],
         'j' => &['j', 'i', 'l'],
-        'k' => &['k', 'r', 'h'],
+        'k' => &['k', 'r', 'h', 'c', 'x'],
         'l' => &['l', 'i', '1', 'k', 't'],
         'm' => &['m', 'n', 'r'],
         'n' => &['n', 'm', 'r'],
@@ -93,8 +94,8 @@ fn ocr_neighbors(c: char) -> &'static [char] {
         'r' => &['r', 'k', 'n', 'v'],
         's' => &['s', '5', '8'],
         't' => &['t', 'l', 'i', 'f'],
-        'u' => &['u', 'v', 'o'],
-        'v' => &['v', 'u', 'r'],
+        'u' => &['u', 'v', 'o', 'a'],
+        'v' => &['v', 'u', 'r', 'w'],
         'w' => &['w', 'v'],
         'x' => &['x', 'k'],
         'y' => &['y', 'v'],
@@ -217,14 +218,10 @@ pub fn best_vocab_match_in_cell<'a>(
         if n.len() < 3 {
             continue;
         }
-        let max_len_diff = n.len() / 3;
         if let Some(fc) = n.chars().next() {
             for vi in idx.candidates_for(fc) {
                 let (key, name) = &idx.vocab[vi];
                 let v = norm(name);
-                if (n.len() as isize - v.len() as isize).unsigned_abs() > max_len_diff {
-                    continue;
-                }
                 let sim = strsim::normalized_levenshtein(&n, &v);
                 if sim >= min_sim
                     && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
@@ -251,14 +248,10 @@ pub fn best_vocab_match_in_cell<'a>(
             if n.len() < 3 {
                 continue;
             }
-            let max_len_diff = n.len() / 3;
             if let Some(fc) = n.chars().next() {
                 for vi in idx.candidates_for(fc) {
                     let (key, name) = &idx.vocab[vi];
                     let v = norm(name);
-                    if (n.len() as isize - v.len() as isize).unsigned_abs() > max_len_diff {
-                        continue;
-                    }
                     let sim = strsim::normalized_levenshtein(&n, &v);
                     if sim >= min_sim
                         && best.is_none_or(|(_, bs, bl)| {
@@ -307,13 +300,9 @@ pub fn best_vocab_match<'a>(
     let mut best: Option<(&str, f64, usize)> = None;
     for c in &candidates {
         if let Some(fc) = c.chars().next() {
-            let max_len_diff = c.len() / 3;
             for vi in idx.candidates_for(fc) {
                 let (key, name) = &idx.vocab[vi];
                 let v = norm(name);
-                if (c.len() as isize - v.len() as isize).unsigned_abs() > max_len_diff {
-                    continue;
-                }
                 let sim = strsim::normalized_levenshtein(c, &v);
                 if sim >= min_sim
                     && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
