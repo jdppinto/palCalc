@@ -342,11 +342,17 @@
     name: [0.2335, 0.0254, 0.5956, 0.0376],
     gender: [0.9063, 0.0206, 0.0683, 0.0359],
     passives: [0.0423, 0.8911, 0.9201, 0.0826],
+    "passive 1": [0.0423, 0.8911, 0.4550, 0.0380],
+    "passive 2": [0.5074, 0.8911, 0.4550, 0.0380],
+    "passive 3": [0.0423, 0.9331, 0.4550, 0.0380],
+    "passive 4": [0.5074, 0.9331, 0.4550, 0.0380],
   };
   function defaultZoneRect(key: string): Rect | null {
     if (!calib.panel) return null;
+    const r = DEFAULT_ZONE_RATIOS[key];
+    if (!r) return null;
     const [px, py, pw, ph] = calib.panel;
-    const [rx, ry, rw, rh] = DEFAULT_ZONE_RATIOS[key];
+    const [rx, ry, rw, rh] = r;
     return [
       Math.round(px + rx * pw),
       Math.round(py + ry * ph),
