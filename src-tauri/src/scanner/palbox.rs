@@ -63,7 +63,7 @@ impl Default for GridCalibration {
             cols: 6,
             rows: 5,
             slot_size: 90,
-            delay_ms: 50,
+            delay_ms: 60,
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
