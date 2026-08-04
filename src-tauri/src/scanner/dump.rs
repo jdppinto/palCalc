@@ -39,12 +39,19 @@ pub fn dumps_dir() -> PathBuf {
 }
 
 /// Create a new timestamped dump directory and return its path.
+/// If the directory already exists, appends a counter suffix.
 pub fn create_dump_dir() -> Result<PathBuf, String> {
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis();
-    let dir = dumps_dir().join(format!("dump_{ts}"));
+    let base = dumps_dir().join(format!("dump_{ts}"));
+    let mut dir = base;
+    let mut n = 0u32;
+    while dir.exists() {
+        n += 1;
+        dir = dumps_dir().join(format!("dump_{ts}_{n}"));
+    }
     std::fs::create_dir_all(&dir).map_err(|e| format!("create dump dir: {e}"))?;
     Ok(dir)
 }
