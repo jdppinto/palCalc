@@ -1,11 +1,14 @@
-//! Replay tests: feed saved dump crops back through OCR and compare to labels.
+//! Replay tests: feed saved dump crops back through the real scan pipeline
+//! and compare to labels. Exercises the exact same code path as the live scan.
 //!
-//! Run: `cargo test --release -- --ignored` (needs `--ignored` because these
-//! tests require game data + real captures).
+//! Run: `cargo test --release replay_gaming_debug -- --nocapture`
 
 use palcalc_core::GameData;
 use palcalc_lib::scanner::dump::{self, load_labels};
 use palcalc_lib::scanner::ocr::{self, VocabIndex};
+use palcalc_lib::scanner::panel::{PanelLayout, PASSIVE_PX_RATIO};
+use palcalc_lib::scanner::synth::TextSynth;
+use palcalc_lib::scanner::textlib::TextLib;
 use std::path::Path;
 
 fn load_image(dir: &Path, name: &str) -> image::RgbaImage {
@@ -14,7 +17,7 @@ fn load_image(dir: &Path, name: &str) -> image::RgbaImage {
         .to_rgba8()
 }
 
-/// Replay a single dump: load name crops, run OCR, compare to labels.
+/// Replay species for a single dump using the real scan's OCR pipeline.
 /// Returns (slot_key, expected_species, got_species, score) for mismatches.
 fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
     let labels = match load_labels(dir) {
@@ -36,9 +39,8 @@ fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
     let mut failures = Vec::new();
     for (slot_key, expected) in &labels {
         if expected.species.is_none() {
-            continue; // empty slot
+            continue;
         }
-        // Key format: "{box},{row},{col}"
         let parts: Vec<&str> = slot_key.split(',').collect();
         let (b, r, c) = match parts.as_slice() {
             [box_idx, row, col] => (*box_idx, *row, *col),
@@ -47,7 +49,6 @@ fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
                 continue;
             }
         };
-        // Single-box scans save to root; multi-box to box_{b}/.
         let name_file = format!("name_{r}_{c}.png");
         let box_dir = dir.join(format!("box_{b}"));
         let name_path = if box_dir.is_dir() {
@@ -89,6 +90,130 @@ fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
     failures
 }
 
+/// Replay passives for a single dump using the REAL SCAN's `read_passive_rows`.
+/// This exercises the exact same code path as the live scan.
+/// Returns (slot_key, expected_passive, got_passive_or_none) for mismatches.
+fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
+    let labels = match load_labels(dir) {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("  skip {dir:?}: {e}");
+            return vec![];
+        }
+    };
+
+    // Load px_name from the dump's report.json (saved by write_report_meta).
+    let px_name = dump::load_layout_px(dir).unwrap_or_else(|e| {
+        eprintln!("  warning: {e}, using fallback px_name=43.5");
+        43.5
+    });
+    eprintln!("  px_name={px_name:.1}");
+
+    // Construct the PanelLayout the real scan would have used.
+    let layout = PanelLayout {
+        name_band: (0, 0, 0, 0),
+        px_name,
+    };
+
+    let gd = GameData::load().expect("GameData");
+    let synth = TextSynth::new().expect("TextSynth");
+    // Empty TextLib — no learned templates. Falls through to OCR + NCC.
+    let textlib = TextLib::load(std::path::PathBuf::from("/nonexistent_textlib_dir"));
+    let passive_names: Vec<(String, String)> = gd
+        .passives
+        .iter()
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    let passive_idx = ocr::VocabIndex::build(&passive_names);
+
+    let expected_px = Some(px_name * PASSIVE_PX_RATIO);
+    let row_px: Option<f32> = None; // let read_passive_rows compute from expected_px
+
+    let mut failures = Vec::new();
+    let mut total_checked = 0usize;
+    let mut ocr_resolved = 0usize;
+    let mut ncc_fallback = 0usize;
+
+    // One box at a time to reduce memory pressure.
+    let max_box: u32 = labels
+        .keys()
+        .filter_map(|k| k.split(',').next()?.parse::<u32>().ok())
+        .max()
+        .unwrap_or(0) + 1;
+
+    for b in 0..max_box {
+        let box_dir = dir.join(format!("box_{b}"));
+        if !box_dir.is_dir() {
+            continue;
+        }
+        let mut box_failures = 0usize;
+        let mut box_checked = 0usize;
+
+        for (slot_key, expected) in &labels {
+            let parts: Vec<&str> = slot_key.split(',').collect();
+            let (bb, r, c) = match parts.as_slice() {
+                [box_idx, row, col] => (*box_idx, *row, *col),
+                _ => continue,
+            };
+            if bb != &b.to_string() {
+                continue;
+            }
+            if expected.passives.is_empty() {
+                continue;
+            }
+
+            let passive_file = format!("passives_{r}_{c}.png");
+            let passive_path = box_dir.join(&passive_file);
+            if !passive_path.exists() {
+                continue;
+            }
+            let region = load_image(&box_dir, &passive_file);
+
+            // Call the REAL SCAN's read_passive_rows — same code path as live scan.
+            let (got_keys, _unknowns, _found_px) = layout.read_passive_rows(
+                &synth,
+                &textlib,
+                &region,
+                &passive_idx,
+                row_px,
+                expected_px,
+            );
+
+            // Count resolution source (unknowns > 0 means NCC or export was needed).
+            if _unknowns.is_empty() {
+                ocr_resolved += 1;
+            } else {
+                ncc_fallback += 1;
+            }
+
+            for exp in &expected.passives {
+                if !got_keys.contains(exp) {
+                    failures.push((
+                        slot_key.clone(),
+                        exp.clone(),
+                        got_keys.first().cloned(),
+                    ));
+                    box_failures += 1;
+                }
+            }
+            box_checked += 1;
+            total_checked += 1;
+        }
+
+        if box_checked > 0 {
+            eprintln!(
+                "  box {b}: {box_checked} slots, {box_failures} failures"
+            );
+        }
+    }
+
+    eprintln!(
+        "  total: {total_checked} slots, {} failures (ocr_resolved={ocr_resolved}, ncc_fallback={ncc_fallback})",
+        failures.len()
+    );
+    failures
+}
+
 #[test]
 #[ignore = "requires game data + dump captures"]
 fn replay_all_dumps() {
@@ -98,13 +223,16 @@ fn replay_all_dumps() {
         return;
     }
     let mut total_failures = 0;
-    for dump in &dumps {
-        if !dump.has_labels {
-            eprintln!("Skipping unlabeled dump: {}", dump.timestamp);
+    for dump_info in &dumps {
+        if !dump_info.has_labels {
+            eprintln!("Skipping unlabeled dump: {}", dump_info.timestamp);
             continue;
         }
-        let dir = Path::new(&dump.path);
-        eprintln!("Replaying dump {} ({} slots)...", dump.timestamp, dump.slot_count);
+        let dir = Path::new(&dump_info.path);
+        eprintln!(
+            "Replaying dump {} ({} slots)...",
+            dump_info.timestamp, dump_info.slot_count
+        );
         let failures = replay_dump(dir);
         if !failures.is_empty() {
             eprintln!("  {} failures:", failures.len());
@@ -148,15 +276,32 @@ fn replay_gaming_debug() {
         .join("gaming-debug")
         .join("dump_1785863907672");
     assert!(dir.is_dir(), "gaming-debug dump not found at {dir:?}");
-    let failures = replay_dump(&dir);
+
+    // Species check
+    eprintln!("=== Species check ===");
+    let species_failures = replay_dump(&dir);
+    if !species_failures.is_empty() {
+        eprintln!("Species failures:");
+        for (s, e, g, sc) in &species_failures {
+            eprintln!("  {s}: expected={e}, got={g:?}, sim={sc:.3}");
+        }
+    }
+
+    // Passive check — uses the real scan's read_passive_rows
+    eprintln!("=== Passive check (real scan pipeline) ===");
+    let passive_failures = replay_passives(&dir);
+    if !passive_failures.is_empty() {
+        eprintln!("Passive failures:");
+        for (s, e, g) in &passive_failures {
+            eprintln!("  {s}: expected={e}, got={g:?}");
+        }
+    }
+
+    let total = species_failures.len() + passive_failures.len();
     assert!(
-        failures.is_empty(),
-        "{} failures:\n{}",
-        failures.len(),
-        failures
-            .iter()
-            .map(|(s, e, g, sc)| format!("  {s}: expected={e}, got={g:?}, sim={sc:.3}"))
-            .collect::<Vec<_>>()
-            .join("\n")
+        total == 0,
+        "{total} failures ({} species + {} passives)",
+        species_failures.len(),
+        passive_failures.len()
     );
 }

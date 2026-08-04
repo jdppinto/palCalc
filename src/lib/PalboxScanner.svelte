@@ -317,9 +317,13 @@
     name: "#4aa3ff",
     gender: "#ff6bd6",
     passives: "#ffd34a",
+    "passive 1": "#ff6b6b",
+    "passive 2": "#6bff6b",
+    "passive 3": "#6b6bff",
+    "passive 4": "#ffff6b",
     panel: "#4ade80",
   };
-  let zoneAspect = $state<"name" | "gender" | "passives" | "panel">("gender");
+  let zoneAspect = $state<"name" | "gender" | "passives" | "passive 1" | "passive 2" | "passive 3" | "passive 4" | "panel">("gender");
   let zoneSel = $state<{ x: number; y: number; w: number; h: number } | null>(null);
   let zoneDrag: { x: number; y: number } | null = null;
   let panelImgEl = $state<HTMLImageElement | null>(null);
@@ -748,7 +752,11 @@
         <option value="panel">panel (sheet bounds)</option>
         <option value="name">name</option>
         <option value="gender">gender</option>
-        <option value="passives">passives</option>
+        <option value="passives">passives (full grid)</option>
+        <option value="passive 1">passive 1 (top-left)</option>
+        <option value="passive 2">passive 2 (top-right)</option>
+        <option value="passive 3">passive 3 (bottom-left)</option>
+        <option value="passive 4">passive 4 (bottom-right)</option>
       </select>
       {#if frame}
         <label>
@@ -763,7 +771,7 @@
     </div>
     {#if frame}
       <div class="row">
-        {#each ["name", "gender", "passives"] as key}
+        {#each ["name", "gender", "passives", "passive 1", "passive 2", "passive 3", "passive 4"] as key}
           {#if calib.zones[key]}
             <button onclick={() => clearZoneMain(key)}>Clear {key} override</button>
           {/if}
@@ -794,7 +802,7 @@
               <span style={`background:${ZONE_COLORS.panel}`}>panel</span>
             </div>
           {/if}
-          {#each ["name", "gender", "passives"] as key}
+        {#each ["name", "gender", "passives", "passive 1", "passive 2", "passive 3", "passive 4"] as key}
             {@const def = defaultZoneRect(key)}
             {#if def && !calib.zones[key]}
               <div
@@ -959,7 +967,11 @@
             <select bind:value={zoneAspect}>
               <option value="name">name</option>
               <option value="gender">gender</option>
-              <option value="passives">passives</option>
+              <option value="passives">passives (full grid)</option>
+              <option value="passive 1">passive 1 (top-left)</option>
+              <option value="passive 2">passive 2 (top-right)</option>
+              <option value="passive 3">passive 3 (bottom-left)</option>
+              <option value="passive 4">passive 4 (bottom-right)</option>
             </select>
             <button onclick={saveZone} disabled={!zoneSel}>Save {zoneAspect} zone</button>
             {#each debugSheet.zones_used.filter((z) => z[2]) as [key] (key)}

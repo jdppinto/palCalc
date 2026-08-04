@@ -104,6 +104,19 @@ pub fn load_labels(dir: &Path) -> Result<Labels, String> {
     serde_json::from_str(&data).map_err(|e| format!("parse labels: {e}"))
 }
 
+/// Load `PanelLayout` from `report.json` in a dump directory.
+/// Returns the layout's `px_name` for passive-row pixel size estimation.
+pub fn load_layout_px(dir: &Path) -> Result<f32, String> {
+    let data = std::fs::read_to_string(dir.join("report.json"))
+        .map_err(|e| format!("read report: {e}"))?;
+    let v: serde_json::Value = serde_json::from_str(&data)
+        .map_err(|e| format!("parse report: {e}"))?;
+    let px = v["panel_layout"]["px_name"]
+        .as_f64()
+        .ok_or("panel_layout.px_name not found in report.json")?;
+    Ok(px as f32)
+}
+
 /// List all dump directories with metadata.
 pub fn list_dumps() -> Vec<DumpInfo> {
     let root = dumps_dir();

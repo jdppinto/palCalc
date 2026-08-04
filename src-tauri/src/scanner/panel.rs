@@ -43,7 +43,7 @@ const PASSIVES_DX: f32 = -4.0;
 const PASSIVES_DY: f32 = 22.0;
 const PASSIVES_W: f32 = 9.5;
 const PASSIVES_H: f32 = 7.5;
-const PASSIVE_PX_RATIO: f32 = 0.763;
+pub const PASSIVE_PX_RATIO: f32 = 0.763;
 
 // Text sizes relative to the panel height (reference: panel h 1115, name
 // ~38px, passive rows ~29px). The panel rect is user-calibrated ground
@@ -443,6 +443,57 @@ impl PanelLayout {
             }
         }
         (known, unknown, found_px)
+    }
+
+    /// Fast-path: OCR pre-cropped passive images (one per slot).
+    /// When the user has calibrated `passive_1..4` zones, each crop contains
+    /// a single passive name — no band detection or column splitting needed.
+    pub fn read_passive_crops(
+        &self,
+        textlib: &TextLib,
+        crops: &[RgbaImage; 4],
+        passive_idx: &ocr::VocabIndex<'_>,
+    ) -> (Vec<String>, Vec<(String, String)>) {
+        let mut known: Vec<String> = Vec::new();
+        let mut unknown: Vec<(String, String)> = Vec::new();
+        for (_i, crop) in crops.iter().enumerate() {
+            if crop.width() < 2 || crop.height() < 2 {
+                continue;
+            }
+            if known.len() >= MAX_PASSIVES {
+                break;
+            }
+            // Learned template first.
+            match textlib.identify(crop) {
+                TextMatch::Known(label) if label == EMPTY_LABEL => continue,
+                TextMatch::Known(label) => {
+                    if !known.iter().any(|k| k == &label) {
+                        known.push(label);
+                    }
+                    continue;
+                }
+                _ => {}
+            }
+            // Per-cell OCR.
+            let ocr_lines = ocr::read_lines_boxed(crop).unwrap_or_default();
+            let mut matched = false;
+            for (text, _) in &ocr_lines {
+                if let Some((key, _)) = ocr::best_vocab_match(text, passive_idx, OCR_MIN_SIM_PASSIVE) {
+                    if !known.iter().any(|k| k == key) {
+                        known.push(key.to_string());
+                    }
+                    matched = true;
+                    break;
+                }
+            }
+            if !matched && !ocr_lines.is_empty() {
+                if let Ok(b64) = png_base64(crop) {
+                    let id = format!("{:016x}", fx(crop));
+                    unknown.push((id, b64));
+                }
+            }
+        }
+        (known, unknown)
     }
 
     fn read_passives_hits(

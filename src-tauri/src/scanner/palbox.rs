@@ -519,6 +519,18 @@ pub fn scan_box(
                     .panel
                     .map_or(l.passives_rect(), PanelLayout::passives_search_rect),
             );
+            // Per-slot passive zones: when calibrated, each captures a single
+            // passive name — no band detection or column splitting needed.
+            let passive_zones: Vec<(i32, i32, u32, u32)> = (1..=4)
+                .filter_map(|i| {
+                    let (rect, ovr) = calib.zone_or(
+                        &format!("passive {i}"),
+                        (0, 0, 0, 0),
+                    );
+                    ovr.then_some(rect)
+                })
+                .collect();
+            let has_passive_slots = passive_zones.len() == 4;
             if slot_start.elapsed() > Duration::from_secs(3) {
                 return Err("slot capture timed out".into());
             }
@@ -527,9 +539,16 @@ pub fn scan_box(
             // grab the full panel once and crop zones in memory, saving 2
             // IPC/subprocess round-trips per occupied slot.
             let t0 = Instant::now();
+            let mut passive_crops: Option<[image::RgbaImage; 4]> = None;
             let (mut band, mut gimg, mut pimg) = if let Some(panel) = calib.panel {
                 let panel_img =
                     backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
+                // Crop per-slot passive zones from the panel image.
+                if has_passive_slots {
+                    passive_crops = Some(std::array::from_fn(|i| {
+                        crop_from_panel(&panel_img, panel, passive_zones[i])
+                    }));
+                }
                 (
                     crop_from_panel(&panel_img, panel, nb),
                     Some(crop_from_panel(&panel_img, panel, gr)),
@@ -552,6 +571,11 @@ pub fn scan_box(
                     band = crop_from_panel(&panel_img, panel, nb);
                     gimg = Some(crop_from_panel(&panel_img, panel, gr));
                     pimg = crop_from_panel(&panel_img, panel, pr);
+                    if has_passive_slots {
+                        passive_crops = Some(std::array::from_fn(|i| {
+                            crop_from_panel(&panel_img, panel, passive_zones[i])
+                        }));
+                    }
                 } else {
                     band = backend.capture_region(nb.0, nb.1, nb.2, nb.3)?;
                     pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
@@ -598,18 +622,23 @@ pub fn scan_box(
             (passives, passive_unknowns) = match passive_cache.get(&pkey) {
                 Some(cached) => cached.clone(),
                 None => {
-                    let expected = calib.panel.map(super::panel::row_px_expected);
-                    let (keys, unknowns, found_px) = l.read_passive_rows(
-                        synth,
-                        textlib,
-                        &pimg,
-                        &passive_idx,
-                        row_px,
-                        expected,
-                    );
-                    if row_px.is_none() {
-                        row_px = found_px;
-                    }
+                    let (keys, unknowns) = if let Some(ref crops) = passive_crops {
+                        l.read_passive_crops(textlib, crops, &passive_idx)
+                    } else {
+                        let expected = calib.panel.map(super::panel::row_px_expected);
+                        let (k, u, found_px) = l.read_passive_rows(
+                            synth,
+                            textlib,
+                            &pimg,
+                            &passive_idx,
+                            row_px,
+                            expected,
+                        );
+                        if row_px.is_none() {
+                            row_px = found_px;
+                        }
+                        (k, u)
+                    };
                     passive_cache.insert(pkey, (keys.clone(), unknowns.clone()));
                     (keys, unknowns)
                 }
@@ -945,13 +974,47 @@ pub fn debug_read_sheet(
     out.zones_used.push(("passives".into(), pr, p_ovr));
     out.log.push(format!("passives region: {pr:?} (override: {p_ovr})"));
     let t = std::time::Instant::now();
+
+    // Check for per-slot passive calibration zones.
+    let passive_zones: Vec<(i32, i32, u32, u32)> = (1..=4)
+        .filter_map(|i| {
+            let (rect, ovr) = calib.zone_or(&format!("passive {i}"), (0, 0, 0, 0));
+            if ovr {
+                Some(rect)
+            } else {
+                None
+            }
+        })
+        .collect();
+    let has_passive_slots = passive_zones.len() == 4;
+
     let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
     let _ = pimg.save(report_dir.join("passives_region.png"));
     out.passives_png = Some(png_base64(&pimg)?);
-    let expected = calib.panel.map(super::panel::row_px_expected);
+
+    // Crop per-slot passive zones from the panel image if calibrated.
+    let passive_crops: Option<[image::RgbaImage; 4]> =
+        if has_passive_slots {
+            if let Some(panel) = calib.panel {
+                Some(std::array::from_fn(|i| {
+                    crop_from_panel(&pimg, panel, passive_zones[i])
+                }))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
     let textlib = TextLib::load(TextLib::default_dir());
-    let (keys, unknowns, px) =
-        l.read_passive_rows(synth, &textlib, &pimg, &passive_idx, None, expected);
+    let (keys, unknowns, px) = if let Some(ref crops) = passive_crops {
+        out.log.push("using per-slot passive crops".into());
+        let (k, u) = l.read_passive_crops(&textlib, crops, &passive_idx);
+        (k, u, None)
+    } else {
+        let expected = calib.panel.map(super::panel::row_px_expected);
+        l.read_passive_rows(synth, &textlib, &pimg, &passive_idx, None, expected)
+    };
     out.log.push(format!(
         "passives: {keys:?} + {} unknown row(s) (row px {px:?}) in {:?}",
         unknowns.len(),

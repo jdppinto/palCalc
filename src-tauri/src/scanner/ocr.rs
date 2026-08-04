@@ -201,7 +201,11 @@ pub fn best_vocab_match_in_cell<'a>(
     let cell_l = cx as f32;
     let cell_r = (cx + cw) as f32;
     let mut best: Option<(&str, f64, usize)> = None;
-    // Single-token pass.
+    // Single-token pass — allow a 10% tolerance on each side of the cell
+    // because OCR may merge two columns into one line whose bounding rect
+    // starts far left of the actual token, making the proportional position
+    // estimate land slightly outside the cell boundary.
+    let pad = (cell_r - cell_l) * 0.10;
     let mut char_offset: f32 = 0.0;
     let mut token_offsets: Vec<f32> = Vec::with_capacity(tokens.len());
     for token in &tokens {
@@ -211,7 +215,7 @@ pub fn best_vocab_match_in_cell<'a>(
         let token_cx = (token_l + token_r) / 2.0;
         token_offsets.push(char_offset);
         char_offset += tlen;
-        if token_cx < cell_l || token_cx >= cell_r {
+        if token_cx < cell_l - pad || token_cx >= cell_r + pad {
             continue;
         }
         let n = norm(token);
@@ -241,7 +245,7 @@ pub fn best_vocab_match_in_cell<'a>(
             let win_l = line_left + start_offset / total_chars as f32 * line_w;
             let win_r = line_left + end_offset / total_chars as f32 * line_w;
             let win_cx = (win_l + win_r) / 2.0;
-            if win_cx < cell_l || win_cx >= cell_r {
+            if win_cx < cell_l - pad || win_cx >= cell_r + pad {
                 continue;
             }
             let n = norm(&win.join(" "));
