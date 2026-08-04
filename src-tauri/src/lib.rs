@@ -495,15 +495,26 @@ fn save_last_scan_for_replay(labels: scanner::dump::Labels) -> Result<String, St
         return Err("no scan data — run a scan first".into());
     }
     let dump_dir = scanner::dump::create_dump_dir()?;
-    // Copy all files from report dir to dump dir.
-    for entry in std::fs::read_dir(&src).map_err(|e| format!("read report dir: {e}"))? {
-        let entry = entry.map_err(|e| e.to_string())?;
-        let file_name = entry.file_name();
-        let dst = dump_dir.join(&file_name);
-        std::fs::copy(entry.path(), &dst).map_err(|e| format!("copy {file_name:?}: {e}"))?;
-    }
+    copy_dir_recursive(&src, &dump_dir)?;
     scanner::dump::save_labels(&dump_dir, &labels)?;
     Ok(dump_dir.display().to_string())
+}
+
+fn copy_dir_recursive(src: &std::path::Path, dst: &std::path::Path) -> Result<(), String> {
+    std::fs::create_dir_all(dst).map_err(|e| format!("create dir: {e}"))?;
+    for entry in std::fs::read_dir(src).map_err(|e| format!("read dir: {e}"))? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let file_name = entry.file_name();
+        let src_path = entry.path();
+        let dst_path = dst.join(&file_name);
+        if src_path.is_dir() {
+            copy_dir_recursive(&src_path, &dst_path)?;
+        } else {
+            std::fs::copy(&src_path, &dst_path)
+                .map_err(|e| format!("copy {file_name:?}: {e}"))?;
+        }
+    }
+    Ok(())
 }
 
 /// List all available dump directories.

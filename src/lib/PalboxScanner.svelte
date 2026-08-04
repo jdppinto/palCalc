@@ -234,16 +234,20 @@
   function computeLabels(results: SlotResult[], rows: number, cols: number): Record<string, SlotLabel> {
     const labels: Record<string, SlotLabel> = {};
     for (const r of results) {
-      labels[`${r.row},${r.col}`] = {
+      labels[`${r.box_index},${r.row},${r.col}`] = {
         species: r.species,
         passives: r.passives,
         gender: r.gender ? String(r.gender) : null,
       };
     }
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        const key = `${row},${col}`;
-        if (!labels[key]) labels[key] = { species: null, passives: [], gender: null };
+    // Fill empty slots for all boxes present in the results.
+    const maxBox = results.reduce((m, r) => Math.max(m, r.box_index), 0);
+    for (let b = 0; b <= maxBox; b++) {
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const key = `${b},${row},${col}`;
+          if (!labels[key]) labels[key] = { species: null, passives: [], gender: null };
+        }
       }
     }
     return labels;

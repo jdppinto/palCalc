@@ -21,7 +21,7 @@ pub struct SlotLabel {
     pub gender: Option<String>,
 }
 
-/// Complete labels for a dump — keyed by "row,col".
+/// Complete labels for a dump — keyed by "{box},{row},{col}".
 pub type Labels = std::collections::HashMap<String, SlotLabel>;
 
 /// Metadata about a dump directory.
@@ -57,10 +57,11 @@ pub fn create_dump_dir() -> Result<PathBuf, String> {
 }
 
 /// Build `labels.json` from scan results — pre-fills with what the scanner found.
-pub fn labels_from_results(results: &[SlotResult], rows: u32, cols: u32) -> Labels {
+/// Keys are `{box},{row},{col}` to support multi-box scans.
+pub fn labels_from_results(results: &[SlotResult], box_count: u32, rows: u32, cols: u32) -> Labels {
     let mut labels = Labels::new();
     for r in results {
-        let key = format!("{},{}", r.row, r.col);
+        let key = format!("{},{},{}", r.box_index, r.row, r.col);
         let gender_str = r.gender.as_ref().map(|g| match g {
             palcalc_core::Gender::Male => "Male",
             palcalc_core::Gender::Female => "Female",
@@ -75,14 +76,16 @@ pub fn labels_from_results(results: &[SlotResult], rows: u32, cols: u32) -> Labe
         );
     }
     // Ensure all grid positions exist (empty slots get null labels).
-    for row in 0..rows {
-        for col in 0..cols {
-            let key = format!("{row},{col}");
-            labels.entry(key).or_insert_with(|| SlotLabel {
-                species: None,
-                passives: Vec::new(),
-                gender: None,
-            });
+    for b in 0..box_count {
+        for row in 0..rows {
+            for col in 0..cols {
+                let key = format!("{b},{row},{col}");
+                labels.entry(key).or_insert_with(|| SlotLabel {
+                    species: None,
+                    passives: Vec::new(),
+                    gender: None,
+                });
+            }
         }
     }
     labels
@@ -130,13 +133,15 @@ pub fn list_dumps() -> Vec<DumpInfo> {
     dumps
 }
 
-/// Count slot crop files in a dump directory.
+/// Count slot crop files in a dump directory (recurses into subdirectories).
 fn count_slot_crops(dir: &Path) -> usize {
     let mut count = 0;
     if let Ok(entries) = std::fs::read_dir(dir) {
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if name.starts_with("slot_") && name.ends_with(".png") {
+            if entry.path().is_dir() {
+                count += count_slot_crops(&entry.path());
+            } else if name.starts_with("slot_") && name.ends_with(".png") {
                 count += 1;
             }
         }
@@ -181,10 +186,10 @@ mod tests {
                 crop_png: String::new(),
             },
         ];
-        let labels = labels_from_results(&results, 1, 6);
+        let labels = labels_from_results(&results, 1, 1, 6);
         assert_eq!(labels.len(), 6);
         assert_eq!(
-            labels["0,0"],
+            labels["0,0,0"],
             SlotLabel {
                 species: Some("Lamball".into()),
                 passives: vec!["Hardy".into()],
@@ -192,7 +197,7 @@ mod tests {
             }
         );
         assert_eq!(
-            labels["0,1"],
+            labels["0,0,1"],
             SlotLabel {
                 species: None,
                 passives: vec![],

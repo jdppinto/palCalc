@@ -38,14 +38,28 @@ fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
         if expected.species.is_none() {
             continue; // empty slot
         }
-        let (r, c) = slot_key.split_once(',').unwrap();
+        // Key format: "{box},{row},{col}"
+        let parts: Vec<&str> = slot_key.split(',').collect();
+        let (b, r, c) = match parts.as_slice() {
+            [box_idx, row, col] => (*box_idx, *row, *col),
+            _ => {
+                eprintln!("  {slot_key}: bad key format, skipping");
+                continue;
+            }
+        };
+        // Single-box scans save to root; multi-box to box_{b}/.
         let name_file = format!("name_{r}_{c}.png");
-        let name_path = dir.join(&name_file);
+        let box_dir = dir.join(format!("box_{b}"));
+        let name_path = if box_dir.is_dir() {
+            box_dir.join(&name_file)
+        } else {
+            dir.join(&name_file)
+        };
         if !name_path.exists() {
-            eprintln!("  {slot_key}: no {name_file}, skipping");
+            eprintln!("  {slot_key}: no {}, skipping", name_path.display());
             continue;
         }
-        let img = load_image(dir, &name_file);
+        let img = load_image(name_path.parent().unwrap(), &name_file);
         match ocr::read_and_match(&img, &sp_idx, 0.72) {
             Ok(Some((got_key, sim))) => {
                 if got_key != expected.species.as_deref().unwrap_or("") {
