@@ -1,10 +1,8 @@
 //! Label-once text matching for hover-panel fields.
 //!
-//! The game's font/rendering is unknown, so nothing is pre-rendered. Instead:
-//! zone crops come from user-calibrated rectangles, meaning every capture of
-//! the same field has identical dimensions and rendering. The first time an
-//! unknown crop appears the user labels it once; the crop is stored as a
-//! template and every later capture of that passive matches near-perfectly.
+//! Templates are stored at original resolution but compared at a fixed
+//! canonical size (`TEMPLATE_SIZE`) so the same passive name matches across
+//! different screen resolutions and UI scales.
 
 use std::io::Cursor;
 use std::path::PathBuf;
@@ -21,6 +19,9 @@ pub const EMPTY_LABEL: &str = "-empty-"; // no underscores: "__" is the stored-f
 const MIN_STDDEV: f32 = 4.0;
 /// Same-UI re-renders of the same text score ~0.99; unrelated text far lower.
 const MATCH_THRESHOLD: f32 = 0.9;
+/// Canonical size for scale-invariant template matching. All crops and
+/// templates are resized to this before NCC comparison.
+const TEMPLATE_SIZE: (u32, u32) = (128, 32);
 
 pub enum TextMatch {
     Empty,
@@ -30,8 +31,8 @@ pub enum TextMatch {
 
 pub struct TextLib {
     dir: PathBuf,
-    /// (label key, grayscale zero-mean unit-norm vector, dims)
-    entries: Vec<(String, Vec<f32>, (u32, u32))>,
+    /// (label key, grayscale zero-mean unit-norm vector at TEMPLATE_SIZE)
+    entries: Vec<(String, Vec<f32>)>,
 }
 
 impl TextLib {
@@ -40,6 +41,7 @@ impl TextLib {
     }
 
     /// Load all stored templates. Filenames are `<label>__<n>.png`.
+    /// Templates are resized to TEMPLATE_SIZE for scale-invariant matching.
     pub fn load(dir: PathBuf) -> Self {
         let mut entries = Vec::new();
         if let Ok(read) = std::fs::read_dir(&dir) {
@@ -53,8 +55,9 @@ impl TextLib {
                     continue;
                 };
                 let img = img.to_rgba8();
-                if let Some(v) = normalize(&img) {
-                    entries.push((label.to_string(), v, img.dimensions()));
+                let resized = resize_to_template(&img);
+                if let Some(v) = normalize(&resized) {
+                    entries.push((label.to_string(), v));
                 }
             }
         }
@@ -62,17 +65,12 @@ impl TextLib {
     }
 
     pub fn identify(&self, crop: &RgbaImage) -> TextMatch {
-        let Some(v) = normalize(crop) else {
+        let resized = resize_to_template(crop);
+        let Some(v) = normalize(&resized) else {
             return TextMatch::Empty;
         };
-        let dims = crop.dimensions();
         let mut best: Option<(&str, f32)> = None;
-        for (label, t, tdims) in &self.entries {
-            // Calibration zones are fixed rects, so dims match in practice;
-            // tolerate small drift by skipping incompatible templates.
-            if *tdims != dims {
-                continue;
-            }
+        for (label, t) in &self.entries {
             let score: f32 = v.iter().zip(t).map(|(a, b)| a * b).sum();
             if best.is_none() || score > best.unwrap().1 {
                 best = Some((label, score));
@@ -87,6 +85,7 @@ impl TextLib {
     }
 
     /// Store a labeled crop as a new template and add it to the live set.
+    /// The original crop is saved to disk; the resized version is used for matching.
     pub fn learn(&mut self, label: &str, crop: &RgbaImage) -> Result<(), String> {
         if label.contains("__") || label.contains('/') || label.contains('\\') {
             return Err("invalid label".into());
@@ -95,12 +94,13 @@ impl TextLib {
         let n = self
             .entries
             .iter()
-            .filter(|(l, _, _)| l == label)
+            .filter(|(l, _)| l == label)
             .count();
         let path = self.dir.join(format!("{label}__{n}.png"));
         crop.save(&path).map_err(|e| e.to_string())?;
-        if let Some(v) = normalize(crop) {
-            self.entries.push((label.to_string(), v, crop.dimensions()));
+        let resized = resize_to_template(crop);
+        if let Some(v) = normalize(&resized) {
+            self.entries.push((label.to_string(), v));
         }
         Ok(())
     }
@@ -122,6 +122,17 @@ fn normalize(img: &RgbaImage) -> Option<Vec<f32>> {
         *x = (*x - mean) / norm;
     }
     Some(v)
+}
+
+/// Resize an image to the canonical TEMPLATE_SIZE using Catmull-Rom filtering.
+/// This enables scale-invariant matching across different resolutions.
+fn resize_to_template(img: &RgbaImage) -> RgbaImage {
+    image::imageops::resize(
+        img,
+        TEMPLATE_SIZE.0,
+        TEMPLATE_SIZE.1,
+        image::imageops::FilterType::CatmullRom,
+    )
 }
 
 /// PNG-encode an image as a base64 string (no data-URL prefix).

@@ -448,14 +448,21 @@ impl PanelLayout {
     /// Fast-path: OCR pre-cropped passive images (one per slot).
     /// When the user has calibrated `passive_1..4` zones, each crop contains
     /// a single passive name — no band detection or column splitting needed.
+    /// Falls back to NCC synth with narrowed sweep range when OCR fails.
     pub fn read_passive_crops(
         &self,
+        synth: &TextSynth,
         textlib: &TextLib,
         crops: &[RgbaImage; 4],
         passive_idx: &ocr::VocabIndex<'_>,
+        expected_px: Option<f32>,
     ) -> (Vec<String>, Vec<(String, String)>) {
         let mut known: Vec<String> = Vec::new();
         let mut unknown: Vec<(String, String)> = Vec::new();
+        // Narrowed sweep range: ±15% around expected font size.
+        let row_px = expected_px.unwrap_or(self.px_name * PASSIVE_PX_RATIO);
+        let px_lo = row_px * 0.85;
+        let px_hi = row_px * 1.15;
         for (_i, crop) in crops.iter().enumerate() {
             if crop.width() < 2 || crop.height() < 2 {
                 continue;
@@ -486,7 +493,24 @@ impl PanelLayout {
                     break;
                 }
             }
-            if !matched && !ocr_lines.is_empty() {
+            if matched {
+                continue;
+            }
+            // NCC synth fallback with narrowed sweep range.
+            let hits = synth.find_labels(
+                crop,
+                passive_idx.vocab,
+                false,
+                px_lo,
+                px_hi,
+                PASSIVE_CONFIDENCE,
+                true,
+            );
+            if let Some((key, _)) = hits.first() {
+                if !known.iter().any(|k| k == key) {
+                    known.push(key.clone());
+                }
+            } else if !ocr_lines.is_empty() {
                 if let Ok(b64) = png_base64(crop) {
                     let id = format!("{:016x}", fx(crop));
                     unknown.push((id, b64));

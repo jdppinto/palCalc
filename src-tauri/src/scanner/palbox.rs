@@ -623,7 +623,8 @@ pub fn scan_box(
                 Some(cached) => cached.clone(),
                 None => {
                     let (keys, unknowns) = if let Some(ref crops) = passive_crops {
-                        l.read_passive_crops(textlib, crops, &passive_idx)
+                        let expected = calib.panel.map(super::panel::row_px_expected);
+                        l.read_passive_crops(synth, textlib, crops, &passive_idx, expected)
                     } else {
                         let expected = calib.panel.map(super::panel::row_px_expected);
                         let (k, u, found_px) = l.read_passive_rows(
@@ -1013,7 +1014,8 @@ pub fn debug_read_sheet(
     let textlib = TextLib::load(TextLib::default_dir());
     let (keys, unknowns, px) = if let Some(ref crops) = passive_crops {
         out.log.push("using per-slot passive crops".into());
-        let (k, u) = l.read_passive_crops(&textlib, crops, &passive_idx);
+        let expected = calib.panel.map(super::panel::row_px_expected);
+        let (k, u) = l.read_passive_crops(synth, &textlib, crops, &passive_idx, expected);
         (k, u, None)
     } else {
         let expected = calib.panel.map(super::panel::row_px_expected);

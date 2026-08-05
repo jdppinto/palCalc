@@ -9,12 +9,29 @@ use palcalc_lib::scanner::ocr::{self, VocabIndex};
 use palcalc_lib::scanner::panel::{PanelLayout, PASSIVE_PX_RATIO};
 use palcalc_lib::scanner::synth::TextSynth;
 use palcalc_lib::scanner::textlib::TextLib;
+use image::RgbaImage;
 use std::path::Path;
 
 fn load_image(dir: &Path, name: &str) -> image::RgbaImage {
     image::open(dir.join(name))
         .unwrap_or_else(|e| panic!("failed to open {name}: {e}"))
         .to_rgba8()
+}
+
+/// Split a 2-column × 2-row passive grid image into 4 quadrants.
+/// Layout: [top-left, top-right, bottom-left, bottom-right].
+/// Empty quadrants (dark pixels) are still returned — read_passive_crops skips them.
+fn split_grid_2x2(img: &RgbaImage) -> [RgbaImage; 4] {
+    let w = img.width();
+    let h = img.height();
+    let hw = w / 2;
+    let hh = h / 2;
+    [
+        image::imageops::crop_imm(img, 0, 0, hw, hh).to_image(),
+        image::imageops::crop_imm(img, hw, 0, w - hw, hh).to_image(),
+        image::imageops::crop_imm(img, 0, hh, hw, h - hh).to_image(),
+        image::imageops::crop_imm(img, hw, hh, w - hw, h - hh).to_image(),
+    ]
 }
 
 /// Replay species for a single dump using the real scan's OCR pipeline.
@@ -90,8 +107,9 @@ fn replay_dump(dir: &Path) -> Vec<(String, String, Option<String>, f32)> {
     failures
 }
 
-/// Replay passives for a single dump using the REAL SCAN's `read_passive_rows`.
-/// This exercises the exact same code path as the live scan.
+/// Replay passives for a single dump using the REAL SCAN's `read_passive_crops`.
+/// This exercises the per-slot OCR path — each passive is OCR'd independently
+/// from a tight crop, eliminating band detection and column-splitting heuristics.
 /// Returns (slot_key, expected_passive, got_passive_or_none) for mismatches.
 fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
     let labels = match load_labels(dir) {
@@ -127,12 +145,12 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
     let passive_idx = ocr::VocabIndex::build(&passive_names);
 
     let expected_px = Some(px_name * PASSIVE_PX_RATIO);
-    let row_px: Option<f32> = None; // let read_passive_rows compute from expected_px
+    let row_px: Option<f32> = None;
 
     let mut failures = Vec::new();
     let mut total_checked = 0usize;
-    let mut ocr_resolved = 0usize;
-    let mut ncc_fallback = 0usize;
+    let mut crops_resolved = 0usize;
+    let mut crops_unknown = 0usize;
 
     // One box at a time to reduce memory pressure.
     let max_box: u32 = labels
@@ -169,8 +187,20 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
             }
             let region = load_image(&box_dir, &passive_file);
 
-            // Call the REAL SCAN's read_passive_rows — same code path as live scan.
-            let (got_keys, _unknowns, _found_px) = layout.read_passive_rows(
+            // Split the 2×2 grid into 4 individual passive crops.
+            let crops = split_grid_2x2(&region);
+
+            // Call the REAL SCAN's read_passive_crops — per-slot OCR + synth path.
+            let (got_keys, unknowns) = layout.read_passive_crops(
+                &synth,
+                &textlib,
+                &crops,
+                &passive_idx,
+                expected_px,
+            );
+
+            // Also run read_passive_rows for side-by-side comparison.
+            let (old_keys, _old_unknowns, _found_px) = layout.read_passive_rows(
                 &synth,
                 &textlib,
                 &region,
@@ -179,13 +209,14 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
                 expected_px,
             );
 
-            // Count resolution source (unknowns > 0 means NCC or export was needed).
-            if _unknowns.is_empty() {
-                ocr_resolved += 1;
+            if unknowns.is_empty() {
+                crops_resolved += 1;
             } else {
-                ncc_fallback += 1;
+                crops_unknown += 1;
             }
 
+            // Check crops path results.
+            let mut slot_has_failure = false;
             for exp in &expected.passives {
                 if !got_keys.contains(exp) {
                     failures.push((
@@ -193,9 +224,25 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
                         exp.clone(),
                         got_keys.first().cloned(),
                     ));
+                    slot_has_failure = true;
                     box_failures += 1;
                 }
             }
+
+            // Log comparison when results differ.
+            if got_keys != old_keys {
+                let exp_str: Vec<&str> = expected.passives.iter().map(|s| s.as_str()).collect();
+                eprintln!(
+                    "  {slot_key}: crops={got_keys:?} rows={old_keys:?} expected={exp_str:?}{}",
+                    if slot_has_failure { " FAIL" } else { "" }
+                );
+            } else if slot_has_failure {
+                let exp_str: Vec<&str> = expected.passives.iter().map(|s| s.as_str()).collect();
+                eprintln!("  {slot_key}: both={got_keys:?} expected={exp_str:?} FAIL");
+            } else {
+                eprintln!("  {slot_key}: OK {got_keys:?}");
+            }
+
             box_checked += 1;
             total_checked += 1;
         }
@@ -208,7 +255,7 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
     }
 
     eprintln!(
-        "  total: {total_checked} slots, {} failures (ocr_resolved={ocr_resolved}, ncc_fallback={ncc_fallback})",
+        "  total: {total_checked} slots, {} failures (crops_resolved={crops_resolved}, crops_unknown={crops_unknown})",
         failures.len()
     );
     failures
@@ -287,8 +334,8 @@ fn replay_gaming_debug() {
         }
     }
 
-    // Passive check — uses the real scan's read_passive_rows
-    eprintln!("=== Passive check (real scan pipeline) ===");
+    // Passive check — uses the real scan's read_passive_crops (per-slot OCR)
+    eprintln!("=== Passive check (per-slot OCR path) ===");
     let passive_failures = replay_passives(&dir);
     if !passive_failures.is_empty() {
         eprintln!("Passive failures:");

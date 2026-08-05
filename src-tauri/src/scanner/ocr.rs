@@ -279,6 +279,7 @@ fn norm(s: &str) -> String {
 }
 
 /// OCR → best-match pipeline (original, used by cell crops and species).
+/// Early exits when a candidate scores ≥0.95 to skip remaining token windows.
 pub fn best_vocab_match<'a>(
     line: &str,
     idx: &VocabIndex<'a>,
@@ -302,6 +303,7 @@ pub fn best_vocab_match<'a>(
     // "Fuack" (via the token window) and "Fuack Ignis" at 1.0 — the
     // subspecies must win over its base name.
     let mut best: Option<(&str, f64, usize)> = None;
+    const EARLY_EXIT_THRESHOLD: f64 = 0.95;
     for c in &candidates {
         if let Some(fc) = c.chars().next() {
             for vi in idx.candidates_for(fc) {
@@ -312,6 +314,10 @@ pub fn best_vocab_match<'a>(
                     && best.is_none_or(|(_, bs, bl)| sim > bs || (sim == bs && v.len() > bl))
                 {
                     best = Some((key.as_str(), sim, v.len()));
+                    // High-confidence match: skip remaining candidates.
+                    if sim >= EARLY_EXIT_THRESHOLD {
+                        return best.map(|(k, s, _)| (k, s));
+                    }
                 }
             }
         }
