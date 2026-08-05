@@ -962,6 +962,18 @@
                 <span style={`background:${ZONE_COLORS[key] ?? "#fff"}`}>{key}{ovr ? " ✎" : ""}</span>
               </div>
             {/each}
+            {#each ["passive 1", "passive 2", "passive 3", "passive 4"] as key}
+              {@const def = defaultZoneRect(key)}
+              {#if def && !debugSheet.zones_used.find((z) => z[0] === key)}
+                <div
+                  class="zone-box dashed"
+                  style={`${zonePct(def)}border-color:${ZONE_COLORS[key]};`}
+                  title={`${key} (default)`}
+                >
+                  <span style={`background:${ZONE_COLORS[key]}`}>{key}</span>
+                </div>
+              {/if}
+            {/each}
             {#if zoneSel}
               <div
                 class="zone-sel"

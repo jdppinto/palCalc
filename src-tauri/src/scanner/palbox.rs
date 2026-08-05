@@ -987,6 +987,10 @@ pub fn debug_read_sheet(
         })
         .collect();
     let has_passive_slots = passive_zones.len() == 4;
+    for (i, rect) in passive_zones.iter().enumerate() {
+        let (r, ovr) = calib.zone_or(&format!("passive {}", i + 1), *rect);
+        out.zones_used.push((format!("passive {}", i + 1), r, ovr));
+    }
 
     let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
     let _ = pimg.save(report_dir.join("passives_region.png"));
