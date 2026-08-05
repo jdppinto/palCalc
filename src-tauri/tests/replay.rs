@@ -145,7 +145,6 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
     let passive_idx = ocr::VocabIndex::build(&passive_names);
 
     let expected_px = Some(px_name * PASSIVE_PX_RATIO);
-    let row_px: Option<f32> = None;
 
     let mut failures = Vec::new();
     let mut total_checked = 0usize;
@@ -199,16 +198,6 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
                 expected_px,
             );
 
-            // Also run read_passive_rows for side-by-side comparison.
-            let (old_keys, _old_unknowns, _found_px) = layout.read_passive_rows(
-                &synth,
-                &textlib,
-                &region,
-                &passive_idx,
-                row_px,
-                expected_px,
-            );
-
             if unknowns.is_empty() {
                 crops_resolved += 1;
             } else {
@@ -229,16 +218,9 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
                 }
             }
 
-            // Log comparison when results differ.
-            if got_keys != old_keys {
+            if slot_has_failure {
                 let exp_str: Vec<&str> = expected.passives.iter().map(|s| s.as_str()).collect();
-                eprintln!(
-                    "  {slot_key}: crops={got_keys:?} rows={old_keys:?} expected={exp_str:?}{}",
-                    if slot_has_failure { " FAIL" } else { "" }
-                );
-            } else if slot_has_failure {
-                let exp_str: Vec<&str> = expected.passives.iter().map(|s| s.as_str()).collect();
-                eprintln!("  {slot_key}: both={got_keys:?} expected={exp_str:?} FAIL");
+                eprintln!("  {slot_key}: got={got_keys:?} expected={exp_str:?} FAIL");
             } else {
                 eprintln!("  {slot_key}: OK {got_keys:?}");
             }
@@ -317,6 +299,7 @@ fn replay_latest_dump() {
 }
 
 #[test]
+#[ignore = "slow: 734 slots × OCR, takes ~20 min"]
 fn replay_gaming_debug() {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("..")
