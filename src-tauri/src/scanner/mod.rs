@@ -11,6 +11,7 @@
 pub mod config;
 pub mod dump;
 pub mod matcher;
+pub mod metrics;
 pub mod palbox;
 pub mod panel;
 pub mod platform;

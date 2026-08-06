@@ -97,13 +97,28 @@ fn profile_sheet_read_layers() {
     let expected = Some(row_px_expected(panel));
 
     ocr::clear_cache();
+    let mbase = super::metrics::snapshot();
     let t = Instant::now();
     let (keys, unknowns, _) =
         layout.read_passive_rows(&synth, &lib, &region, &pv_idx, None, expected);
+    let total = ms(t);
+    let m = super::metrics::snapshot().since(mbase);
     eprintln!(
-        "[passives] read_passive_rows (full pipeline): {:.1}ms -> {keys:?} +{} unknown",
-        ms(t),
+        "[passives] read_passive_rows (full pipeline): {total:.1}ms -> {keys:?} +{} unknown",
         unknowns.len()
+    );
+    // Same breakdown the scan report prints — attribution should account for
+    // essentially all of the pipeline total.
+    eprintln!(
+        "[attrib]   ocr={:.1}ms ({} calls, {} hits) synth={:.1}ms ({} calls) textlib={:.1}ms ({} calls) | sum={:.1}ms of {total:.1}ms",
+        m.ocr.as_secs_f64() * 1000.0,
+        m.ocr_calls,
+        m.ocr_hits,
+        m.synth.as_secs_f64() * 1000.0,
+        m.synth_calls,
+        m.textlib.as_secs_f64() * 1000.0,
+        m.textlib_calls,
+        (m.ocr + m.synth + m.textlib).as_secs_f64() * 1000.0,
     );
 
     ocr::clear_cache();

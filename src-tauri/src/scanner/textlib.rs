@@ -65,6 +65,10 @@ impl TextLib {
     }
 
     pub fn identify(&self, crop: &RgbaImage) -> TextMatch {
+        super::metrics::time_textlib(|| self.identify_inner(crop))
+    }
+
+    fn identify_inner(&self, crop: &RgbaImage) -> TextMatch {
         let resized = resize_to_template(crop);
         let Some(v) = normalize(&resized) else {
             return TextMatch::Empty;

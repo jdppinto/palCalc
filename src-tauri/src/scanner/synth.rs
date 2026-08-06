@@ -120,6 +120,17 @@ impl TextSynth {
         px_lo: f32,
         px_hi: f32,
     ) -> Option<(String, TextHit)> {
+        super::metrics::time_synth(|| self.best_label_inner(img, candidates, bold, px_lo, px_hi))
+    }
+
+    fn best_label_inner(
+        &self,
+        img: &RgbaImage,
+        candidates: &[(String, String)],
+        bold: bool,
+        px_lo: f32,
+        px_hi: f32,
+    ) -> Option<(String, TextHit)> {
         let full = luma_of(img);
         let font = self.font(bold);
 
@@ -162,7 +173,24 @@ impl TextSynth {
     /// vertical position.
     /// `abs_score`: match text of either polarity — passive rows can render
     /// dark-on-light (inverted NCC) as well as light-on-dark.
+    #[allow(clippy::too_many_arguments)]
     pub fn find_labels(
+        &self,
+        img: &RgbaImage,
+        candidates: &[(String, String)],
+        bold: bool,
+        px_lo: f32,
+        px_hi: f32,
+        min_score: f32,
+        abs_score: bool,
+    ) -> Vec<(String, TextHit)> {
+        super::metrics::time_synth(|| {
+            self.find_labels_inner(img, candidates, bold, px_lo, px_hi, min_score, abs_score)
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn find_labels_inner(
         &self,
         img: &RgbaImage,
         candidates: &[(String, String)],

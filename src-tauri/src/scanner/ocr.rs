@@ -163,9 +163,10 @@ pub fn read_lines_boxed(img: &RgbaImage) -> Result<Lines, String> {
     let key = (pixel_hash(img), img.width(), img.height());
     let cache = OCR_CACHE.get_or_init(|| Mutex::new(HashMap::new()));
     if let Some(hit) = cache.lock().unwrap().get(&key) {
+        super::metrics::record_ocr_hit();
         return Ok(hit.clone());
     }
-    let lines = read_lines_uncached(img)?;
+    let lines = super::metrics::time_ocr(|| read_lines_uncached(img))?;
     // Errors are deliberately not cached — a failure is usually engine state,
     // not a property of these pixels.
     let mut c = cache.lock().unwrap();

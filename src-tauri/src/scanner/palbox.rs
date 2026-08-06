@@ -427,9 +427,14 @@ pub fn scan_box(
     let mut first_occupied = true;
     let mut timing_move = Duration::ZERO;
     let mut timing_capture = Duration::ZERO;
-    let mut timing_ocr = Duration::ZERO;
+    let mut timing_read = Duration::ZERO;
     let mut timing_png = Duration::ZERO;
     let mut prev_panel_hash: Option<u64> = None;
+    // Per-layer breakdown of `timing_read`, recorded where the work happens.
+    let metrics_base = super::metrics::snapshot();
+    let (mut name_hits, mut passive_hits) = (0u32, 0u32);
+    // Worst single slot: a 30-slot sum hides one pathological slot completely.
+    let mut worst_slot = (Duration::ZERO, 0u32, 0u32);
     for (i, p) in pre.iter().enumerate() {
         let slot_start = Instant::now();
         if !occupied.contains(&i) {
@@ -595,7 +600,10 @@ pub fn scan_box(
                     Some(r)
                 }
                 None => match name_cache.get(&band_key) {
-                    Some(cached) => cached.clone(),
+                    Some(cached) => {
+                        name_hits += 1;
+                        cached.clone()
+                    }
                     None => {
                         let r = l.read_name(synth, &band, &species_idx);
                         name_cache.insert(band_key, r.clone());
@@ -611,16 +619,12 @@ pub fn scan_box(
             }
             gender = classify_gender(gimg.as_ref().unwrap_or(&band));
 
-            if let Some(dir) = debug_dir {
-                if let Some(ref gi) = gimg {
-                    let _ = gi.save(dir.join(format!("gender_{}_{}.png", p.row, p.col)));
-                }
-                let _ =
-                    pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
-            }
             let pkey = img_hash(&pimg) ^ ((p.row as u64) << 32) ^ ((p.col as u64) << 48);
             (passives, passive_unknowns) = match passive_cache.get(&pkey) {
-                Some(cached) => cached.clone(),
+                Some(cached) => {
+                    passive_hits += 1;
+                    cached.clone()
+                }
                 None => {
                     let (keys, unknowns) = if let Some(ref crops) = passive_crops {
                         let expected = calib.panel.map(super::panel::row_px_expected);
@@ -644,7 +648,17 @@ pub fn scan_box(
                     (keys, unknowns)
                 }
             };
-            timing_ocr += t0.elapsed();
+            timing_read += t0.elapsed();
+
+            // Debug captures are written AFTER the read timer stops: three PNG
+            // encodes per slot were being charged to recognition time, and
+            // every scan passes a debug dir.
+            if let Some(dir) = debug_dir {
+                if let Some(ref gi) = gimg {
+                    let _ = gi.save(dir.join(format!("gender_{}_{}.png", p.row, p.col)));
+                }
+                let _ = pimg.save(dir.join(format!("passives_{}_{}.png", p.row, p.col)));
+            }
         }
 
         done += 1;
@@ -699,12 +713,36 @@ pub fn scan_box(
                 s
             },
         });
+        let slot_elapsed = slot_start.elapsed();
+        if slot_elapsed > worst_slot.0 {
+            worst_slot = (slot_elapsed, p.row, p.col);
+        }
     }
     let occupied_count = occupied.len();
     let log: Vec<String> = report.lines().map(String::from).collect();
+    let m = super::metrics::snapshot().since(metrics_base);
+    // `read` is the wall time of the whole recognition step; ocr/synth/textlib
+    // break it down by layer. They differ by more than an order of magnitude,
+    // so a single total can't say which one a slow scan is spending time in.
     let timing_msg = format!(
-        "[timing] {occupied_count} slots | move={:?} capture={:?} ocr={:?} png={:?}",
-        timing_move, timing_capture, timing_ocr, timing_png
+        "[timing] {occupied_count} slots | move={:?} capture={:?} read={:?} png={:?}\n\
+         [read]   ocr={:?} ({} calls, {} memo hits) synth={:?} ({} calls) textlib={:?} ({} calls)\n\
+         [cache]  name {name_hits}/{occupied_count} passives {passive_hits}/{occupied_count} \
+         | worst slot {:?} at ({},{})",
+        timing_move,
+        timing_capture,
+        timing_read,
+        timing_png,
+        m.ocr,
+        m.ocr_calls,
+        m.ocr_hits,
+        m.synth,
+        m.synth_calls,
+        m.textlib,
+        m.textlib_calls,
+        worst_slot.0,
+        worst_slot.1,
+        worst_slot.2,
     );
     eprintln!("{timing_msg}");
     let _ = std::fs::write(
