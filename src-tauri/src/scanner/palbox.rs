@@ -455,6 +455,10 @@ pub fn scan_box(
         if SCAN_ABORT.load(Ordering::Relaxed) {
             return Err("scan aborted".into());
         }
+        // Per-slot layer breakdown: the box aggregate can't say WHICH slot was
+        // expensive, and the slot's captures sit in the same debug bundle under
+        // the same (row, col), so a slow slot is directly inspectable.
+        let slot_metrics_base = super::metrics::snapshot();
         let t0 = Instant::now();
         backend.move_cursor(p.cx, p.cy)?;
         timing_move += t0.elapsed();
@@ -669,8 +673,10 @@ pub fn scan_box(
             box_current: 1,
             box_total: 1,
         });
+        let sm = super::metrics::snapshot().since(slot_metrics_base);
         report.push_str(&format!(
-            "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{}\n",
+            "slot {},{}: species={:?} score={:.3} gender={:?} passives={:?}{} \
+             [ocr={:.0}ms/{} hits={} synth={:.0}ms/{} textlib={:.1}ms/{}]\n",
             p.row,
             p.col,
             species.as_deref().unwrap_or("<none>"),
@@ -682,6 +688,13 @@ pub fn scan_box(
             } else {
                 format!(" +{} unknown row(s)", passive_unknowns.len())
             },
+            sm.ocr.as_secs_f64() * 1000.0,
+            sm.ocr_calls,
+            sm.ocr_hits,
+            sm.synth.as_secs_f64() * 1000.0,
+            sm.synth_calls,
+            sm.textlib.as_secs_f64() * 1000.0,
+            sm.textlib_calls,
         ));
         // Dump this run's unknown passive-row crops so misses are inspectable
         // (named by slot so they never collide across the box).
