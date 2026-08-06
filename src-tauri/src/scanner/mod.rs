@@ -15,5 +15,7 @@ pub mod palbox;
 pub mod panel;
 pub mod platform;
 pub mod ocr;
+#[cfg(test)]
+mod perf;
 pub mod synth;
 pub mod textlib;

@@ -9,7 +9,7 @@ use image::RgbaImage;
 use ocrs::{ImageSource, OcrEngine, OcrEngineParams, TextItem};
 use rten::Model;
 use std::collections::HashMap;
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 
 static DETECTION: &[u8] = include_bytes!("../../../data/ocr/text-detection.rten");
 static RECOGNITION: &[u8] = include_bytes!("../../../data/ocr/text-recognition.rten");
@@ -114,6 +114,39 @@ fn ocr_neighbors(c: char) -> &'static [char] {
 // OCR engine wrappers
 // ---------------------------------------------------------------------------
 
+type Lines = Vec<(String, (i32, i32, u32, u32))>;
+
+/// Memoized OCR results keyed by exact pixel content. Inference dominates a
+/// scan (~200-350ms per call, ~6 calls per slot), and the inputs repeat
+/// heavily: a box is full of duplicate pals, most pals share common passives,
+/// and empty passive cells are pixel-identical everywhere. OCR is a pure
+/// function of its pixels, so a hit returns the same lines it would compute.
+static OCR_CACHE: OnceLock<Mutex<HashMap<(u64, u32, u32), Lines>>> = OnceLock::new();
+
+/// Bound on cached captures — entries are a handful of short strings each, so
+/// this stays trivial in memory while covering a full 32-box sweep's distinct
+/// crops. Overflow clears rather than evicting by age: a scan's working set
+/// fits well under the cap, so this only ever trips on pathological input.
+const OCR_CACHE_CAP: usize = 8192;
+
+/// FNV-1a over the raw pixels. Paired with the dimensions in the key.
+fn pixel_hash(img: &RgbaImage) -> u64 {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for &b in img.as_raw() {
+        h ^= b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    h
+}
+
+/// Drop every memoized OCR result. Called at scan start so a scan can never
+/// serve results captured under a previous game/UI state.
+pub fn clear_cache() {
+    if let Some(c) = OCR_CACHE.get() {
+        c.lock().unwrap().clear();
+    }
+}
+
 /// OCR all text lines in an image. Small captures are upscaled first
 /// (Inventory Kamera retries at growing scale factors; one 2x step covers
 /// our 20-40px UI text).
@@ -125,9 +158,25 @@ pub fn read_lines(img: &RgbaImage) -> Result<Vec<String>, String> {
 }
 
 /// OCR all text lines with their bounding rects in original-image pixels.
-pub fn read_lines_boxed(
-    img: &RgbaImage,
-) -> Result<Vec<(String, (i32, i32, u32, u32))>, String> {
+/// Memoized by pixel content; see `OCR_CACHE`.
+pub fn read_lines_boxed(img: &RgbaImage) -> Result<Lines, String> {
+    let key = (pixel_hash(img), img.width(), img.height());
+    let cache = OCR_CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+    if let Some(hit) = cache.lock().unwrap().get(&key) {
+        return Ok(hit.clone());
+    }
+    let lines = read_lines_uncached(img)?;
+    // Errors are deliberately not cached — a failure is usually engine state,
+    // not a property of these pixels.
+    let mut c = cache.lock().unwrap();
+    if c.len() >= OCR_CACHE_CAP {
+        c.clear();
+    }
+    c.insert(key, lines.clone());
+    Ok(lines)
+}
+
+fn read_lines_uncached(img: &RgbaImage) -> Result<Lines, String> {
     let engine = engine()?;
     let scaled;
     let (img, scale) = if img.height() < 128 {
@@ -141,7 +190,12 @@ pub fn read_lines_boxed(
     } else {
         (img, 1)
     };
-    let rgb = image::DynamicImage::ImageRgba8(img.clone()).into_rgb8();
+    // Drop alpha directly. Going through DynamicImage::ImageRgba8(img.clone())
+    // copied the whole RGBA buffer only to convert it away.
+    let mut rgb = image::RgbImage::new(img.width(), img.height());
+    for (dst, src) in rgb.pixels_mut().zip(img.pixels()) {
+        *dst = image::Rgb([src[0], src[1], src[2]]);
+    }
     let source =
         ImageSource::from_bytes(rgb.as_raw(), rgb.dimensions()).map_err(|e| e.to_string())?;
     let input = engine.prepare_input(source).map_err(|e| e.to_string())?;
@@ -404,6 +458,48 @@ mod tests {
             .iter()
             .map(|(k, p)| (k.clone(), p.name.clone()))
             .collect()
+    }
+
+    /// The hand-rolled alpha drop in `read_lines_uncached` must produce exactly
+    /// what the previous `DynamicImage::ImageRgba8(clone).into_rgb8()` did —
+    /// including for non-opaque pixels, which that conversion truncates rather
+    /// than blends.
+    #[test]
+    fn rgb_conversion_matches_dynamic_image() {
+        let mut img = RgbaImage::new(23, 17);
+        for (i, p) in img.pixels_mut().enumerate() {
+            let i = i as u32;
+            *p = image::Rgba([
+                (i * 7 % 256) as u8,
+                (i * 13 % 256) as u8,
+                (i * 29 % 256) as u8,
+                (i * 3 % 256) as u8,
+            ]);
+        }
+        let expected = image::DynamicImage::ImageRgba8(img.clone()).into_rgb8();
+        let mut actual = image::RgbImage::new(img.width(), img.height());
+        for (dst, src) in actual.pixels_mut().zip(img.pixels()) {
+            *dst = image::Rgb([src[0], src[1], src[2]]);
+        }
+        assert_eq!(actual.as_raw(), expected.as_raw());
+    }
+
+    /// A cache hit must return exactly what a fresh inference returns, and a
+    /// different image must not collide with it.
+    #[test]
+    #[ignore = "slow; --release -- --ignored"]
+    fn ocr_cache_returns_identical_lines() {
+        clear_cache();
+        let img = fixture("field_name_tanzee.png");
+        let cold = read_lines_boxed(&img).unwrap();
+        let warm = read_lines_boxed(&img).unwrap();
+        assert_eq!(cold, warm, "cache hit diverged from fresh inference");
+        let other = fixture("name_lifmunk.png");
+        let other_lines = read_lines_boxed(&other).unwrap();
+        assert_ne!(cold, other_lines, "distinct images must not share an entry");
+        // And still correct after a clear.
+        clear_cache();
+        assert_eq!(read_lines_boxed(&img).unwrap(), cold);
     }
 
     /// Subspecies name must beat its base name when both match perfectly.

@@ -7,6 +7,8 @@
 use ab_glyph::{Font, FontRef, PxScale, ScaleFont};
 use rayon::prelude::*;
 use image::RgbaImage;
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
 // Per-role fonts chosen by the font-audit table over field fixtures:
 // rows (regular role): the game's own NotoSans-Medium (0.65 on "Artisan" vs
@@ -29,13 +31,41 @@ pub struct TextHit {
 }
 
 struct Tpl {
-    /// Glyph coverage in [0,1], row-major.
-    v: Vec<f32>,
+    /// Glyph coverage as (row, col, weight) for NONZERO pixels only, in
+    /// row-major ascending order. Glyph bounding boxes are mostly empty
+    /// (~80% zeros), and `score_at` skipped those pixels with a branch after
+    /// already paying for the load; iterating the sparse set directly keeps
+    /// the accumulation order — and therefore the f64 result — identical.
+    nz: Vec<(u32, u32, f32)>,
     w: u32,
     h: u32,
     wsum: f64,
     tmean: f64,
     tvar: f64,
+}
+
+/// Memoized `render` results. The same (label, px) template is re-rendered
+/// constantly — once per candidate per px in every coarse pass, then three
+/// more times per surviving coarse hit in refinement, and again for every
+/// capture in the scan. Rasterizing glyph outlines is pure, so the result is
+/// cached per `TextSynth` (keyed by role, so custom-font instances from the
+/// audit tooling never share entries with the bundled fonts).
+#[derive(Default)]
+struct TplCache {
+    map: RwLock<HashMap<(bool, String, u32), Arc<Tpl>>>,
+}
+
+impl TplCache {
+    fn get(&self, font: &FontRef, bold: bool, text: &str, px: f32) -> Arc<Tpl> {
+        let key = (bold, text.to_string(), px.to_bits());
+        if let Some(t) = self.map.read().unwrap().get(&key) {
+            return t.clone();
+        }
+        let tpl = Arc::new(render(font, text, px));
+        // A concurrent render of the same key is harmless — identical value.
+        self.map.write().unwrap().insert(key, tpl.clone());
+        tpl
+    }
 }
 
 struct Luma {
@@ -47,6 +77,7 @@ struct Luma {
 pub struct TextSynth {
     regular: FontRef<'static>,
     bold: FontRef<'static>,
+    cache: TplCache,
 }
 
 impl TextSynth {
@@ -54,6 +85,7 @@ impl TextSynth {
         Ok(Self {
             regular: FontRef::try_from_slice(REGULAR).map_err(|e| e.to_string())?,
             bold: FontRef::try_from_slice(BOLD).map_err(|e| e.to_string())?,
+            cache: TplCache::default(),
         })
     }
 
@@ -66,6 +98,7 @@ impl TextSynth {
         Ok(Self {
             regular: FontRef::try_from_slice(r).map_err(|e| e.to_string())?,
             bold: FontRef::try_from_slice(b).map_err(|e| e.to_string())?,
+            cache: TplCache::default(),
         })
     }
 
@@ -75,34 +108,6 @@ impl TextSynth {
         } else {
             &self.regular
         }
-    }
-
-    /// Best occurrence of `text` anywhere in `img`, sweeping pixel sizes in
-    /// [px_lo, px_hi]. Coarse half-resolution sweep, full-res refinement.
-    pub fn find_text(
-        &self,
-        img: &RgbaImage,
-        text: &str,
-        bold: bool,
-        px_lo: f32,
-        px_hi: f32,
-    ) -> Option<TextHit> {
-        let full = luma_of(img);
-        let font = self.font(bold);
-
-        let mut coarse: Option<(f32, u32, u32, f32)> = None; // score, x, y, px
-        let mut px = px_lo;
-        while px <= px_hi + 0.01 {
-            let tpl = render(font, text, px);
-            if let Some((s, x, y)) = sweep(&full, &tpl, 2) {
-                if coarse.is_none() || s > coarse.unwrap().0 {
-                    coarse = Some((s, x, y, px));
-                }
-            }
-            px += 2.0;
-        }
-        let (_, cx, cy, cpx) = coarse?;
-        refine(font, text, &full, cx, cy, cpx)
     }
 
     /// Best-matching candidate label within `img` (the whole image is the
@@ -128,7 +133,7 @@ impl TextSynth {
                 let mut out = Vec::new();
                 let mut px = px_lo;
                 while px <= px_hi + 0.01 {
-                    let tpl = render(font, label, px);
+                    let tpl = self.cache.get(font, bold, label, px);
                     for (s, x, y) in sweep_topk(&full, &tpl, 3, 4) {
                         out.push((s, i, x, y, px));
                     }
@@ -141,7 +146,9 @@ impl TextSynth {
 
         let mut best: Option<(String, TextHit)> = None;
         for &(_, i, cx, cy, px) in ranked.iter().take(24) {
-            if let Some(hit) = refine(font, &candidates[i].1, &full, cx, cy, px) {
+            if let Some(hit) =
+                refine(&self.cache, font, bold, &candidates[i].1, &full, cx, cy, px)
+            {
                 if best.is_none() || hit.score > best.as_ref().unwrap().1.score {
                     best = Some((candidates[i].0.clone(), hit));
                 }
@@ -174,11 +181,15 @@ impl TextSynth {
         // windows). Empty profile falls back to the full sweep.
         let rows = text_rows(&full, px_lo as u32 / 3);
 
-        let mut hits = label_pass(font, &full, candidates, &rows, px_lo, px_hi, min_score, abs_score);
+        let mut hits = label_pass(
+            &self.cache, font, bold, &full, candidates, &rows, px_lo, px_hi, min_score, abs_score,
+        );
         // The row profile is a heuristic; if it guided the sweep to nothing,
         // fall back to the exhaustive pass rather than reporting no rows.
         if hits.is_empty() && !rows.is_empty() {
-            hits = label_pass(font, &full, candidates, &[], px_lo, px_hi, min_score, abs_score);
+            hits = label_pass(
+                &self.cache, font, bold, &full, candidates, &[], px_lo, px_hi, min_score, abs_score,
+            );
         }
         hits.sort_by_key(|(_, h)| h.y);
         // Row dedup: hits whose vertical spans overlap are the same row —
@@ -204,7 +215,9 @@ impl TextSynth {
 /// `abs_score` matches either text polarity (dark-on-light or light-on-dark).
 #[allow(clippy::too_many_arguments)]
 fn label_pass(
+    cache: &TplCache,
     font: &FontRef,
+    bold: bool,
     full: &Luma,
     candidates: &[(String, String)],
     rows: &[(u32, u32)],
@@ -220,7 +233,7 @@ fn label_pass(
             let mut cand_best: Option<TextHit> = None;
             let mut px = px_lo;
             while px <= px_hi + 0.01 {
-                let tpl = render(font, label, px);
+                let tpl = cache.get(font, bold, label, px);
                 let coarse: Vec<(f32, u32, u32)> = if rows.is_empty() {
                     sweep_topk_by(full, &tpl, 2, 3, val)
                 } else {
@@ -229,7 +242,7 @@ fn label_pass(
                         .collect()
                 };
                 for (_, cx, cy) in coarse {
-                    if let Some(hit) = refine_by(font, label, full, cx, cy, px, val) {
+                    if let Some(hit) = refine_by(cache, font, bold, label, full, cx, cy, px, val) {
                         if cand_best.is_none()
                             || val(hit.score) > val(cand_best.unwrap().score)
                         {
@@ -301,8 +314,18 @@ fn render(font: &FontRef, text: &str, px: f32) -> Tpl {
         .iter()
         .map(|&c| c as f64 * (255.0 * c as f64 - tmean).powi(2))
         .sum();
+    // Row-major ascending, matching the order `score_at` used to visit them.
+    let mut nz = Vec::new();
+    for ty in 0..h {
+        for tx in 0..w {
+            let c = v[(ty * w + tx) as usize];
+            if c != 0.0 {
+                nz.push((ty, tx, c));
+            }
+        }
+    }
     Tpl {
-        v,
+        nz,
         w,
         h,
         wsum,
@@ -414,8 +437,11 @@ fn sweep_at_row_by(
     best
 }
 
+#[allow(clippy::too_many_arguments)]
 fn refine_by(
+    cache: &TplCache,
     font: &FontRef,
+    bold: bool,
     text: &str,
     full: &Luma,
     cx: u32,
@@ -429,7 +455,7 @@ fn refine_by(
         if px < 6.0 {
             continue;
         }
-        let tpl = render(font, text, px);
+        let tpl = cache.get(font, bold, text, px);
         if tpl.w > full.w || tpl.h > full.h || tpl.tvar <= 0.0 {
             continue;
         }
@@ -495,61 +521,17 @@ fn text_rows(img: &Luma, min_band: u32) -> Vec<(u32, u32)> {
     rows
 }
 
-/// Best window of `tpl` constrained to a text row starting near `row_y`.
-fn sweep_at_row(img: &Luma, tpl: &Tpl, row_y: u32, step: usize) -> Option<(f32, u32, u32)> {
-    if tpl.w > img.w || tpl.h > img.h || tpl.wsum < 2.0 || tpl.tvar <= 0.0 {
-        return None;
-    }
-    // The band start marks the glyph tops; the template has ~2px padding
-    // above the ascent, so the window top sits slightly above the band.
-    let y_lo = row_y.saturating_sub(6);
-    let y_hi = (row_y + tpl.h / 2 + 4).min(img.h - tpl.h);
-    let mut best: Option<(f32, u32, u32)> = None;
-    for oy in y_lo..=y_hi {
-        for ox in (0..=(img.w - tpl.w)).step_by(step) {
-            let s = score_at(img, tpl, ox, oy);
-            if best.is_none() || s > best.unwrap().0 {
-                best = Some((s, ox, oy));
-            }
-        }
-    }
-    best
-}
-
-/// Best weighted-NCC window of `tpl` over `img`, scanning at `step`.
-fn sweep(img: &Luma, tpl: &Tpl, step: usize) -> Option<(f32, u32, u32)> {
-    if tpl.w > img.w || tpl.h > img.h || tpl.wsum < 2.0 || tpl.tvar <= 0.0 {
-        return None;
-    }
-    let mut best: Option<(f32, u32, u32)> = None;
-    for oy in (0..=(img.h - tpl.h)).step_by(step) {
-        for ox in (0..=(img.w - tpl.w)).step_by(step) {
-            let s = score_at(img, tpl, ox, oy);
-            if best.is_none() || s > best.unwrap().0 {
-                best = Some((s, ox, oy));
-            }
-        }
-    }
-    best
-}
-
 fn score_at(img: &Luma, tpl: &Tpl, ox: u32, oy: u32) -> f32 {
     // f64 accumulation: the variance is a difference of large products and
     // f32 cancellation was observed to inflate scores past 1.0.
     let (mut sg, mut sg2, mut num) = (0.0f64, 0.0f64, 0.0f64);
-    for ty in 0..tpl.h {
-        let irow = ((oy + ty) * img.w + ox) as usize;
-        let trow = (ty * tpl.w) as usize;
-        for tx in 0..tpl.w as usize {
-            let wgt = tpl.v[trow + tx] as f64;
-            if wgt == 0.0 {
-                continue;
-            }
-            let l = img.v[irow + tx] as f64;
-            sg += wgt * l;
-            sg2 += wgt * l * l;
-            num += wgt * (255.0 * wgt - tpl.tmean) * l;
-        }
+    let base = (oy * img.w + ox) as usize;
+    for &(ty, tx, w) in &tpl.nz {
+        let wgt = w as f64;
+        let l = img.v[base + (ty * img.w + tx) as usize] as f64;
+        sg += wgt * l;
+        sg2 += wgt * l * l;
+        num += wgt * (255.0 * wgt - tpl.tmean) * l;
     }
     let gvar = sg2 - sg * sg / tpl.wsum;
     // Minimum contrast under the glyph mask: a near-uniform window fits any
@@ -561,37 +543,17 @@ fn score_at(img: &Luma, tpl: &Tpl, ox: u32, oy: u32) -> f32 {
 }
 
 /// Full-resolution refinement around a coarse position: neighboring pixel
-/// sizes, small positional neighborhood.
-fn refine(font: &FontRef, text: &str, full: &Luma, cx: u32, cy: u32, cpx: f32) -> Option<TextHit> {
-    let mut best: Option<TextHit> = None;
-    for dpx in [-1.0f32, 0.0, 1.0] {
-        let px = cpx + dpx;
-        if px < 6.0 {
-            continue;
-        }
-        let tpl = render(font, text, px);
-        if tpl.w > full.w || tpl.h > full.h || tpl.tvar <= 0.0 {
-            continue;
-        }
-        let x0 = cx.saturating_sub(4).min(full.w - tpl.w);
-        let y0 = cy.saturating_sub(4).min(full.h - tpl.h);
-        let x1 = (cx + 4).min(full.w - tpl.w);
-        let y1 = (cy + 4).min(full.h - tpl.h);
-        for oy in y0..=y1 {
-            for ox in x0..=x1 {
-                let s = score_at(full, &tpl, ox, oy);
-                if best.is_none() || s > best.as_ref().unwrap().score {
-                    best = Some(TextHit {
-                        score: s,
-                        x: ox,
-                        y: oy,
-                        w: tpl.w,
-                        h: tpl.h,
-                        px,
-                    });
-                }
-            }
-        }
-    }
-    best
+/// sizes, small positional neighborhood. Signed-score variant of `refine_by`.
+#[allow(clippy::too_many_arguments)]
+fn refine(
+    cache: &TplCache,
+    font: &FontRef,
+    bold: bool,
+    text: &str,
+    full: &Luma,
+    cx: u32,
+    cy: u32,
+    cpx: f32,
+) -> Option<TextHit> {
+    refine_by(cache, font, bold, text, full, cx, cy, cpx, |s| s)
 }

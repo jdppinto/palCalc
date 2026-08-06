@@ -304,6 +304,9 @@ async fn scan_current_box(
         .map(|(k, p)| (k.clone(), p.name.clone()))
         .collect();
     SCAN_ABORT.store(false, Ordering::Relaxed);
+    // Bound the OCR memo to one scan; identical pixels always OCR to the
+    // same lines, so this is about memory, not staleness.
+    scanner::ocr::clear_cache();
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
         // Give the user 2 seconds to alt-tab into the game.
@@ -363,6 +366,9 @@ async fn scan_all_boxes(
         .map(|(k, p)| (k.clone(), p.name.clone()))
         .collect();
     SCAN_ABORT.store(false, Ordering::Relaxed);
+    // Bound the OCR memo to one scan; identical pixels always OCR to the
+    // same lines, so this is about memory, not staleness.
+    scanner::ocr::clear_cache();
     tauri::async_runtime::spawn_blocking(move || {
         let mut backend = platform::detect()?;
         // Give the user 2 seconds to alt-tab into the game.
