@@ -745,10 +745,7 @@ pub fn scan_box(
         worst_slot.2,
     );
     eprintln!("{timing_msg}");
-    let _ = std::fs::write(
-        super::config::palcalc_dir().join("timing.log"),
-        &timing_msg,
-    );
+    append_timing(&timing_msg);
     if let Some(dir) = debug_dir {
         let _ = std::fs::write(dir.join("report.txt"), &report);
     }
@@ -800,6 +797,7 @@ pub fn scan_boxes(
             std::thread::sleep(settle);
         }
         let box_dir = debug_dir.map(|d| d.join(format!("box_{b}")));
+        append_timing(&format!("=== box {} of {box_count} ===", b + 1));
         let (mut slots, log) = scan_box(
             backend,
             templates,
@@ -1074,6 +1072,37 @@ pub fn debug_read_sheet(
     out.passive_unknowns = unknowns;
     let _ = write_report_meta("sheet", &out.log);
     Ok(out)
+}
+
+pub fn timing_log_path() -> std::path::PathBuf {
+    super::config::palcalc_dir().join("timing.log")
+}
+
+/// Start a fresh timing log. Called once per scan command — `scan_boxes` runs
+/// `scan_box` per page, so a truncating write left only the last box's numbers
+/// in the file for a 32-page sweep.
+pub fn reset_timing_log() {
+    let path = timing_log_path();
+    if let Some(dir) = path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let _ = std::fs::write(&path, "");
+}
+
+/// Append one timing block to the log, creating it if a scan never reset it.
+fn append_timing(msg: &str) {
+    use std::io::Write;
+    let path = timing_log_path();
+    if let Some(dir) = path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    if let Ok(mut f) = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+    {
+        let _ = writeln!(f, "{msg}");
+    }
 }
 
 /// Cheap FNV-style pixel hash for per-scan capture memoization.
