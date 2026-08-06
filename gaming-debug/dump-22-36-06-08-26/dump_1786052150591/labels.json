@@ -1,0 +1,6761 @@
+{
+  "10,3,5": {
+    "species": "GrassMammoth",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_sadist"
+    ],
+    "gender": "Male"
+  },
+  "27,2,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,2,3": {
+    "species": "Sekhmet",
+    "passives": [
+      "TrainerWorkSpeed_UP_1",
+      "CraftSpeed_up3",
+      "ElementBoost_Normal_1_PAL",
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "3,0,4": {
+    "species": "Kitsunebi",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Female"
+  },
+  "11,4,4": {
+    "species": "LazyDragon_Electric",
+    "passives": [
+      "ElementResist_Dragon_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "6,0,3": {
+    "species": "SharkKid",
+    "passives": [
+      "SwimSpeed_up_1",
+      "MoveSpeed_up_2",
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "12,1,2": {
+    "species": "ThunderBird",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "8,4,4": {
+    "species": "LizardMan_Fire",
+    "passives": [
+      "SalePrice_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "5,1,0": {
+    "species": "PinkRabbit",
+    "passives": [
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "28,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,1,2": {
+    "species": "BlackPuppy",
+    "passives": [],
+    "gender": "Male"
+  },
+  "15,3,4": {
+    "species": "NightBlueHorse",
+    "passives": [],
+    "gender": "Female"
+  },
+  "11,2,3": {
+    "species": "RaijinDaughter",
+    "passives": [
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "4,0,5": {
+    "species": "WindChimes",
+    "passives": [
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "18,2,0": {
+    "species": "IceNarwhal",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "12,0,2": {
+    "species": "IceFox",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Female"
+  },
+  "31,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "11,1,4": {
+    "species": "Baphomet",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "31,1,4": {
+    "species": "SnowTigerBeastman",
+    "passives": [
+      "PAL_ALLAttack_down2"
+    ],
+    "gender": "Male"
+  },
+  "13,3,3": {
+    "species": "Plesiosaur",
+    "passives": [
+      "Deffence_up2_2",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "15,4,3": {
+    "species": "Yeti",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "9,2,5": {
+    "species": "FoxMage_Dark",
+    "passives": [
+      "PAL_sadist"
+    ],
+    "gender": "Male"
+  },
+  "15,1,5": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3",
+      "PAL_oraora",
+      "SwimSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "4,4,2": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "10,4,5": {
+    "species": "StuffedShark",
+    "passives": [],
+    "gender": "Female"
+  },
+  "23,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,0,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,2,5": {
+    "species": "DarkScorpion",
+    "passives": [
+      "ElementBoost_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "10,4,0": {
+    "species": "GrassMammoth",
+    "passives": [
+      "Deffence_up2_2",
+      "SalePrice_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "23,2,0": {
+    "species": "MimicDog",
+    "passives": [
+      "CraftSpeed_down2"
+    ],
+    "gender": "Male"
+  },
+  "31,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,0,5": {
+    "species": "PlantSlime",
+    "passives": [
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "2,2,0": {
+    "species": "Monkey",
+    "passives": [
+      "AutoHPRegeneRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "29,1,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "5,1,3": {
+    "species": "JellyfishFairy",
+    "passives": [
+      "PAL_Sanity_Down_3",
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "7,2,1": {
+    "species": "CatVampire",
+    "passives": [
+      "PAL_CorporateSlave",
+      "ElementBoost_Normal_1_PAL",
+      "ElementResist_Aqua_1_PAL",
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "7,3,2": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL",
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "31,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "8,0,3": {
+    "species": "PinkLizard",
+    "passives": [
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "3,2,3": {
+    "species": "Deer",
+    "passives": [
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "14,2,2": {
+    "species": "Umihebi_Fire",
+    "passives": [
+      "PAL_Sanity_Up_2",
+      "PAL_rude"
+    ],
+    "gender": "Female"
+  },
+  "3,4,5": {
+    "species": "MopBaby",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "30,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,3,5": {
+    "species": "CubeTurtle",
+    "passives": [
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Male"
+  },
+  "2,3,1": {
+    "species": "NightFox",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "3,2,0": {
+    "species": "CuteMole",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "17,0,2": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "NonKilling"
+    ],
+    "gender": "Female"
+  },
+  "8,2,2": {
+    "species": "PurpleSpider",
+    "passives": [
+      "Stamina_Up_3",
+      "Stamina_Up_1",
+      "ElementBoost_Leaf_1_PAL",
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "30,1,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "2,2,3": {
+    "species": "Monkey_Fire",
+    "passives": [
+      "SwimSpeed_up_1",
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "22,3,2": {
+    "species": "FlowerPrince",
+    "passives": [
+      "Deffence_down1"
+    ],
+    "gender": "Male"
+  },
+  "26,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "3,0,0": {
+    "species": "Boar",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "5,1,1": {
+    "species": "PinkRabbit",
+    "passives": [
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "8,0,4": {
+    "species": "PinkLizard",
+    "passives": [
+      "ElementResist_Normal_1_PAL",
+      "PAL_Sanity_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "17,1,4": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3",
+      "Nocturnal",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "26,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,2,5": {
+    "species": "LazyCatfish",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Female"
+  },
+  "14,0,2": {
+    "species": "HerculesBeetle",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "13,3,1": {
+    "species": "LazyCatfish_Gold",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "29,1,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,4,4": {
+    "species": "SoldierBee",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "17,0,3": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "NonKilling"
+    ],
+    "gender": "Female"
+  },
+  "11,2,4": {
+    "species": "FireKirin",
+    "passives": [
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "1,3,0": {
+    "species": "NegativeKoala",
+    "passives": [
+      "TrainerWorkSpeed_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "13,4,1": {
+    "species": "Manticore",
+    "passives": [
+      "PAL_rude",
+      "CraftSpeed_up2",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "19,4,0": {
+    "species": "GhostDragon",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "4,2,3": {
+    "species": "BlueDragon",
+    "passives": [
+      "PAL_oraora"
+    ],
+    "gender": "Female"
+  },
+  "24,0,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "25,0,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "8,0,5": {
+    "species": "PinkLizard",
+    "passives": [
+      "ElementResist_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "6,1,2": {
+    "species": "DarkCrow",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "22,2,5": {
+    "species": "ThunderDragonMan",
+    "passives": [
+      "ElementBoost_Thunder_2_PAL",
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "21,4,4": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "25,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,2,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "14,0,1": {
+    "species": "HerculesBeetle",
+    "passives": [
+      "Deffence_up1",
+      "CraftSpeed_up2",
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "26,0,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "21,0,1": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Female"
+  },
+  "5,0,5": {
+    "species": "Kelpie_Fire",
+    "passives": [
+      "PAL_ALLAttack_up2",
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "8,1,2": {
+    "species": "PurpleSpider",
+    "passives": [
+      "Stamina_Up_3",
+      "ElementBoost_Leaf_1_PAL",
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Female"
+  },
+  "11,1,0": {
+    "species": "PandaGirl",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "17,1,3": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3"
+    ],
+    "gender": "Female"
+  },
+  "14,3,3": {
+    "species": "FeatherOstrich",
+    "passives": [
+      "SwimSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "23,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "26,0,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "26,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,0,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,1,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "10,1,0": {
+    "species": "FengyunDeeper_Electric",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "15,0,5": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2",
+      "Stamina_Up_3",
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "25,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "15,0,3": {
+    "species": "GuardianDog",
+    "passives": [
+      "MoveSpeed_up_2",
+      "Stamina_Up_3",
+      "Stamina_Up_1",
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "21,3,2": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "CraftSpeed_up2",
+      "Nocturnal",
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "6,2,4": {
+    "species": "LittleBriarRose",
+    "passives": [
+      "Stamina_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "2,1,0": {
+    "species": "KingAlpaca",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementResist_Earth_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "17,4,2": {
+    "species": "CubeTurtle_Neutral",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "22,1,4": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "PAL_FullStomach_Down_2"
+    ],
+    "gender": "Female"
+  },
+  "18,0,1": {
+    "species": "WhiteAlienDragon",
+    "passives": [
+      "Alien",
+      "Deffence_down1"
+    ],
+    "gender": "Female"
+  },
+  "3,4,3": {
+    "species": "MopBaby",
+    "passives": [
+      "TrainerMining_up1"
+    ],
+    "gender": "Female"
+  },
+  "29,0,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,0,3": {
+    "species": "TropicalOstrich",
+    "passives": [
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "15,2,1": {
+    "species": "GuardianDog",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "21,2,3": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "2,1,4": {
+    "species": "DreamDemon",
+    "passives": [
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "8,1,1": {
+    "species": "NaughtyCat",
+    "passives": [
+      "PAL_FullStomach_Down_1",
+      "PAL_conceited"
+    ],
+    "gender": "Female"
+  },
+  "4,2,5": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "MoveSpeed_up_2",
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Male"
+  },
+  "7,1,3": {
+    "species": "CatVampire",
+    "passives": [
+      "TrainerWorkSpeed_UP_1",
+      "ElementResist_Aqua_1_PAL",
+      "PAL_ALLAttack_up1"
+    ],
+    "gender": "Female"
+  },
+  "11,1,3": {
+    "species": "Baphomet",
+    "passives": [
+      "AutoHPRegeneRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "31,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "15,3,5": {
+    "species": "NightBlueHorse",
+    "passives": [
+      "PAL_sadist"
+    ],
+    "gender": "Male"
+  },
+  "5,2,5": {
+    "species": "GhostBlackCat",
+    "passives": [],
+    "gender": "Male"
+  },
+  "8,3,0": {
+    "species": "PurpleSpider",
+    "passives": [
+      "TrainerMining_up1",
+      "ElementBoost_Ice_1_PAL",
+      "CraftSpeed_up2",
+      "Stamina_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "8,4,2": {
+    "species": "LizardMan_Fire",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "1,3,4": {
+    "species": "Penguin",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "16,0,0": {
+    "species": "CandleGhost",
+    "passives": [
+      "PAL_ALLAttack_up1"
+    ],
+    "gender": "Female"
+  },
+  "10,0,1": {
+    "species": "FengyunDeeper",
+    "passives": [
+      "Stamina_Up_1",
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "1,1,5": {
+    "species": "CloverFairy",
+    "passives": [
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Male"
+  },
+  "19,2,5": {
+    "species": "GhostDragon",
+    "passives": [
+      "WorldTree_MoveSpeed",
+      "Deffence_up2",
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "23,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,0,0": {
+    "species": "ColorfulBird",
+    "passives": [
+      "CoolTimeReduction_Up_2",
+      "PAL_FullStomach_Down_3"
+    ],
+    "gender": "Female"
+  },
+  "19,1,4": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_3",
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "11,1,5": {
+    "species": "Baphomet",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "21,1,4": {
+    "species": "ThiefBird",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementBoost_Earth_2_PAL",
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "12,3,5": {
+    "species": "GrassPanda",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "16,3,5": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "Nocturnal",
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "1,3,1": {
+    "species": "NegativeKoala",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "13,4,2": {
+    "species": "Manticore",
+    "passives": [
+      "PAL_rude",
+      "CraftSpeed_up2",
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "9,3,1": {
+    "species": "FoxMage_Dark",
+    "passives": [
+      "PAL_ALLAttack_up1",
+      "TrainerLogging_up1"
+    ],
+    "gender": "Female"
+  },
+  "13,2,4": {
+    "species": "LazyCatfish",
+    "passives": [
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Female"
+  },
+  "4,3,3": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "MiniNushi",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "PAL_ALLAttack_up2",
+      "Deffence_down2"
+    ],
+    "gender": "Female"
+  },
+  "12,1,3": {
+    "species": "GhostAnglerfish",
+    "passives": [
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "10,4,3": {
+    "species": "GrassMammoth",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "9,1,5": {
+    "species": "RobinHood_Ground",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "28,2,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,2,0": {
+    "species": "CloverFairy",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "21,0,3": {
+    "species": "FoxExorcist",
+    "passives": [],
+    "gender": "Male"
+  },
+  "10,2,3": {
+    "species": "Ronin_Dark",
+    "passives": [],
+    "gender": "Female"
+  },
+  "22,1,3": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "1,0,3": {
+    "species": "Ganesha",
+    "passives": [
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "19,0,2": {
+    "species": "DandelionGirl",
+    "passives": [
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "28,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,3,2": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "29,1,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "2,3,5": {
+    "species": "LavaGirl",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "10,0,3": {
+    "species": "FengyunDeeper_Electric",
+    "passives": [
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "21,3,5": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Deffence_up2_2",
+      "Deffence_up2"
+    ],
+    "gender": "Female"
+  },
+  "27,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,1,4": {
+    "species": "DarkCrow",
+    "passives": [
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "18,4,2": {
+    "species": "BlueThunderHorse",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "21,3,4": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "6,2,3": {
+    "species": "FluffyBird",
+    "passives": [
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "8,2,5": {
+    "species": "PurpleSpider",
+    "passives": [
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Male"
+  },
+  "9,2,1": {
+    "species": "FoxMage",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Female"
+  },
+  "23,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,3,2": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "ElementBoost_Dark_1_PAL",
+      "Stamina_Up_1",
+      "Noukin"
+    ],
+    "gender": "Female"
+  },
+  "29,1,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "9,1,0": {
+    "species": "Serpent",
+    "passives": [
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "1,2,3": {
+    "species": "Hedgehog",
+    "passives": [
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "24,0,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,1,5": {
+    "species": "DarkCrow",
+    "passives": [
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Female"
+  },
+  "7,1,5": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "PAL_CorporateSlave",
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "22,3,4": {
+    "species": "NightLady",
+    "passives": [
+      "PAL_ALLAttack_down1"
+    ],
+    "gender": "Female"
+  },
+  "14,3,5": {
+    "species": "SkyDragon",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "18,0,3": {
+    "species": "GhostRabbit",
+    "passives": [],
+    "gender": "Female"
+  },
+  "12,3,4": {
+    "species": "GrassPanda",
+    "passives": [
+      "PAL_Sanity_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "11,0,2": {
+    "species": "FlowerDoll",
+    "passives": [
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "21,2,0": {
+    "species": "MoonChild",
+    "passives": [
+      "SalePrice_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "12,1,5": {
+    "species": "GhostAnglerfish_Fire",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_2"
+    ],
+    "gender": "Male"
+  },
+  "25,1,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "10,3,2": {
+    "species": "IceCrocodile",
+    "passives": [
+      "TrainerLogging_up1"
+    ],
+    "gender": "Male"
+  },
+  "27,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,1,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,2,5": {
+    "species": "IceNarwhal",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_down2"
+    ],
+    "gender": "Female"
+  },
+  "21,1,1": {
+    "species": "ClownRabbit",
+    "passives": [
+      "MutationPal_ExplosionResist",
+      "Stamina_Up_3",
+      "ElementBoost_Earth_2_PAL",
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Male"
+  },
+  "23,1,4": {
+    "species": "MushroomLady",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "3,0,5": {
+    "species": "Kitsunebi_Ice",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Female"
+  },
+  "10,2,4": {
+    "species": "IceCrocodile",
+    "passives": [
+      "Nushi",
+      "TrainerWorkSpeed_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "11,3,3": {
+    "species": "FireKirin_Dark",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "23,1,3": {
+    "species": "MushroomLady",
+    "passives": [
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "13,2,1": {
+    "species": "SakuraSaurus",
+    "passives": [
+      "Deffence_up2_2",
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "23,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,0,2": {
+    "species": "SnowTigerBeastman",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "22,0,1": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "6,0,1": {
+    "species": "Kirin",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "12,4,3": {
+    "species": "RedArmorBird",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "12,2,0": {
+    "species": "ThunderDog",
+    "passives": [
+      "ReloadSpeedUp_Passive"
+    ],
+    "gender": "Male"
+  },
+  "26,2,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,4,3": {
+    "species": "Sekhmet",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up2",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Female"
+  },
+  "19,2,1": {
+    "species": "GhostDragon",
+    "passives": [
+      "PAL_ALLAttack_up3",
+      "MutationPal_ExplosionResist",
+      "ElementResist_Normal_1_PAL",
+      "Stamina_Up_3"
+    ],
+    "gender": "Male"
+  },
+  "25,1,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "8,4,5": {
+    "species": "LizardMan_Fire",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "29,1,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,4,2": {
+    "species": "BirdDragon",
+    "passives": [
+      "ReloadSpeedUp_Passive"
+    ],
+    "gender": "Female"
+  },
+  "7,4,1": {
+    "species": "VioletFairy",
+    "passives": [
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "9,1,1": {
+    "species": "Serpent",
+    "passives": [
+      "CraftSpeed_up2",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "23,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "26,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,2,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,1,1": {
+    "species": "BlackPuppy",
+    "passives": [
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "10,4,4": {
+    "species": "GrassMammoth",
+    "passives": [
+      "Deffence_up2_2",
+      "SalePrice_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "0,1,4": {
+    "species": "Blueplatypus",
+    "passives": [
+      "NonKilling",
+      "PAL_ALLAttack_up1"
+    ],
+    "gender": "Male"
+  },
+  "0,2,5": {
+    "species": "FlyingManta",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "1,2,1": {
+    "species": "Hedgehog",
+    "passives": [
+      "ElementResist_Earth_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "4,1,4": {
+    "species": "SweetsSheep",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Male"
+  },
+  "26,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "20,4,3": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "27,0,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,2,2": {
+    "species": "Umihebi_Fire",
+    "passives": [
+      "CraftSpeed_up2",
+      "PAL_rude",
+      "Nocturnal",
+      "ElementBoost_Aqua_2_PAL"
+    ],
+    "gender": "Female"
+  },
+  "3,4,1": {
+    "species": "BerryGoat",
+    "passives": [
+      "Deffence_up1"
+    ],
+    "gender": "Female"
+  },
+  "20,0,5": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "SalePrice_Up_2",
+      "Stamina_Up_1",
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "30,2,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,3,4": {
+    "species": "GoldenHorse",
+    "passives": [
+      "Stamina_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "20,4,1": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "CraftSpeed_up2",
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "9,2,3": {
+    "species": "FoxMage",
+    "passives": [
+      "SalePrice_Up_2",
+      "CraftSpeed_down1",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Female"
+  },
+  "12,0,0": {
+    "species": "LazyDragon_Electric",
+    "passives": [
+      "AutoHPRegeneRate_Passive"
+    ],
+    "gender": "Male"
+  },
+  "22,0,3": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "31,2,0": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "16,0,1": {
+    "species": "CandleGhost",
+    "passives": [
+      "PAL_ALLAttack_down2"
+    ],
+    "gender": "Female"
+  },
+  "29,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,2,2": {
+    "species": "Hedgehog",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "26,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,4,5": {
+    "species": "VolcanoDragon",
+    "passives": [
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "1,0,0": {
+    "species": "LeafMomonga",
+    "passives": [
+      "PAL_Sanity_Down_2",
+      "ElementResist_Earth_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "0,4,3": {
+    "species": "KendoFrog",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Female"
+  },
+  "29,2,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "8,3,2": {
+    "species": "IceSeal",
+    "passives": [
+      "ElementResist_Dragon_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "29,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "8,2,1": {
+    "species": "PurpleSpider",
+    "passives": [
+      "MutationPal_Immortal",
+      "SwimSpeed_up_3",
+      "TrainerATK_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "0,2,4": {
+    "species": "FlyingManta",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "29,1,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,2,4": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "Nocturnal"
+    ],
+    "gender": "Female"
+  },
+  "28,1,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,0,3": {
+    "species": "PinkRabbit",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "28,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "22,1,5": {
+    "species": "ElecPanda",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "5,2,3": {
+    "species": "Eagle",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "21,1,3": {
+    "species": "ThiefBird",
+    "passives": [
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "17,1,0": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3"
+    ],
+    "gender": "Female"
+  },
+  "14,3,4": {
+    "species": "FeatherOstrich",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Male"
+  },
+  "18,3,3": {
+    "species": "GrassRabbitMan",
+    "passives": [
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "15,2,3": {
+    "species": "GuardianDog",
+    "passives": [
+      "MoveSpeed_up_2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "15,3,0": {
+    "species": "VolcanicMonster",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Female"
+  },
+  "8,3,1": {
+    "species": "IceSeal",
+    "passives": [
+      "MiniNushi",
+      "PAL_FullStomach_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "16,1,1": {
+    "species": "KingBahamut",
+    "passives": [
+      "ElementBoost_Fire_2_PAL",
+      "AutoHPRegeneRate_Passive"
+    ],
+    "gender": "Male"
+  },
+  "1,2,4": {
+    "species": "Hedgehog",
+    "passives": [
+      "ElementResist_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "27,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "2,1,1": {
+    "species": "DreamDemon",
+    "passives": [
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "7,2,4": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "28,0,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,0,5": {
+    "species": "KingSunfish_Thunder",
+    "passives": [
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "0,4,2": {
+    "species": "KendoFrog",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "14,1,4": {
+    "species": "Umihebi_Fire",
+    "passives": [
+      "ElementResist_Dragon_1_PAL",
+      "ElementBoost_Aqua_2_PAL"
+    ],
+    "gender": "Male"
+  },
+  "24,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "25,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,3,0": {
+    "species": "Sekhmet",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "26,0,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,0,4": {
+    "species": "TropicalOstrich",
+    "passives": [
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Female"
+  },
+  "14,1,1": {
+    "species": "WhiteMoth",
+    "passives": [
+      "TrainerATK_UP_1"
+    ],
+    "gender": "Female"
+  },
+  "8,3,5": {
+    "species": "LizardMan",
+    "passives": [
+      "NightOwl"
+    ],
+    "gender": "Male"
+  },
+  "28,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "8,0,2": {
+    "species": "PinkLizard",
+    "passives": [
+      "ElementResist_Normal_1_PAL",
+      "CraftSpeed_down1"
+    ],
+    "gender": "Male"
+  },
+  "30,0,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "11,4,5": {
+    "species": "LazyDragon_Electric",
+    "passives": [
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "22,0,2": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "PAL_CorporateSlave",
+      "Nocturnal"
+    ],
+    "gender": "Female"
+  },
+  "13,1,1": {
+    "species": "DrillGame",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "22,2,1": {
+    "species": "LilyQueen",
+    "passives": [
+      "ElementBoost_Leaf_2_PAL",
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Female"
+  },
+  "30,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "11,3,4": {
+    "species": "LazyDragon",
+    "passives": [
+      "PAL_FullStomach_Up_1",
+      "TrainerMining_up1"
+    ],
+    "gender": "Male"
+  },
+  "27,2,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,4,3": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "SalePrice_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "4,0,0": {
+    "species": "MopBaby",
+    "passives": [
+      "MoveSpeed_up_2",
+      "PAL_FullStomach_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "4,4,0": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "NonKilling"
+    ],
+    "gender": "Female"
+  },
+  "9,3,4": {
+    "species": "HadesBird",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "21,4,1": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up2",
+      "Nocturnal",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "14,4,2": {
+    "species": "GuardianDog",
+    "passives": [
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "9,0,1": {
+    "species": "Gorilla_Ground",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "4,1,5": {
+    "species": "CowPal",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "15,4,4": {
+    "species": "Yeti_Grass",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "17,0,0": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "24,1,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "20,3,0": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "PAL_oraora",
+      "SwimSpeed_up_1",
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "15,0,1": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "8,3,4": {
+    "species": "LizardMan",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "26,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,2,3": {
+    "species": "DarkScorpion",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive",
+      "ElementResist_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "21,0,0": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "ElementBoost_Aqua_2_PAL",
+      "PAL_oraora",
+      "ElementBoost_Thunder_1_PAL",
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "0,3,2": {
+    "species": "WoolFox",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Male"
+  },
+  "12,3,3": {
+    "species": "CactusDoll",
+    "passives": [
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Male"
+  },
+  "2,2,1": {
+    "species": "Monkey",
+    "passives": [
+      "Deffence_up2",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "20,1,1": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "PAL_Sanity_Up_2",
+      "SalePrice_Up_2",
+      "ElementResist_Normal_1_PAL",
+      "SelfDeathAddItemDrop_up_2"
+    ],
+    "gender": "Female"
+  },
+  "17,4,0": {
+    "species": "CubeTurtle",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "6,3,0": {
+    "species": "CuteButterfly",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "17,3,4": {
+    "species": "ScorpionMan",
+    "passives": [
+      "PAL_ALLAttack_up2",
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Female"
+  },
+  "23,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "21,0,2": {
+    "species": "FoxExorcist",
+    "passives": [
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "29,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,1,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,0,5": {
+    "species": "BlackPuppy",
+    "passives": [
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Female"
+  },
+  "26,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "21,2,1": {
+    "species": "MonochromeQueen",
+    "passives": [
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Male"
+  },
+  "25,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "0,0,2": {
+    "species": "PinkCat",
+    "passives": [
+      "PAL_ALLAttack_down1",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "13,1,3": {
+    "species": "DrillGame",
+    "passives": [
+      "Deffence_up1",
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Female"
+  },
+  "10,2,1": {
+    "species": "Ronin_Dark",
+    "passives": [
+      "SalePrice_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "24,1,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,1,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,0,0": {
+    "species": "ElecSnail_Ground",
+    "passives": [
+      "ElementResist_Thunder_1_PAL",
+      "Stamina_Up_1",
+      "TrainerMining_up1",
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "13,2,0": {
+    "species": "SakuraSaurus",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementBoost_Dragon_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "10,2,5": {
+    "species": "IceCrocodile",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_rude"
+    ],
+    "gender": "Female"
+  },
+  "21,0,4": {
+    "species": "FoxExorcist",
+    "passives": [
+      "PAL_ALLAttack_up1"
+    ],
+    "gender": "Male"
+  },
+  "3,4,0": {
+    "species": "Garm",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "25,2,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,1,0": {
+    "species": "PlantSlime",
+    "passives": [
+      "TrainerMining_up1",
+      "ElementBoost_Leaf_1_PAL",
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "4,0,1": {
+    "species": "MopKing",
+    "passives": [
+      "PAL_Sanity_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "30,1,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "15,3,1": {
+    "species": "VolcanicMonster",
+    "passives": [
+      "ElementBoost_Ice_1_PAL",
+      "Deffence_up2_2"
+    ],
+    "gender": "Female"
+  },
+  "9,1,4": {
+    "species": "RobinHood",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "16,2,5": {
+    "species": "Sekhmet",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "27,0,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "21,3,0": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "14,4,3": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3",
+      "Stamina_Up_1",
+      "MoveSpeed_up_3"
+    ],
+    "gender": "Female"
+  },
+  "26,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,0,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,1,3": {
+    "species": "GrassGolem",
+    "passives": [
+      "Deffence_up2_2",
+      "CraftSpeed_down2",
+      "NonKilling"
+    ],
+    "gender": "Female"
+  },
+  "15,4,2": {
+    "species": "Yeti",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "17,4,1": {
+    "species": "CubeTurtle_Neutral",
+    "passives": [],
+    "gender": "Female"
+  },
+  "25,1,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "21,2,4": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "5,0,4": {
+    "species": "Kelpie_Fire",
+    "passives": [
+      "PAL_ALLAttack_up2",
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "24,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,0,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,2,1": {
+    "species": "BlueDragon",
+    "passives": [
+      "ElementBoost_Aqua_1_PAL",
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "28,2,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,3,2": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "11,4,0": {
+    "species": "LazyDragon",
+    "passives": [
+      "PAL_FullStomach_Up_1",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "3,3,2": {
+    "species": "Deer_Ground",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "0,2,2": {
+    "species": "FlyingManta",
+    "passives": [
+      "Deffence_up1"
+    ],
+    "gender": "Female"
+  },
+  "16,0,3": {
+    "species": "VenusFlytrap",
+    "passives": [],
+    "gender": "Female"
+  },
+  "17,2,2": {
+    "species": "Sekhmet",
+    "passives": [
+      "CoolTimeReduction_Up_1",
+      "PAL_ALLAttack_up3",
+      "ElementBoost_Earth_2_PAL",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Female"
+  },
+  "16,1,5": {
+    "species": "GrassGolem_Dark",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "20,0,4": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "MoveSpeed_up_2",
+      "MoveSpeed_up_3",
+      "PAL_Sanity_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "29,0,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "5,4,2": {
+    "species": "CatBat",
+    "passives": [
+      "PAL_ALLAttack_up1"
+    ],
+    "gender": "Female"
+  },
+  "25,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,0,4": {
+    "species": "VenusFlytrap",
+    "passives": [
+      "PAL_Sanity_Up_2",
+      "ElementResist_Earth_1_PAL",
+      "Deffence_up1"
+    ],
+    "gender": "Female"
+  },
+  "3,1,0": {
+    "species": "Kitsunebi_Ice",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "11,2,0": {
+    "species": "Baphomet_Dark",
+    "passives": [
+      "TrainerDEF_UP_1",
+      "PAL_oraora"
+    ],
+    "gender": "Male"
+  },
+  "3,3,1": {
+    "species": "Deer",
+    "passives": [
+      "Deffence_up1"
+    ],
+    "gender": "Male"
+  },
+  "2,3,0": {
+    "species": "NightFox",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive",
+      "Deffence_up1"
+    ],
+    "gender": "Male"
+  },
+  "4,4,1": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "SalePrice_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "12,0,1": {
+    "species": "IceFox",
+    "passives": [
+      "PAL_sadist"
+    ],
+    "gender": "Female"
+  },
+  "5,2,4": {
+    "species": "Eagle",
+    "passives": [
+      "Noukin"
+    ],
+    "gender": "Female"
+  },
+  "16,2,0": {
+    "species": "Anubis",
+    "passives": [
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "15,1,1": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3",
+      "PAL_oraora",
+      "SwimSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "0,4,4": {
+    "species": "LeafMomonga",
+    "passives": [
+      "PAL_Sanity_Down_1",
+      "PAL_oraora"
+    ],
+    "gender": "Female"
+  },
+  "2,1,5": {
+    "species": "DreamDemon",
+    "passives": [
+      "PAL_FullStomach_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "25,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,3,0": {
+    "species": "DarkScorpion",
+    "passives": [
+      "ElementResist_Dragon_1_PAL",
+      "PAL_Sanity_Down_3"
+    ],
+    "gender": "Male"
+  },
+  "9,3,0": {
+    "species": "FoxMage_Dark",
+    "passives": [
+      "PAL_oraora"
+    ],
+    "gender": "Male"
+  },
+  "9,2,4": {
+    "species": "FoxMage_Dark",
+    "passives": [
+      "PAL_Sanity_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "26,1,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,4,1": {
+    "species": "CaptainPenguin",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "20,2,4": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL",
+      "PAL_oraora",
+      "Stamina_Up_3"
+    ],
+    "gender": "Female"
+  },
+  "11,1,2": {
+    "species": "Baphomet",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "24,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,2,1": {
+    "species": "IceNarwhal",
+    "passives": [
+      "MiniNushi",
+      "ElementResist_Earth_1_PAL",
+      "PAL_FullStomach_Down_2"
+    ],
+    "gender": "Female"
+  },
+  "2,4,5": {
+    "species": "Boar",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "10,3,1": {
+    "species": "IceCrocodile",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Male"
+  },
+  "11,0,4": {
+    "species": "PandaGirl",
+    "passives": [
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "29,0,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "3,2,2": {
+    "species": "Deer",
+    "passives": [
+      "Rare",
+      "SwimSpeed_up_2",
+      "Deffence_up1"
+    ],
+    "gender": "Male"
+  },
+  "18,1,0": {
+    "species": "BlackPuppy",
+    "passives": [
+      "Deffence_down2"
+    ],
+    "gender": "Male"
+  },
+  "3,1,5": {
+    "species": "CuteMole",
+    "passives": [
+      "Deffence_down1"
+    ],
+    "gender": "Female"
+  },
+  "22,3,3": {
+    "species": "NightLady",
+    "passives": [
+      "SalePrice_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "10,2,2": {
+    "species": "Ronin_Dark",
+    "passives": [
+      "Deffence_down2"
+    ],
+    "gender": "Female"
+  },
+  "22,4,5": {
+    "species": "IceHorse",
+    "passives": [
+      "Legend",
+      "Deffence_down2",
+      "WorkSuitabilityAddRank_MonsterFarm_2",
+      "ElementBoost_Ice_2_PAL"
+    ],
+    "gender": "Male"
+  },
+  "20,0,0": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "ElementResist_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "10,1,5": {
+    "species": "Ronin_Dark",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive",
+      "MoveSpeed_up_2",
+      "CraftSpeed_up1",
+      "TrainerDEF_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "2,3,2": {
+    "species": "LavaGirl",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Female"
+  },
+  "20,0,1": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Stamina_Up_1",
+      "ElementResist_Normal_1_PAL",
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "10,3,3": {
+    "species": "IceCrocodile",
+    "passives": [
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "19,4,2": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "SalePrice_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "27,1,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,2,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,2,3": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "SalePrice_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "9,1,2": {
+    "species": "Serpent",
+    "passives": [
+      "ElementBoost_Earth_1_PAL",
+      "CraftSpeed_up2",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "23,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "14,4,1": {
+    "species": "LeafPrincess",
+    "passives": [
+      "Deffence_down2"
+    ],
+    "gender": "Female"
+  },
+  "31,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,0,0": {
+    "species": "Plesiosaur",
+    "passives": [
+      "Deffence_up2_2",
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Male"
+  },
+  "6,4,4": {
+    "species": "BirdDragon_Ice",
+    "passives": [
+      "AutoHPRegeneRate_Passive",
+      "ElementBoost_Aqua_1_PAL",
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Male"
+  },
+  "7,4,2": {
+    "species": "VioletFairy",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "22,0,4": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Female"
+  },
+  "14,3,0": {
+    "species": "Suzaku",
+    "passives": [
+      "MoveSpeed_up_2",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "TrainerMining_up1"
+    ],
+    "gender": "Female"
+  },
+  "16,3,4": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "Nocturnal",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "20,1,3": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_3",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "24,1,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "25,0,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "14,3,2": {
+    "species": "Suzaku",
+    "passives": [
+      "MoveSpeed_up_2",
+      "Stamina_Up_1",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "TrainerMining_up1"
+    ],
+    "gender": "Female"
+  },
+  "7,0,1": {
+    "species": "CatVampire",
+    "passives": [
+      "TrainerWorkSpeed_UP_1",
+      "Stamina_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "20,3,1": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL",
+      "PAL_oraora",
+      "NightOwl"
+    ],
+    "gender": "Male"
+  },
+  "6,3,3": {
+    "species": "CuteButterfly",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Female"
+  },
+  "11,3,2": {
+    "species": "FireKirin_Dark",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "29,4,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "2,1,3": {
+    "species": "DreamDemon",
+    "passives": [
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "19,1,5": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_1",
+      "Stamina_Up_3",
+      "PAL_oraora"
+    ],
+    "gender": "Male"
+  },
+  "15,4,0": {
+    "species": "NightBlueHorse_Neutral",
+    "passives": [
+      "PAL_Sanity_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "23,0,1": {
+    "species": "JetDragon",
+    "passives": [
+      "Legend",
+      "ElementBoost_Dragon_2_PAL",
+      "PAL_sadist"
+    ],
+    "gender": "Female"
+  },
+  "15,0,2": {
+    "species": "GuardianDog",
+    "passives": [
+      "MoveSpeed_up_2",
+      "Stamina_Up_3",
+      "Stamina_Up_1",
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "24,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,4,4": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "Nocturnal",
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "11,4,3": {
+    "species": "LazyDragon_Electric",
+    "passives": [
+      "ElementResist_Dragon_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "13,0,0": {
+    "species": "VolcanoDragon",
+    "passives": [
+      "ReloadSpeedUp_Passive"
+    ],
+    "gender": "Male"
+  },
+  "25,1,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "3,0,2": {
+    "species": "Kitsunebi",
+    "passives": [
+      "AutoHPRegeneRate_Passive",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "1,1,1": {
+    "species": "PlantSlime",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "21,2,5": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "25,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "14,0,0": {
+    "species": "HerculesBeetle",
+    "passives": [
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "26,1,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,1,0": {
+    "species": "KingWhale",
+    "passives": [
+      "Legend"
+    ],
+    "gender": "Male"
+  },
+  "0,2,3": {
+    "species": "FlyingManta",
+    "passives": [
+      "SelfDeathAddItemDrop_up_2"
+    ],
+    "gender": "Female"
+  },
+  "31,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,0,4": {
+    "species": "CatVampire",
+    "passives": [
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "TrainerWorkSpeed_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "1,3,3": {
+    "species": "Penguin",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "26,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,1,0": {
+    "species": "CatVampire",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3",
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "13,0,5": {
+    "species": "TropicalOstrich",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "10,4,2": {
+    "species": "GrassMammoth",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "27,1,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,3,3": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_3",
+      "PAL_CorporateSlave",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Female"
+  },
+  "14,2,1": {
+    "species": "Umihebi_Fire",
+    "passives": [
+      "ElementBoost_Aqua_2_PAL",
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Male"
+  },
+  "16,2,1": {
+    "species": "Anubis",
+    "passives": [
+      "MutationPal_Immortal",
+      "SelfDeathAddItemDrop_up_3",
+      "PAL_ALLAttack_down2",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "4,1,1": {
+    "species": "WindChimes",
+    "passives": [
+      "TrainerATK_UP_1"
+    ],
+    "gender": "Female"
+  },
+  "11,2,2": {
+    "species": "Baphomet_Dark",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "0,0,3": {
+    "species": "PinkCat",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Female"
+  },
+  "19,3,4": {
+    "species": "GhostDragon",
+    "passives": [
+      "PAL_rude",
+      "PAL_Sanity_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "28,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,1,0": {
+    "species": "SharkKid_Fire",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "19,0,4": {
+    "species": "BrownRabbit",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "22,1,0": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "6,4,3": {
+    "species": "BirdDragon_Ice",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "12,1,0": {
+    "species": "ThunderBird",
+    "passives": [
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Male"
+  },
+  "22,0,5": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up3",
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "11,3,5": {
+    "species": "LazyDragon",
+    "passives": [
+      "PAL_FullStomach_Up_1",
+      "PAL_sadist"
+    ],
+    "gender": "Male"
+  },
+  "7,3,1": {
+    "species": "CatVampire",
+    "passives": [
+      "PAL_CorporateSlave",
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Female"
+  },
+  "12,3,2": {
+    "species": "CactusDoll",
+    "passives": [
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "16,3,3": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "Nocturnal",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "20,0,2": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "PAL_Sanity_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "19,1,1": {
+    "species": "KingSunfish_Thunder",
+    "passives": [
+      "ElementResist_Ice_1_PAL",
+      "ElementBoost_Normal_1_PAL",
+      "PAL_FullStomach_Down_3"
+    ],
+    "gender": "Female"
+  },
+  "24,0,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,4,1": {
+    "species": "RedArmorBird",
+    "passives": [
+      "PAL_FullStomach_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "14,2,0": {
+    "species": "MonochromeQueen",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Female"
+  },
+  "17,2,0": {
+    "species": "Sekhmet",
+    "passives": [
+      "CoolTimeReduction_Up_1",
+      "PAL_ALLAttack_up3",
+      "ElementBoost_Earth_2_PAL",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Female"
+  },
+  "5,3,0": {
+    "species": "GhostBlackCat",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Male"
+  },
+  "28,1,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,2,4": {
+    "species": "Sekhmet",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "18,1,5": {
+    "species": "MysteryMask",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "3,3,0": {
+    "species": "Deer",
+    "passives": [
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "1,4,0": {
+    "species": "Penguin",
+    "passives": [
+      "ElementBoost_Dark_1_PAL",
+      "NonKilling",
+      "PAL_conceited"
+    ],
+    "gender": "Female"
+  },
+  "13,1,5": {
+    "species": "SakuraSaurus",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "15,2,2": {
+    "species": "GuardianDog",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "11,0,1": {
+    "species": "FlowerDoll",
+    "passives": [
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "19,1,0": {
+    "species": "KingSunfish_Thunder",
+    "passives": [
+      "MiniNushi"
+    ],
+    "gender": "Female"
+  },
+  "10,0,0": {
+    "species": "FengyunDeeper",
+    "passives": [
+      "MoveSpeed_up_2",
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "19,3,2": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_1",
+      "PAL_rude",
+      "ElementResist_Leaf_1_PAL",
+      "PAL_ALLAttack_down1"
+    ],
+    "gender": "Female"
+  },
+  "3,2,4": {
+    "species": "Deer",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Female"
+  },
+  "30,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "3,4,4": {
+    "species": "MopBaby",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "5,2,2": {
+    "species": "OctopusGirl_Neutral",
+    "passives": [
+      "MiniNushi"
+    ],
+    "gender": "Male"
+  },
+  "1,1,2": {
+    "species": "PlantSlime",
+    "passives": [
+      "TrainerDEF_UP_1"
+    ],
+    "gender": "Female"
+  },
+  "22,2,2": {
+    "species": "LilyQueen_Dark",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "7,0,2": {
+    "species": "CatVampire",
+    "passives": [
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "TrainerWorkSpeed_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "19,0,1": {
+    "species": "DandelionGirl",
+    "passives": [
+      "TrainerWorkSpeed_UP_1",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "19,3,0": {
+    "species": "GhostDragon",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_down2",
+      "MoveSpeed_up_1",
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "31,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "3,1,1": {
+    "species": "Kitsunebi_Ice",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "6,3,2": {
+    "species": "CuteButterfly",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "0,1,2": {
+    "species": "Carbunclo",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "5,1,2": {
+    "species": "PinkRabbit",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "2,2,2": {
+    "species": "Monkey",
+    "passives": [
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "9,3,3": {
+    "species": "CatMage",
+    "passives": [
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Male"
+  },
+  "0,3,3": {
+    "species": "WoolFox",
+    "passives": [
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Female"
+  },
+  "2,0,2": {
+    "species": "Alpaca",
+    "passives": [
+      "Stamina_Up_1",
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "16,3,0": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "0,0,4": {
+    "species": "PinkCat",
+    "passives": [
+      "PAL_conceited",
+      "PAL_ALLAttack_up1"
+    ],
+    "gender": "Male"
+  },
+  "19,0,3": {
+    "species": "DandelionGirl",
+    "passives": [
+      "Deffence_up1",
+      "MoveSpeed_up_2",
+      "Stamina_Up_1",
+      "MoveSpeed_up_3"
+    ],
+    "gender": "Female"
+  },
+  "3,2,5": {
+    "species": "Deer",
+    "passives": [
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Female"
+  },
+  "25,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "22,4,3": {
+    "species": "SaintCentaur",
+    "passives": [
+      "Legend",
+      "ElementBoost_Normal_2_PAL",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "25,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "11,4,2": {
+    "species": "LazyDragon_Electric",
+    "passives": [
+      "NightOwl"
+    ],
+    "gender": "Male"
+  },
+  "31,1,3": {
+    "species": "Umihebi_Fire",
+    "passives": [
+      "Nocturnal",
+      "ElementBoost_Aqua_2_PAL"
+    ],
+    "gender": "Female"
+  },
+  "28,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,3,1": {
+    "species": "Sekhmet",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "25,1,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,0,5": {
+    "species": "SharkKid",
+    "passives": [],
+    "gender": "Female"
+  },
+  "25,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "3,3,4": {
+    "species": "Garm",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "30,2,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,3,1": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "Nushi",
+      "PAL_ALLAttack_down1"
+    ],
+    "gender": "Female"
+  },
+  "24,1,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,2,4": {
+    "species": "BlueDragon",
+    "passives": [
+      "PAL_FullStomach_Down_1",
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "21,3,1": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "9,4,0": {
+    "species": "GrassMinotaur",
+    "passives": [
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "22,4,1": {
+    "species": "NightLady",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "23,0,3": {
+    "species": "KingWhale",
+    "passives": [
+      "Legend",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "26,0,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "10,3,4": {
+    "species": "GrassMammoth",
+    "passives": [
+      "Deffence_up2_2",
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "18,0,4": {
+    "species": "GhostRabbit",
+    "passives": [
+      "PAL_sadist"
+    ],
+    "gender": "Female"
+  },
+  "7,1,4": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "PAL_CorporateSlave",
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "9,4,3": {
+    "species": "Mutant",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "21,4,0": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "0,2,1": {
+    "species": "CuteFox",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "6,2,1": {
+    "species": "FlameBuffalo",
+    "passives": [
+      "SwimSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "21,3,3": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "2,4,4": {
+    "species": "Boar",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "2,4,1": {
+    "species": "FlameBambi",
+    "passives": [
+      "SelfDeathAddItemDrop_up_2"
+    ],
+    "gender": "Male"
+  },
+  "16,1,2": {
+    "species": "KingBahamut",
+    "passives": [
+      "ElementBoost_Fire_2_PAL",
+      "ElementBoost_Fire_1_PAL",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "18,2,3": {
+    "species": "IceNarwhal",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "4,1,0": {
+    "species": "WindChimes",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "13,3,5": {
+    "species": "Manticore",
+    "passives": [
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "15,1,4": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2",
+      "Stamina_Up_3",
+      "PAL_rude"
+    ],
+    "gender": "Female"
+  },
+  "18,4,0": {
+    "species": "BlackMetalDragon",
+    "passives": [
+      "Deffence_up1",
+      "SalePrice_Up_2",
+      "TrainerATK_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "23,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "26,0,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,3,3": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL",
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "4,4,4": {
+    "species": "ElecCat",
+    "passives": [
+      "Deffence_up2"
+    ],
+    "gender": "Female"
+  },
+  "1,1,4": {
+    "species": "CloverFairy",
+    "passives": [
+      "PAL_FullStomach_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "18,2,2": {
+    "species": "IceNarwhal",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "11,0,0": {
+    "species": "StuffedShark_Fire",
+    "passives": [
+      "Nushi",
+      "PAL_Sanity_Up_2",
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "10,4,1": {
+    "species": "GrassMammoth",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "6,0,4": {
+    "species": "SharkKid",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "30,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,3,0": {
+    "species": "IceNarwhal",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "7,1,2": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "9,4,2": {
+    "species": "GrassMinotaur",
+    "passives": [
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "25,0,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "5,4,5": {
+    "species": "ColorfulBird",
+    "passives": [
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "14,3,1": {
+    "species": "Suzaku",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2",
+      "ElementResist_Normal_1_PAL",
+      "SalePrice_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "29,2,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,4,5": {
+    "species": "Kelpie",
+    "passives": [
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "2,0,1": {
+    "species": "Alpaca",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "14,4,0": {
+    "species": "LeafPrincess",
+    "passives": [
+      "Rare",
+      "Stamina_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "24,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,4,1": {
+    "species": "Sekhmet",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up2",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Female"
+  },
+  "0,4,5": {
+    "species": "LeafMomonga",
+    "passives": [
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "4,3,5": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "ElementResist_Dragon_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "29,0,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,0,5": {
+    "species": "KingBahamut",
+    "passives": [
+      "ElementBoost_Fire_2_PAL",
+      "PAL_ALLAttack_up2",
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "17,2,3": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "Nocturnal",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "23,2,3": {
+    "species": "GrassPanda_Electric",
+    "passives": [
+      "ElementResist_Dragon_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "27,0,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "9,0,5": {
+    "species": "Serpent",
+    "passives": [
+      "ElementBoost_Earth_1_PAL",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "18,4,5": {
+    "species": "ElecSnail",
+    "passives": [
+      "SalePrice_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "23,0,0": {
+    "species": "JetDragon",
+    "passives": [
+      "Legend",
+      "ElementBoost_Dragon_2_PAL",
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "6,3,1": {
+    "species": "CuteButterfly",
+    "passives": [
+      "ElementResist_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "31,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,1,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "0,1,5": {
+    "species": "Blueplatypus",
+    "passives": [
+      "ElementResist_Fire_1_PAL",
+      "Deffence_up3"
+    ],
+    "gender": "Male"
+  },
+  "6,1,1": {
+    "species": "Werewolf",
+    "passives": [
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "23,1,1": {
+    "species": "MonochromeQueen",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "17,0,5": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "22,2,0": {
+    "species": "LilyQueen",
+    "passives": [
+      "ElementBoost_Leaf_2_PAL",
+      "TrainerDEF_UP_1"
+    ],
+    "gender": "Female"
+  },
+  "12,4,0": {
+    "species": "GrassPanda_Electric",
+    "passives": [
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "22,4,4": {
+    "species": "IceHorse",
+    "passives": [
+      "Legend",
+      "PAL_oraora",
+      "ElementBoost_Ice_2_PAL"
+    ],
+    "gender": "Male"
+  },
+  "4,2,2": {
+    "species": "BlueDragon",
+    "passives": [
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "31,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,4,5": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Stamina_Up_1",
+      "PAL_Sanity_Up_2",
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "19,1,3": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_3",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "31,0,4": {
+    "species": "ThunderDragonMan",
+    "passives": [
+      "ElementBoost_Thunder_2_PAL",
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "14,0,5": {
+    "species": "DarkFlameFox",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "8,0,1": {
+    "species": "PinkLizard",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "30,0,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "15,3,3": {
+    "species": "VolcanicMonster_Ice",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "18,0,0": {
+    "species": "DarkAlien",
+    "passives": [
+      "Alien",
+      "SalePrice_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "28,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "25,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,0,1": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "5,2,0": {
+    "species": "ClioneTwins",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "11,1,1": {
+    "species": "Baphomet",
+    "passives": [
+      "CraftSpeed_down2"
+    ],
+    "gender": "Female"
+  },
+  "5,3,4": {
+    "species": "HawkBird",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "27,1,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,0,4": {
+    "species": "ThunderBird",
+    "passives": [
+      "SwimSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "18,4,4": {
+    "species": "ElecSnail",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "3,3,3": {
+    "species": "Garm",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "3,1,4": {
+    "species": "NegativeOctopus_Neutral",
+    "passives": [
+      "PAL_rude",
+      "MoveSpeed_up_1",
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Male"
+  },
+  "20,2,1": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "PAL_oraora",
+      "PAL_ALLAttack_down1",
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "5,3,3": {
+    "species": "HawkBird",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "3,0,3": {
+    "species": "Kitsunebi",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Male"
+  },
+  "11,2,5": {
+    "species": "FireKirin",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "31,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "0,0,1": {
+    "species": "SheepBall",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "17,1,1": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "8,4,0": {
+    "species": "LizardMan",
+    "passives": [
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "25,0,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "26,2,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "8,1,3": {
+    "species": "PurpleSpider",
+    "passives": [
+      "Stamina_Up_3",
+      "ElementBoost_Leaf_1_PAL",
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Female"
+  },
+  "12,2,2": {
+    "species": "DarkScorpion",
+    "passives": [
+      "Deffence_up1"
+    ],
+    "gender": "Male"
+  },
+  "26,3,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "0,3,5": {
+    "species": "WoolFox",
+    "passives": [
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Male"
+  },
+  "31,2,1": {
+    "species": "Umihebi_Fire",
+    "passives": [
+      "PAL_rude",
+      "Noukin",
+      "MoveSpeed_up_2",
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "10,3,0": {
+    "species": "IceCrocodile",
+    "passives": [
+      "MiniNushi",
+      "SalePrice_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "17,0,4": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave",
+      "SelfDeathAddItemDrop_up_2",
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "21,1,0": {
+    "species": "ClownRabbit",
+    "passives": [
+      "MutationPal_Immortal",
+      "Stamina_Up_3",
+      "ElementBoost_Earth_2_PAL",
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Male"
+  },
+  "25,0,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,0,3": {
+    "species": "TentacleTurtle",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "SwimSpeed_up_1",
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "20,0,3": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "PAL_Sanity_Up_2",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "4,3,4": {
+    "species": "BlueDragon_Ice",
+    "passives": [],
+    "gender": "Female"
+  },
+  "22,3,5": {
+    "species": "NightLady",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "9,4,4": {
+    "species": "FengyunDeeper",
+    "passives": [
+      "Stamina_Up_1",
+      "ElementBoost_Thunder_1_PAL",
+      "MoveSpeed_up_2",
+      "CraftSpeed_down2"
+    ],
+    "gender": "Male"
+  },
+  "12,0,5": {
+    "species": "ThunderBird",
+    "passives": [
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "20,4,0": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "20,3,5": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Female"
+  },
+  "2,0,5": {
+    "species": "Alpaca",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2",
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "9,4,1": {
+    "species": "GrassMinotaur",
+    "passives": [
+      "CraftSpeed_up2",
+      "PAL_ALLAttack_down1"
+    ],
+    "gender": "Female"
+  },
+  "25,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "26,1,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,2,3": {
+    "species": "SakuraSaurus_Water",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "14,2,5": {
+    "species": "Suzaku",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "8,1,4": {
+    "species": "PurpleSpider",
+    "passives": [
+      "MutationPal_Immortal"
+    ],
+    "gender": "Male"
+  },
+  "1,3,5": {
+    "species": "Penguin",
+    "passives": [],
+    "gender": "Female"
+  },
+  "24,0,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,2,5": {
+    "species": "LittleBriarRose",
+    "passives": [
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "15,0,0": {
+    "species": "GuardianDog",
+    "passives": [
+      "PAL_ALLAttack_up3",
+      "MoveSpeed_up_2",
+      "Stamina_Up_3",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Female"
+  },
+  "16,1,0": {
+    "species": "KingBahamut",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "27,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,2,2": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "SalePrice_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "20,3,4": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Female"
+  },
+  "23,1,5": {
+    "species": "MimicDog",
+    "passives": [
+      "ElementBoost_Dragon_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "29,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,4,3": {
+    "species": "Manticore",
+    "passives": [
+      "CraftSpeed_up2",
+      "ElementBoost_Dragon_1_PAL",
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "11,2,1": {
+    "species": "Baphomet_Dark",
+    "passives": [
+      "TrainerLogging_up1",
+      "ElementResist_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "10,1,3": {
+    "species": "Ronin",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "22,3,0": {
+    "species": "MoonQueen",
+    "passives": [
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "28,0,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,4,4": {
+    "species": "DarkAlien",
+    "passives": [
+      "Alien",
+      "Stamina_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "5,2,1": {
+    "species": "ClioneTwins",
+    "passives": [
+      "TrainerMining_up1"
+    ],
+    "gender": "Female"
+  },
+  "8,4,3": {
+    "species": "LizardMan_Fire",
+    "passives": [
+      "Noukin",
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "14,2,3": {
+    "species": "Suzaku",
+    "passives": [
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "9,3,2": {
+    "species": "FoxMage_Dark",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "9,0,2": {
+    "species": "Serpent",
+    "passives": [
+      "CraftSpeed_up2",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "5,0,3": {
+    "species": "Kelpie_Fire",
+    "passives": [
+      "PAL_ALLAttack_up3",
+      "PAL_ALLAttack_up2",
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "30,0,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "9,1,3": {
+    "species": "Serpent_Ground",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "9,2,2": {
+    "species": "FoxMage",
+    "passives": [
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "24,1,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,2,2": {
+    "species": "Anubis",
+    "passives": [
+      "RideJumpCount_Increase2",
+      "Deffence_up3",
+      "PAL_ALLAttack_down2",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "6,4,1": {
+    "species": "BirdDragon",
+    "passives": [
+      "ElementBoost_Ice_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "0,1,0": {
+    "species": "ChickenPal",
+    "passives": [
+      "SelfDeathAddItemDrop_up_2"
+    ],
+    "gender": "Male"
+  },
+  "20,4,5": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "ElementResist_Dark_1_PAL",
+      "ElementBoost_Normal_1_PAL",
+      "Noukin",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Male"
+  },
+  "23,0,4": {
+    "species": "KingWhale",
+    "passives": [
+      "Legend"
+    ],
+    "gender": "Female"
+  },
+  "25,2,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "0,1,3": {
+    "species": "Carbunclo",
+    "passives": [
+      "TrainerDEF_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "21,2,2": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "26,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,3,0": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementBoost_Normal_1_PAL",
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "13,3,0": {
+    "species": "LazyCatfish",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "1,4,4": {
+    "species": "WizardOwl",
+    "passives": [
+      "SalePrice_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "24,0,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "23,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,1,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,3,5": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "7,0,0": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Female"
+  },
+  "15,2,0": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3",
+      "ElementBoost_Leaf_1_PAL",
+      "ElementBoost_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "31,1,5": {
+    "species": "LotusDragon",
+    "passives": [
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "5,1,4": {
+    "species": "JellyfishFairy",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Male"
+  },
+  "26,1,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,0,4": {
+    "species": "TentacleTurtle",
+    "passives": [
+      "SelfDeathAddItemDrop_up_3",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "23,2,1": {
+    "species": "KabukiMan",
+    "passives": [
+      "SelfDeathAddItemDrop_up_2",
+      "RideJumpCount_Increase1"
+    ],
+    "gender": "Female"
+  },
+  "5,0,1": {
+    "species": "Kelpie_Fire",
+    "passives": [
+      "PAL_ALLAttack_up2",
+      "PAL_ALLAttack_up3",
+      "PAL_oraora",
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "5,0,2": {
+    "species": "Kelpie_Fire",
+    "passives": [
+      "PAL_ALLAttack_up2",
+      "PAL_ALLAttack_up3",
+      "PAL_oraora",
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "12,3,1": {
+    "species": "CactusDoll",
+    "passives": [
+      "TrainerWorkSpeed_UP_1",
+      "SwimSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "28,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,2,4": {
+    "species": "DarkScorpion",
+    "passives": [
+      "SelfDeathAddItemDrop_up_3"
+    ],
+    "gender": "Female"
+  },
+  "21,1,5": {
+    "species": "SnakeGirl",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_ALLAttack_down2"
+    ],
+    "gender": "Male"
+  },
+  "10,0,4": {
+    "species": "FengyunDeeper_Electric",
+    "passives": [
+      "ElementResist_Earth_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "18,3,1": {
+    "species": "GrassRabbitMan",
+    "passives": [
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "26,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,4,3": {
+    "species": "WizardOwl",
+    "passives": [
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "22,3,1": {
+    "species": "SnowTigerBeastman",
+    "passives": [
+      "WorldTree_MoveSpeed"
+    ],
+    "gender": "Male"
+  },
+  "14,2,4": {
+    "species": "Suzaku",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "2,1,2": {
+    "species": "DreamDemon",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "21,0,5": {
+    "species": "LotusDragon",
+    "passives": [
+      "ElementBoost_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "26,1,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,1,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "23,2,2": {
+    "species": "ThunderDog_Ice",
+    "passives": [
+      "Stamina_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "11,3,1": {
+    "species": "FireKirin_Dark",
+    "passives": [
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "6,2,0": {
+    "species": "FlameBuffalo",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "27,1,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "15,4,5": {
+    "species": "Yeti_Grass",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Female"
+  },
+  "10,0,2": {
+    "species": "FengyunDeeper",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "30,3,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "5,3,1": {
+    "species": "GhostBlackCat",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "7,4,3": {
+    "species": "VioletFairy",
+    "passives": [
+      "TrainerLogging_up1"
+    ],
+    "gender": "Female"
+  },
+  "29,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,1,3": {
+    "species": "BlackPuppy",
+    "passives": [
+      "ReloadSpeedUp_Passive"
+    ],
+    "gender": "Female"
+  },
+  "23,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,1,2": {
+    "species": "KingSunfish_Thunder",
+    "passives": [
+      "MiniNushi",
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Male"
+  },
+  "23,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,2,1": {
+    "species": "DarkScorpion",
+    "passives": [],
+    "gender": "Female"
+  },
+  "5,0,0": {
+    "species": "Kelpie",
+    "passives": [
+      "Stamina_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "14,1,0": {
+    "species": "DarkFlameFox",
+    "passives": [
+      "ElementResist_Aqua_1_PAL",
+      "ElementResist_Earth_1_PAL",
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "21,4,2": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up2",
+      "Nocturnal",
+      "CraftSpeed_up3"
+    ],
+    "gender": "Male"
+  },
+  "3,4,2": {
+    "species": "BerryGoat",
+    "passives": [
+      "Stamina_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "31,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,4,3": {
+    "species": "ElecCat",
+    "passives": [
+      "TrainerLogging_up1"
+    ],
+    "gender": "Female"
+  },
+  "1,2,5": {
+    "species": "Hedgehog",
+    "passives": [
+      "SalePrice_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "28,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "11,0,3": {
+    "species": "FlowerDoll_Fire",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "8,0,0": {
+    "species": "QueenBee",
+    "passives": [
+      "Deffence_up2_2",
+      "MoveSpeed_up_2",
+      "Stamina_Up_1",
+      "PAL_Sanity_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "8,2,3": {
+    "species": "PurpleSpider",
+    "passives": [
+      "PAL_ALLAttack_up3",
+      "ElementBoost_Leaf_1_PAL",
+      "ElementBoost_Earth_2_PAL",
+      "MutationPal_Immortal"
+    ],
+    "gender": "Female"
+  },
+  "13,1,0": {
+    "species": "TropicalOstrich",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "15,2,4": {
+    "species": "GuardianDog",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "0,3,0": {
+    "species": "FlyingManta",
+    "passives": [
+      "ElementResist_Earth_1_PAL",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "20,2,5": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "CraftSpeed_up3"
+    ],
+    "gender": "Female"
+  },
+  "19,4,1": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_1",
+      "WorldTree_MoveSpeed",
+      "Stamina_Up_3",
+      "MoveSpeed_up_3"
+    ],
+    "gender": "Male"
+  },
+  "20,3,2": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "25,2,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "11,3,0": {
+    "species": "FireKirin_Dark",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "4,1,2": {
+    "species": "SweetsSheep",
+    "passives": [
+      "SelfDeathAddItemDrop_up_2"
+    ],
+    "gender": "Female"
+  },
+  "8,1,5": {
+    "species": "PurpleSpider",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "13,3,4": {
+    "species": "AmaterasuWolf_Dark",
+    "passives": [
+      "PAL_FullStomach_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "8,3,3": {
+    "species": "LizardMan",
+    "passives": [
+      "CoolTimeReduction_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "17,1,2": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "9,4,5": {
+    "species": "FengyunDeeper",
+    "passives": [
+      "MoveSpeed_up_2",
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "4,0,2": {
+    "species": "TentacleTurtle",
+    "passives": [],
+    "gender": "Female"
+  },
+  "20,2,0": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Stamina_Up_3",
+      "MoveSpeed_up_2",
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "8,1,0": {
+    "species": "NaughtyCat",
+    "passives": [
+      "ElementBoost_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "4,3,0": {
+    "species": "BlueDragon_Ice",
+    "passives": [
+      "PAL_oraora"
+    ],
+    "gender": "Male"
+  },
+  "27,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "20,4,4": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "ElementResist_Dark_1_PAL",
+      "ElementBoost_Normal_1_PAL",
+      "Noukin",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Male"
+  },
+  "22,1,1": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal",
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Female"
+  },
+  "31,0,1": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "28,1,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,1,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "20,2,3": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Stamina_Up_3",
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "2,2,5": {
+    "species": "NightFox",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "20,1,2": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "PAL_Sanity_Up_2",
+      "ElementResist_Normal_1_PAL",
+      "SwimSpeed_up_1",
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "1,4,2": {
+    "species": "CaptainPenguin",
+    "passives": [
+      "PAL_oraora"
+    ],
+    "gender": "Female"
+  },
+  "27,0,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,0,2": {
+    "species": "Ganesha",
+    "passives": [
+      "PAL_oraora"
+    ],
+    "gender": "Female"
+  },
+  "22,2,4": {
+    "species": "ThunderDragonMan",
+    "passives": [
+      "ElementBoost_Thunder_2_PAL",
+      "Deffence_up1"
+    ],
+    "gender": "Female"
+  },
+  "15,1,0": {
+    "species": "GuardianDog",
+    "passives": [
+      "MoveSpeed_up_2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Female"
+  },
+  "9,0,0": {
+    "species": "Gorilla",
+    "passives": [
+      "PAL_rude",
+      "TrainerWorkSpeed_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "4,1,3": {
+    "species": "SweetsSheep",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "6,4,0": {
+    "species": "BirdDragon",
+    "passives": [
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "14,0,3": {
+    "species": "HerculesBeetle_Ground",
+    "passives": [
+      "Deffence_up1"
+    ],
+    "gender": "Male"
+  },
+  "24,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "11,0,5": {
+    "species": "PandaGirl",
+    "passives": [
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "26,1,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "2,3,4": {
+    "species": "LavaGirl",
+    "passives": [
+      "Stamina_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "15,4,1": {
+    "species": "Yeti",
+    "passives": [
+      "Deffence_up2_2",
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "19,3,5": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_1",
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "12,1,1": {
+    "species": "ThunderBird",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "8,2,0": {
+    "species": "PurpleSpider",
+    "passives": [
+      "ElementBoost_Leaf_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "22,2,3": {
+    "species": "ThunderDragonMan",
+    "passives": [
+      "ElementBoost_Thunder_2_PAL",
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "5,4,1": {
+    "species": "CatBat",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "16,0,2": {
+    "species": "CandleGhost",
+    "passives": [
+      "PAL_Sanity_Up_1",
+      "NightOwl"
+    ],
+    "gender": "Female"
+  },
+  "16,4,0": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3",
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "18,1,4": {
+    "species": "MysteryMask",
+    "passives": [
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "30,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,4,5": {
+    "species": "Manticore",
+    "passives": [
+      "Deffence_up2",
+      "PAL_ALLAttack_up2"
+    ],
+    "gender": "Male"
+  },
+  "23,1,2": {
+    "species": "MushroomLady",
+    "passives": [
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "25,0,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,0,3": {
+    "species": "IceFox",
+    "passives": [
+      "PAL_oraora"
+    ],
+    "gender": "Male"
+  },
+  "0,0,5": {
+    "species": "ChickenPal",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "20,1,5": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "CraftSpeed_up3",
+      "ElementResist_Aqua_1_PAL",
+      "CraftSpeed_up2",
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "18,2,4": {
+    "species": "IceNarwhal",
+    "passives": [
+      "PAL_FullStomach_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "18,4,1": {
+    "species": "WingGolem",
+    "passives": [
+      "Deffence_up2_2",
+      "SalePrice_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "3,1,3": {
+    "species": "NegativeOctopus_Neutral",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "18,3,5": {
+    "species": "SumoDog",
+    "passives": [
+      "Deffence_up2_2"
+    ],
+    "gender": "Male"
+  },
+  "7,2,0": {
+    "species": "CatVampire",
+    "passives": [
+      "PAL_CorporateSlave",
+      "ElementBoost_Normal_1_PAL",
+      "ElementResist_Aqua_1_PAL",
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "28,0,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,3,2": {
+    "species": "LazyCatfish_Gold",
+    "passives": [
+      "Noukin"
+    ],
+    "gender": "Male"
+  },
+  "7,2,5": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "31,3,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "4,2,0": {
+    "species": "CowPal",
+    "passives": [
+      "Deffence_up2"
+    ],
+    "gender": "Female"
+  },
+  "3,3,5": {
+    "species": "Garm",
+    "passives": [
+      "Deffence_up1"
+    ],
+    "gender": "Male"
+  },
+  "9,3,5": {
+    "species": "HadesBird",
+    "passives": [],
+    "gender": "Female"
+  },
+  "7,4,5": {
+    "species": "QueenBee",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "27,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "2,4,2": {
+    "species": "FlameBambi",
+    "passives": [
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "14,1,2": {
+    "species": "WhiteMoth",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "10,1,1": {
+    "species": "FengyunDeeper_Electric",
+    "passives": [
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "12,4,4": {
+    "species": "RedArmorBird",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "31,1,1": {
+    "species": "Umihebi",
+    "passives": [
+      "ElementBoost_Aqua_2_PAL",
+      "PAL_Sanity_Up_2"
+    ],
+    "gender": "Male"
+  },
+  "2,3,3": {
+    "species": "LavaGirl",
+    "passives": [
+      "PAL_ALLAttack_up1"
+    ],
+    "gender": "Male"
+  },
+  "19,2,2": {
+    "species": "GhostDragon",
+    "passives": [
+      "Stamina_Up_1",
+      "WorldTree_MoveSpeed",
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "23,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "22,0,0": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "CraftSpeed_up3",
+      "Nocturnal",
+      "TrainerLogging_up1"
+    ],
+    "gender": "Female"
+  },
+  "6,2,2": {
+    "species": "FluffyBird",
+    "passives": [
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Female"
+  },
+  "17,4,3": {
+    "species": "MimicDog",
+    "passives": [
+      "CoolTimeReduction_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "9,0,3": {
+    "species": "Serpent",
+    "passives": [
+      "ElementBoost_Earth_1_PAL",
+      "CraftSpeed_up2",
+      "WorkSuitabilityAddRank_MonsterFarm_1",
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "31,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "0,3,4": {
+    "species": "WoolFox",
+    "passives": [
+      "ReloadSpeedUp_Passive",
+      "Stamina_Up_2",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "21,1,2": {
+    "species": "ThiefBird",
+    "passives": [
+      "ElementBoost_Earth_2_PAL",
+      "ElementResist_Dark_1_PAL",
+      "Deffence_up2_2"
+    ],
+    "gender": "Female"
+  },
+  "26,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,4,2": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3",
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "20,1,0": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "SalePrice_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "13,4,0": {
+    "species": "Manticore",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "15,1,2": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3",
+      "ElementBoost_Leaf_1_PAL",
+      "ElementBoost_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "20,3,3": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL",
+      "PAL_oraora",
+      "ElementBoost_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "12,4,2": {
+    "species": "RedArmorBird",
+    "passives": [
+      "SalePrice_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "17,4,5": {
+    "species": "DarkAlien",
+    "passives": [
+      "Alien",
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "19,2,0": {
+    "species": "GhostDragon",
+    "passives": [
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Female"
+  },
+  "2,2,4": {
+    "species": "NightFox",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Female"
+  },
+  "22,1,2": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Deffence_down1",
+      "SwimSpeed_up_1"
+    ],
+    "gender": "Female"
+  },
+  "27,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "6,3,5": {
+    "species": "BirdDragon",
+    "passives": [
+      "ElementBoost_Dragon_1_PAL",
+      "PAL_Sanity_Down_1"
+    ],
+    "gender": "Male"
+  },
+  "7,0,3": {
+    "species": "CatVampire",
+    "passives": [
+      "CraftSpeed_up3",
+      "TrainerWorkSpeed_UP_1",
+      "ElementBoost_Normal_1_PAL",
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "14,4,5": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3"
+    ],
+    "gender": "Female"
+  },
+  "21,4,3": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "28,0,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "17,2,5": {
+    "species": "Sekhmet",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "2,0,4": {
+    "species": "Alpaca",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2",
+      "ElementBoost_Earth_1_PAL",
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Male"
+  },
+  "13,4,4": {
+    "species": "Manticore",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "2,4,0": {
+    "species": "FlameBambi",
+    "passives": [
+      "ElementResist_Dragon_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "27,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "25,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,1,2": {
+    "species": "ClioneTwins",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "9,2,0": {
+    "species": "FlowerRabbit",
+    "passives": [],
+    "gender": "Male"
+  },
+  "25,3,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,1,4": {
+    "species": "SakuraSaurus",
+    "passives": [
+      "Deffence_up2_2",
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "25,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "24,0,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "29,2,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,1,1": {
+    "species": "CatVampire",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3",
+      "ElementResist_Ice_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "1,3,2": {
+    "species": "NegativeKoala",
+    "passives": [
+      "PAL_Sanity_Up_2",
+      "SelfDeathAddItemDrop_up_2"
+    ],
+    "gender": "Male"
+  },
+  "7,4,0": {
+    "species": "CatVampire",
+    "passives": [
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "ElementBoost_Normal_1_PAL",
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "3,1,2": {
+    "species": "Kitsunebi_Ice",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "5,1,5": {
+    "species": "JellyfishGhost",
+    "passives": [
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "2,0,3": {
+    "species": "Alpaca",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2",
+      "ElementBoost_Earth_1_PAL",
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Male"
+  },
+  "23,0,2": {
+    "species": "JetDragon",
+    "passives": [
+      "Legend",
+      "ElementBoost_Dragon_2_PAL",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "1,0,4": {
+    "species": "PlantSlime",
+    "passives": [
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "16,4,5": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "PAL_CorporateSlave",
+      "Deffence_up2"
+    ],
+    "gender": "Female"
+  },
+  "3,2,1": {
+    "species": "CuteMole",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "25,1,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,0,2": {
+    "species": "WhiteAlienDragon",
+    "passives": [
+      "Alien",
+      "Test_PalEgg_HatchingSpeed_Up"
+    ],
+    "gender": "Male"
+  },
+  "18,3,2": {
+    "species": "GrassRabbitMan",
+    "passives": [
+      "CraftSpeed_up2",
+      "Deffence_up2_2",
+      "NonKilling",
+      "ElementBoost_Dragon_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "11,4,1": {
+    "species": "LazyDragon",
+    "passives": [
+      "PAL_FullStomach_Up_1",
+      "CoolTimeReduction_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "24,3,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "5,3,5": {
+    "species": "HawkBird",
+    "passives": [
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "5,4,4": {
+    "species": "CatBat",
+    "passives": [
+      "Stamina_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "6,4,5": {
+    "species": "BirdDragon_Ice",
+    "passives": [
+      "ElementBoost_Dragon_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "1,0,1": {
+    "species": "LeafMomonga",
+    "passives": [
+      "CoolTimeReduction_Up_1",
+      "SalePrice_Down_1"
+    ],
+    "gender": "Female"
+  },
+  "16,3,1": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up2",
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "30,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "15,3,2": {
+    "species": "VolcanicMonster",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_Sanity_Down_2"
+    ],
+    "gender": "Female"
+  },
+  "6,3,4": {
+    "species": "FairyDragon",
+    "passives": [
+      "ElementBoost_Thunder_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "23,1,0": {
+    "species": "KingWhale",
+    "passives": [
+      "Legend"
+    ],
+    "gender": "Male"
+  },
+  "29,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "5,4,3": {
+    "species": "CatBat",
+    "passives": [
+      "CraftSpeed_up1"
+    ],
+    "gender": "Female"
+  },
+  "22,4,2": {
+    "species": "NightLady",
+    "passives": [
+      "ElementResist_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "20,4,2": {
+    "species": "ThunderFluffyBird",
+    "passives": [
+      "PAL_ALLAttack_down2"
+    ],
+    "gender": "Male"
+  },
+  "13,2,2": {
+    "species": "SakuraSaurus_Water",
+    "passives": [
+      "Deffence_up2_2",
+      "Deffence_up1"
+    ],
+    "gender": "Female"
+  },
+  "0,2,0": {
+    "species": "CuteFox",
+    "passives": [
+      "SalePrice_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "0,4,1": {
+    "species": "KendoFrog",
+    "passives": [
+      "PAL_Sanity_Down_2",
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "20,1,4": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_3",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "23,0,5": {
+    "species": "KingWhale",
+    "passives": [
+      "Legend",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "30,0,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,2,4": {
+    "species": "GhostDragon",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "0,0,0": {
+    "species": "SheepBall",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Female"
+  },
+  "8,4,1": {
+    "species": "LizardMan",
+    "passives": [
+      "ElementResist_Dragon_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "24,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "14,1,5": {
+    "species": "Umihebi_Fire",
+    "passives": [
+      "PAL_rude"
+    ],
+    "gender": "Female"
+  },
+  "2,0,0": {
+    "species": "Alpaca",
+    "passives": [
+      "ElementResist_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "27,0,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "1,4,5": {
+    "species": "WizardOwl",
+    "passives": [
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "28,4,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "23,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "31,0,5": {
+    "species": "Mothman",
+    "passives": [
+      "PAL_FullStomach_Down_1",
+      "CraftSpeed_up1",
+      "PAL_CorporateSlave",
+      "Nocturnal"
+    ],
+    "gender": "Female"
+  },
+  "5,4,0": {
+    "species": "HawkBird",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2"
+    ],
+    "gender": "Male"
+  },
+  "10,1,4": {
+    "species": "Ronin",
+    "passives": [
+      "ElementBoost_Dark_1_PAL",
+      "PAL_rude"
+    ],
+    "gender": "Male"
+  },
+  "30,2,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "13,1,2": {
+    "species": "DrillGame",
+    "passives": [
+      "Deffence_up1",
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "10,1,2": {
+    "species": "FlowerDinosaur_Electric",
+    "passives": [
+      "ElementResist_Dark_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "14,1,3": {
+    "species": "IceWitch",
+    "passives": [
+      "ElementBoost_Aqua_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "26,2,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "20,2,2": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "Stamina_Up_3",
+      "CraftSpeed_up2",
+      "Stamina_Up_1"
+    ],
+    "gender": "Male"
+  },
+  "10,0,5": {
+    "species": "FengyunDeeper_Electric",
+    "passives": [
+      "MoveSpeed_up_1"
+    ],
+    "gender": "Male"
+  },
+  "24,2,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "19,2,3": {
+    "species": "GhostDragon",
+    "passives": [
+      "MoveSpeed_up_2",
+      "WorldTree_MoveSpeed",
+      "Stamina_Up_3"
+    ],
+    "gender": "Male"
+  },
+  "17,3,3": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "ElementBoost_Dark_1_PAL",
+      "Stamina_Up_1",
+      "Noukin"
+    ],
+    "gender": "Female"
+  },
+  "26,0,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,1,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "0,1,1": {
+    "species": "Carbunclo",
+    "passives": [
+      "CraftSpeed_up2"
+    ],
+    "gender": "Male"
+  },
+  "24,4,3": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "14,0,4": {
+    "species": "SnowPeafowl",
+    "passives": [
+      "TrainerWorkSpeed_UP_1",
+      "PAL_sadist",
+      "ElementBoost_Normal_1_PAL",
+      "SalePrice_Up_2"
+    ],
+    "gender": "Female"
+  },
+  "24,2,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,2,2": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "28,1,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "26,2,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "15,0,4": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_1",
+      "MoveSpeed_up_2",
+      "Stamina_Up_3",
+      "Deffence_up2"
+    ],
+    "gender": "Male"
+  },
+  "0,3,1": {
+    "species": "FlyingManta_Thunder",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "24,4,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "12,1,4": {
+    "species": "GhostAnglerfish",
+    "passives": [
+      "TrainerWorkSpeed_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "19,4,4": {
+    "species": "GhostDragon_Fire",
+    "passives": [
+      "SalePrice_Up_2",
+      "Stamina_Up_1",
+      "ElementBoost_Fire_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "6,1,3": {
+    "species": "DarkCrow",
+    "passives": [
+      "AutoHPRegeneRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "5,3,2": {
+    "species": "HawkBird",
+    "passives": [
+      "ElementBoost_Normal_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "13,0,1": {
+    "species": "VolcanoDragon",
+    "passives": [
+      "PlayerSP_DecreaseRate_Passive"
+    ],
+    "gender": "Female"
+  },
+  "27,0,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "7,3,4": {
+    "species": "CatVampire",
+    "passives": [
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "13,0,2": {
+    "species": "VolcanoDragon",
+    "passives": [
+      "TrainerLogging_up1"
+    ],
+    "gender": "Male"
+  },
+  "19,3,1": {
+    "species": "GhostDragon",
+    "passives": [
+      "MoveSpeed_up_2",
+      "MoveSpeed_up_3",
+      "Nocturnal",
+      "SwimSpeed_up_2"
+    ],
+    "gender": "Female"
+  },
+  "28,0,1": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "10,2,0": {
+    "species": "Ronin_Dark",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "15,1,3": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3",
+      "MoveSpeed_up_2",
+      "Stamina_Up_1",
+      "NonKilling"
+    ],
+    "gender": "Female"
+  },
+  "8,2,4": {
+    "species": "PurpleSpider",
+    "passives": [
+      "PAL_ALLAttack_up3"
+    ],
+    "gender": "Male"
+  },
+  "2,4,3": {
+    "species": "Bastet_Ice",
+    "passives": [
+      "SalePrice_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "0,4,0": {
+    "species": "KendoFrog",
+    "passives": [
+      "CoolTimeReduction_Up_1",
+      "PAL_FullStomach_Down_2"
+    ],
+    "gender": "Female"
+  },
+  "27,3,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "30,4,5": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "14,4,4": {
+    "species": "GuardianDog",
+    "passives": [
+      "Stamina_Up_3",
+      "Stamina_Up_1"
+    ],
+    "gender": "Female"
+  },
+  "9,0,4": {
+    "species": "Serpent",
+    "passives": [
+      "ElementBoost_Earth_1_PAL"
+    ],
+    "gender": "Female"
+  },
+  "22,4,0": {
+    "species": "NightLady",
+    "passives": [
+      "TrainerWorkSpeed_UP_1"
+    ],
+    "gender": "Male"
+  },
+  "15,2,5": {
+    "species": "VolcanicMonster",
+    "passives": [
+      "Deffence_up2_2",
+      "CraftSpeed_down2",
+      "WorkSuitabilityAddRank_MonsterFarm_1"
+    ],
+    "gender": "Female"
+  },
+  "29,0,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "27,4,0": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "16,1,4": {
+    "species": "GrassGolem_Dark",
+    "passives": [
+      "Deffence_up2_2",
+      "PAL_ALLAttack_down2"
+    ],
+    "gender": "Female"
+  },
+  "30,2,4": {
+    "species": null,
+    "passives": [],
+    "gender": null
+  },
+  "18,4,3": {
+    "species": "BlueThunderHorse",
+    "passives": [
+      "SwimSpeed_up_2",
+      "CoolTimeReduction_Up_1",
+      "CraftSpeed_up1"
+    ],
+    "gender": "Male"
+  },
+  "21,4,5": {
+    "species": "DomeArmorDragon",
+    "passives": [
+      "Nocturnal"
+    ],
+    "gender": "Male"
+  },
+  "6,0,2": {
+    "species": "SharkKid",
+    "passives": [
+      "PAL_conceited"
+    ],
+    "gender": "Male"
+  },
+  "3,0,1": {
+    "species": "Kitsunebi",
+    "passives": [
+      "PAL_masochist"
+    ],
+    "gender": "Male"
+  },
+  "17,1,5": {
+    "species": "Sekhmet",
+    "passives": [
+      "PAL_CorporateSlave",
+      "CraftSpeed_up3",
+      "Nocturnal",
+      "CraftSpeed_up2"
+    ],
+    "gender": "Female"
+  },
+  "17,2,1": {
+    "species": "Sekhmet",
+    "passives": [
+      "CraftSpeed_up3",
+      "CraftSpeed_up2",
+      "Nocturnal",
+      "PAL_CorporateSlave"
+    ],
+    "gender": "Male"
+  },
+  "7,0,5": {
+    "species": "CatVampire",
+    "passives": [
+      "CraftSpeed_up3",
+      "PAL_CorporateSlave",
+      "ElementBoost_Normal_1_PAL",
+      "ElementResist_Aqua_1_PAL"
+    ],
+    "gender": "Male"
+  },
+  "1,1,3": {
+    "species": "CloverFairy",
+    "passives": [
+      "ElementResist_Thunder_1_PAL"
+    ],
+    "gender": "Male"
+  }
+}

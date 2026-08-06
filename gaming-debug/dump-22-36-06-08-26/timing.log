@@ -1,0 +1,128 @@
+=== box 1 of 32 ===
+[timing] 30 slots | move=429.234462ms capture=296.08565ms read=3.681151844s png=1.99668ms
+[read]   ocr=3.658727777s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.756348ms (64 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 227.455876ms at (4,0)
+=== box 2 of 32 ===
+[timing] 30 slots | move=427.57435ms capture=278.318726ms read=3.553602034s png=2.111864ms
+[read]   ocr=3.532205258s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.214091ms (64 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 229.644805ms at (3,2)
+=== box 3 of 32 ===
+[timing] 30 slots | move=426.61683ms capture=282.816395ms read=3.636918629s png=2.072052ms
+[read]   ocr=3.614885706s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.527384ms (66 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 223.157998ms at (1,1)
+=== box 4 of 32 ===
+[timing] 30 slots | move=426.821446ms capture=282.004948ms read=3.639778918s png=1.932142ms
+[read]   ocr=3.617855573s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.463489ms (64 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 232.183409ms at (1,4)
+=== box 5 of 32 ===
+[timing] 30 slots | move=426.786432ms capture=260.026636ms read=3.65546489s png=1.967365ms
+[read]   ocr=3.633795719s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.266358ms (64 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 224.622614ms at (3,3)
+=== box 6 of 32 ===
+[timing] 30 slots | move=428.288237ms capture=309.868114ms read=3.614962689s png=2.023886ms
+[read]   ocr=3.592803145s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.672854ms (66 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 228.1217ms at (4,0)
+=== box 7 of 32 ===
+[timing] 30 slots | move=426.535934ms capture=290.25518ms read=3.561651916s png=2.032354ms
+[read]   ocr=3.540141943s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.175321ms (64 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 216.376244ms at (0,3)
+=== box 8 of 32 ===
+[timing] 30 slots | move=427.054558ms capture=275.311313ms read=3.825869651s png=1.960817ms
+[read]   ocr=3.801256407s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=8.710488ms (84 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 230.09564ms at (4,0)
+=== box 9 of 32 ===
+[timing] 30 slots | move=427.380153ms capture=307.83587ms read=3.747432838s png=2.127493ms
+[read]   ocr=3.724490466s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=7.528962ms (74 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 220.265187ms at (3,0)
+=== box 10 of 32 ===
+[timing] 30 slots | move=426.958009ms capture=278.604342ms read=4.524189238s png=2.071458ms
+[read]   ocr=3.659950864s (60 calls, 0 memo hits) synth=841.297757ms (1 calls) textlib=7.400393ms (72 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 1.060608704s at (4,5)
+=== box 11 of 32 ===
+[timing] 30 slots | move=428.140954ms capture=277.591673ms read=4.531974096s png=2.15203ms
+[read]   ocr=3.69997081s (60 calls, 0 memo hits) synth=809.42083ms (1 calls) textlib=6.502255ms (64 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 1.033161942s at (0,0)
+=== box 12 of 32 ===
+[timing] 30 slots | move=425.48277ms capture=250.3646ms read=3.657619899s png=2.03107ms
+[read]   ocr=3.635892807s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.26035ms (62 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 228.291348ms at (4,0)
+=== box 13 of 32 ===
+[timing] 30 slots | move=426.661049ms capture=317.425929ms read=3.670311209s png=2.019452ms
+[read]   ocr=3.648542889s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.20571ms (60 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 236.099231ms at (3,0)
+=== box 14 of 32 ===
+[timing] 30 slots | move=427.257115ms capture=281.300918ms read=3.765958523s png=2.032432ms
+[read]   ocr=3.743573592s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=6.522978ms (66 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 223.645404ms at (2,0)
+=== box 15 of 32 ===
+[timing] 30 slots | move=427.925309ms capture=280.120589ms read=4.802246998s png=2.022747ms
+[read]   ocr=3.78031842s (60 calls, 0 memo hits) synth=998.095527ms (1 calls) textlib=7.868903ms (78 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 1.237631484s at (3,0)
+=== box 16 of 32 ===
+[timing] 30 slots | move=427.409716ms capture=267.380132ms read=4.127324925s png=2.011039ms
+[read]   ocr=3.720967171s (60 calls, 0 memo hits) synth=382.187286ms (1 calls) textlib=8.737077ms (86 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 594.511861ms at (3,2)
+=== box 17 of 32 ===
+[timing] 30 slots | move=426.912186ms capture=292.216281ms read=4.952824857s png=2.112346ms
+[read]   ocr=3.888396993s (60 calls, 0 memo hits) synth=1.03846318s (1 calls) textlib=9.711847ms (102 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 1.262854287s at (2,4)
+=== box 18 of 32 ===
+[timing] 30 slots | move=427.706116ms capture=284.124698ms read=3.750134309s png=2.107077ms
+[read]   ocr=3.726182965s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=7.75008ms (80 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 232.040951ms at (0,4)
+=== box 19 of 32 ===
+[timing] 30 slots | move=427.41364ms capture=276.670018ms read=3.583326649s png=2.07168ms
+[read]   ocr=3.560675384s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=7.337735ms (72 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 224.287237ms at (2,0)
+=== box 20 of 32 ===
+[timing] 30 slots | move=427.142945ms capture=237.880878ms read=4.843800981s png=1.958681ms
+[read]   ocr=3.859494214s (60 calls, 0 memo hits) synth=958.13271ms (1 calls) textlib=9.33711ms (94 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 1.192167762s at (3,0)
+=== box 21 of 32 ===
+[timing] 30 slots | move=425.987565ms capture=306.630556ms read=5.578888021s png=2.06029ms
+[read]   ocr=3.88807876s (60 calls, 0 memo hits) synth=1.664492593s (4 calls) textlib=9.64524ms (98 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 697.335511ms at (0,3)
+=== box 22 of 32 ===
+[timing] 30 slots | move=427.928887ms capture=261.422564ms read=3.737890309s png=2.095389ms
+[read]   ocr=3.712451411s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=9.140678ms (94 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 241.505268ms at (1,0)
+=== box 23 of 32 ===
+[timing] 30 slots | move=426.761349ms capture=286.458797ms read=5.125580852s png=2.087817ms
+[read]   ocr=3.764032588s (60 calls, 0 memo hits) synth=1.337438985s (2 calls) textlib=7.916789ms (80 calls)
+[cache]  name 0/30 passives 0/30 | worst slot 1.136306221s at (4,4)
+=== box 24 of 32 ===
+[timing] 16 slots | move=226.588448ms capture=144.336353ms read=2.411825985s png=1.10498ms
+[read]   ocr=1.936065547s (32 calls, 0 memo hits) synth=463.493569ms (2 calls) textlib=4.040694ms (38 calls)
+[cache]  name 0/16 passives 0/16 | worst slot 545.113106ms at (0,3)
+=== box 25 of 32 ===
+[timing] 0 slots | move=0ns capture=0ns read=0ns png=0ns
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[cache]  name 0/0 passives 0/0 | worst slot 0ns at (0,0)
+=== box 26 of 32 ===
+[timing] 0 slots | move=0ns capture=0ns read=0ns png=0ns
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[cache]  name 0/0 passives 0/0 | worst slot 0ns at (0,0)
+=== box 27 of 32 ===
+[timing] 0 slots | move=0ns capture=0ns read=0ns png=0ns
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[cache]  name 0/0 passives 0/0 | worst slot 0ns at (0,0)
+=== box 28 of 32 ===
+[timing] 0 slots | move=0ns capture=0ns read=0ns png=0ns
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[cache]  name 0/0 passives 0/0 | worst slot 0ns at (0,0)
+=== box 29 of 32 ===
+[timing] 0 slots | move=0ns capture=0ns read=0ns png=0ns
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[cache]  name 0/0 passives 0/0 | worst slot 0ns at (0,0)
+=== box 30 of 32 ===
+[timing] 0 slots | move=0ns capture=0ns read=0ns png=0ns
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[cache]  name 0/0 passives 0/0 | worst slot 0ns at (0,0)
+=== box 31 of 32 ===
+[timing] 0 slots | move=0ns capture=0ns read=0ns png=0ns
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[cache]  name 0/0 passives 0/0 | worst slot 0ns at (0,0)
+=== box 32 of 32 ===
+[timing] 15 slots | move=213.413135ms capture=122.930084ms read=2.466876872s png=1.06972ms
+[read]   ocr=1.905413926s (30 calls, 0 memo hits) synth=549.211006ms (1 calls) textlib=4.046931ms (40 calls)
+[cache]  name 0/15 passives 0/15 | worst slot 768.296044ms at (2,1)
