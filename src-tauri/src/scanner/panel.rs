@@ -28,6 +28,12 @@ pub const OCR_MIN_SIM_PASSIVE: f64 = 0.85;
 /// The panel shows at most this many passive rows.
 pub const MAX_PASSIVES: usize = 4;
 
+/// Intermediate result from parallel passive crop recognition.
+enum CropResult {
+    Known(String),
+    Unknown(String, String),
+}
+
 /// Species-name matches at or above this are authoritative overrides.
 pub const NAME_CONFIDENCE: f32 = 0.45;
 /// Passive-row matches at or above this count as present. Held above the
@@ -449,6 +455,7 @@ impl PanelLayout {
     /// When the user has calibrated `passive_1..4` zones, each crop contains
     /// a single passive name — no band detection or column splitting needed.
     /// Falls back to NCC synth with narrowed sweep range when OCR fails.
+    /// Processes all 4 crops in parallel via rayon.
     pub fn read_passive_crops(
         &self,
         synth: &TextSynth,
@@ -457,64 +464,69 @@ impl PanelLayout {
         passive_idx: &ocr::VocabIndex<'_>,
         expected_px: Option<f32>,
     ) -> (Vec<String>, Vec<(String, String)>) {
-        let mut known: Vec<String> = Vec::new();
-        let mut unknown: Vec<(String, String)> = Vec::new();
-        // Narrowed sweep range: ±15% around expected font size.
+        use rayon::prelude::*;
+
         let row_px = expected_px.unwrap_or(self.px_name * PASSIVE_PX_RATIO);
         let px_lo = row_px * 0.85;
         let px_hi = row_px * 1.15;
-        for (_i, crop) in crops.iter().enumerate() {
-            if crop.width() < 2 || crop.height() < 2 {
-                continue;
-            }
+
+        let results: Vec<Option<CropResult>> = crops
+            .par_iter()
+            .map(|crop| {
+                if crop.width() < 2 || crop.height() < 2 {
+                    return None;
+                }
+                match textlib.identify(crop) {
+                    TextMatch::Known(label) if label == EMPTY_LABEL => return None,
+                    TextMatch::Known(label) => return Some(CropResult::Known(label)),
+                    _ => {}
+                }
+                let ocr_lines = ocr::read_lines_boxed(crop).unwrap_or_default();
+                for (text, _) in &ocr_lines {
+                    if let Some((key, _)) =
+                        ocr::best_vocab_match(text, passive_idx, OCR_MIN_SIM_PASSIVE)
+                    {
+                        return Some(CropResult::Known(key.to_string()));
+                    }
+                }
+                let hits = synth.find_labels(
+                    crop,
+                    passive_idx.vocab,
+                    false,
+                    px_lo,
+                    px_hi,
+                    PASSIVE_CONFIDENCE,
+                    true,
+                );
+                if let Some((key, _)) = hits.first() {
+                    Some(CropResult::Known(key.clone()))
+                } else if !ocr_lines.is_empty() {
+                    png_base64(crop)
+                        .ok()
+                        .map(|b64| {
+                            let id = format!("{:016x}", fx(crop));
+                            CropResult::Unknown(id, b64)
+                        })
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let mut known: Vec<String> = Vec::new();
+        let mut unknown: Vec<(String, String)> = Vec::new();
+        for r in results {
             if known.len() >= MAX_PASSIVES {
                 break;
             }
-            // Learned template first.
-            match textlib.identify(crop) {
-                TextMatch::Known(label) if label == EMPTY_LABEL => continue,
-                TextMatch::Known(label) => {
-                    if !known.iter().any(|k| k == &label) {
-                        known.push(label);
+            match r {
+                Some(CropResult::Known(k)) => {
+                    if !known.iter().any(|x| x == &k) {
+                        known.push(k);
                     }
-                    continue;
                 }
-                _ => {}
-            }
-            // Per-cell OCR.
-            let ocr_lines = ocr::read_lines_boxed(crop).unwrap_or_default();
-            let mut matched = false;
-            for (text, _) in &ocr_lines {
-                if let Some((key, _)) = ocr::best_vocab_match(text, passive_idx, OCR_MIN_SIM_PASSIVE) {
-                    if !known.iter().any(|k| k == key) {
-                        known.push(key.to_string());
-                    }
-                    matched = true;
-                    break;
-                }
-            }
-            if matched {
-                continue;
-            }
-            // NCC synth fallback with narrowed sweep range.
-            let hits = synth.find_labels(
-                crop,
-                passive_idx.vocab,
-                false,
-                px_lo,
-                px_hi,
-                PASSIVE_CONFIDENCE,
-                true,
-            );
-            if let Some((key, _)) = hits.first() {
-                if !known.iter().any(|k| k == key) {
-                    known.push(key.clone());
-                }
-            } else if !ocr_lines.is_empty() {
-                if let Ok(b64) = png_base64(crop) {
-                    let id = format!("{:016x}", fx(crop));
-                    unknown.push((id, b64));
-                }
+                Some(CropResult::Unknown(id, b64)) => unknown.push((id, b64)),
+                None => {}
             }
         }
         (known, unknown)
