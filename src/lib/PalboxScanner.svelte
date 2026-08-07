@@ -79,6 +79,11 @@
   // Panel corner staging (top-left captured, waiting for bottom-right)
   let panelTl = $state<[number, number] | null>(null);
   let calibSaved = $state(false);
+  // Whether the calibration <details> is expanded. Deliberately NOT derived
+  // from calibSaved: saving a zone mid-calibration must not snap the panel
+  // shut (and capturing a corner must not pop it open). Initialized once
+  // from the loaded status, then only the user toggles it.
+  let calibOpen = $state(true);
   let countdown = $state(0);
   let capturing = $state<0 | 1 | 2 | 3 | 4>(0);
   let scanning = $state(false);
@@ -532,6 +537,7 @@
     if (status.calibration) {
       calib = status.calibration;
       calibSaved = true;
+      calibOpen = false;
     }
     await listen<{
       current: number;
@@ -703,7 +709,7 @@
     </p>
   {/if}
 
-  <details open={!calibSaved}>
+  <details bind:open={calibOpen}>
     <summary>Grid calibration {calibSaved ? "✓" : "(needed before scanning)"}</summary>
     <div class="row">
       <button class="save" onclick={useDefaults}>
