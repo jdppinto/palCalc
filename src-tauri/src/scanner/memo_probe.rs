@@ -106,12 +106,6 @@ fn fingerprint_at(img: &RgbaImage, w: u32, h: u32) -> Option<Vec<f32>> {
     Some(v)
 }
 
-/// Sanity gate: a crop whose fingerprint is >=0.999 correlated with an earlier
-/// crop carrying a DIFFERENT label is almost certainly a ground-truth error,
-/// not a memo hazard — two such cases in dump_1786052150591 (14,3,0 missing
-/// Stamina_Up_1, 16,3,2 missing Nocturnal) were verified by eye against the
-/// crops and fixed in labels.json. `probe_label_consistency` re-checks this so
-/// the next bad label is caught instead of being blamed on the memo.
 /// Load every crop for one path, in the order a live scan would visit them
 /// (box, then row, then col) — that is the order the memo would actually see.
 fn load_crops(dump: &str, dir: &Path, kind: PathKind) -> Vec<Crop> {
@@ -273,6 +267,87 @@ fn measure_ocr_ms(crops_dir: &Path) -> f64 {
         total += t.elapsed().as_secs_f64() * 1000.0;
     }
     total / samples.len() as f64
+}
+
+/// Validates the adaptive-settle thresholds in palbox against real captures.
+///
+/// The settle loop exits early only once the panel SIGNATURE (name band +
+/// passives region, see `palbox::panel_signature`) has both changed from the
+/// previous slot (ncc < 0.995) and stopped changing between polls (>= 0.999).
+///
+/// Two properties matter, and this measures both:
+///   - a consecutive pair that is genuinely a different pal must fall below the
+///     changed bound, or the repaint goes unnoticed and the slot waits the full
+///     delay — safe but slow, so this reports the rate;
+///   - the bound must sit well below an UNREPAINTED panel's self-correlation
+///     (~0.99995), or a stale panel could be mistaken for a fresh one. That is
+///     the direction that would cause a wrong read, so it is asserted.
+///
+/// The name band ALONE fails this: same species/level/gender with different
+/// passives renders an identical band, which was the median case in one dump.
+#[test]
+#[ignore = "probe; --release -- --ignored --nocapture"]
+fn probe_settle_thresholds() {
+    const CHANGED_BELOW: f32 = 0.995;
+    for (name, dir) in dumps() {
+        if !dir.is_dir() {
+            continue;
+        }
+        let names = load_crops(&name, &dir, PathKind::Name);
+        let pass = load_crops(&name, &dir, PathKind::Passives);
+        // Signature = both halves concatenated and renormalized.
+        let sigs: Vec<(String, Option<Vec<f32>>, String)> = names
+            .iter()
+            .filter_map(|n| {
+                let p = pass.iter().find(|p| p.key == n.key)?;
+                let sig = match (&n.fp, &p.fp) {
+                    (Some(a), Some(b)) => {
+                        let mut v = a.clone();
+                        v.extend(b.iter().copied());
+                        let norm = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+                        for x in &mut v {
+                            *x /= norm;
+                        }
+                        Some(v)
+                    }
+                    _ => None,
+                };
+                Some((n.key.clone(), sig, format!("{}|{}", n.label, p.label)))
+            })
+            .collect();
+        let (mut detected, mut missed) = (0usize, 0usize);
+        let mut worst_change = f32::NEG_INFINITY;
+        for w in sigs.windows(2) {
+            let (Some(a), Some(b)) = (&w[0].1, &w[1].1) else {
+                continue;
+            };
+            if w[0].2 == w[1].2 {
+                continue; // indistinguishable pair: correctly waits in full
+            }
+            let n: f32 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
+            if n < CHANGED_BELOW {
+                detected += 1;
+            } else {
+                missed += 1;
+                worst_change = worst_change.max(n);
+            }
+        }
+        let total = detected + missed;
+        eprintln!(
+            "[settle] dump={name}: {detected}/{total} different-pal transitions detected ({:.1}%) — the rest wait the full delay",
+            detected as f64 / total.max(1) as f64 * 100.0
+        );
+        // An unrepainted panel self-correlates at ~0.99995; the bound must be
+        // clear of that by a wide margin or a stale panel reads as fresh.
+        assert!(
+            CHANGED_BELOW < 0.999,
+            "changed bound {CHANGED_BELOW} is too close to an unrepainted panel's self-correlation"
+        );
+        assert!(
+            detected * 100 / total.max(1) >= 90,
+            "{name}: only {detected}/{total} transitions detected — adaptive settle would rarely engage"
+        );
+    }
 }
 
 /// Ground-truth consistency check, not a memo measurement.

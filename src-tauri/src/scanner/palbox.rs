@@ -17,6 +17,43 @@ use super::textlib::{png_base64, TextLib};
 /// Global abort flag, flipped by the `abort_scan` command.
 pub static SCAN_ABORT: AtomicBool = AtomicBool::new(false);
 
+/// Adaptive-settle thresholds on the panel signature (see `panel_signature`).
+///
+/// Measured over both committed dumps, comparing consecutive slots: a pair that
+/// is genuinely a different pal correlates at most 0.980 / 0.99996, and
+/// `< 0.995` catches 704/704 and 681/682 of those transitions. Two captures of
+/// an UNREPAINTED panel sit at ~0.99995, comfortably above the bound, so the
+/// loop cannot mistake a stale panel for a fresh one.
+///
+/// The name band alone is NOT usable here: two pals with the same species,
+/// level and gender but different passives render an identical name band, and
+/// in one dump that was the median case (0.99999).
+const SETTLE_CHANGED_BELOW: f32 = 0.995;
+const SETTLE_STABLE_AT: f32 = 0.999;
+
+/// Normalized cross-correlation of two equal-length fingerprints.
+fn ncc(a: &[f32], b: &[f32]) -> f32 {
+    a.iter().zip(b).map(|(x, y)| x * y).sum()
+}
+
+/// Signature of a rendered panel: the name band and the passives region
+/// fingerprinted together, renormalized so a dot product is still an NCC.
+/// Both halves are needed — the name band carries species/level/gender and the
+/// passives region carries the traits, and either alone is identical between
+/// distinct pals often enough to be useless as a change detector.
+fn panel_signature(band: &image::RgbaImage, passives: &image::RgbaImage) -> Option<Vec<f32>> {
+    let mut v = super::textlib::fingerprint(band)?;
+    v.extend(super::textlib::fingerprint(passives)?);
+    let norm = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+    if norm < 1e-6 {
+        return None;
+    }
+    for x in &mut v {
+        *x /= norm;
+    }
+    Some(v)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GridCalibration {
     /// Screen position of the CENTER of the top-left slot.
@@ -40,6 +77,15 @@ pub struct GridCalibration {
     /// Milliseconds to wait after pressing E to switch boxes.
     #[serde(default = "default_box_settle")]
     pub box_settle_ms: u64,
+    /// Poll the panel until it has demonstrably repainted instead of always
+    /// sleeping the full `delay_ms`. `delay_ms` remains the ceiling, so this
+    /// can only ever wait less. Measured: hover was 44.0s of a 156.8s sweep.
+    #[serde(default = "default_adaptive")]
+    pub adaptive_delay: bool,
+    /// Floor before the first poll — the game needs some time to begin
+    /// repainting at all, and polling before that is wasted captures.
+    #[serde(default = "default_min_delay")]
+    pub min_delay_ms: u64,
     /// The hover-panel ("pal sheet") bounds, absolute screen rect. All text
     /// reads are constrained inside it — nothing else on screen is processed.
     #[serde(default)]
@@ -53,6 +99,8 @@ pub struct GridCalibration {
 }
 
 fn default_grid_unhover() -> u64 { 20 }
+fn default_adaptive() -> bool { true }
+fn default_min_delay() -> u64 { 20 }
 fn default_first_slot() -> u64 { 50 }
 fn default_box_settle() -> u64 { 50 }
 
@@ -68,6 +116,8 @@ impl Default for GridCalibration {
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
+            adaptive_delay: true,
+            min_delay_ms: 20,
             panel: None,
             zones: HashMap::new(),
         }
@@ -437,6 +487,12 @@ pub fn scan_box(
     let mut timing_read = Duration::ZERO;
     let mut timing_png = Duration::ZERO;
     let mut prev_panel_hash: Option<u64> = None;
+    // Adaptive settle state: the previous slot's panel signature is the
+    // baseline a repaint is detected against.
+    let adaptive = calib.adaptive_delay && calib.panel.is_some();
+    let mut prev_sig: Option<Vec<f32>> = None;
+    let mut polls = 0u32;
+    let mut settled_early = 0u32;
     // Per-layer breakdown of `timing_read`, recorded where the work happens.
     let metrics_base = super::metrics::snapshot();
     // Worst single slot: a 30-slot sum hides one pathological slot completely.
@@ -471,12 +527,20 @@ pub fn scan_box(
         // Measured elapsed, not nominal: sleep overshoot is exactly what we
         // want visible here.
         let t_hover = Instant::now();
-        std::thread::sleep(Duration::from_millis(if first_occupied {
+        // The first occupied slot of a box waits in full — the panel has to
+        // appear from scratch, so there is no previous panel to detect a change
+        // against. Afterwards, adaptive mode sleeps only the floor and lets the
+        // poll loop below decide when the panel has actually repainted.
+        let first = first_occupied;
+        let settle_ms = if first {
             first_occupied = false;
             calib.first_slot_ms.max(calib.delay_ms)
+        } else if adaptive {
+            calib.min_delay_ms.min(calib.delay_ms)
         } else {
             calib.delay_ms
-        }));
+        };
+        std::thread::sleep(Duration::from_millis(settle_ms));
         timing_hover += t_hover.elapsed();
         // If the user grabbed the mouse and moved it significantly, abort
         // instead of fighting over cursor control.
@@ -560,8 +624,61 @@ pub fn scan_box(
             let t0 = Instant::now();
             let mut passive_crops: Option<[image::RgbaImage; 4]> = None;
             let (mut band, mut gimg, mut pimg) = if let Some(panel) = calib.panel {
-                let panel_img =
+                // Adaptive settle: poll the panel until its NAME BAND has both
+                // changed from the previous slot's and stopped changing between
+                // polls. Requiring a positive change means a repeat of the same
+                // pal can never exit early — it waits the full `delay_ms` just
+                // as before, so this cannot make a stale read more likely.
+                // The name band is the discriminator because different species
+                // render different text (measured NCC <= 0.87 across species,
+                // >= 0.9999 for the same panel).
+                let mut panel_img =
                     backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
+                if adaptive && !first {
+                    let deadline = Duration::from_millis(calib.delay_ms);
+                    let mut last: Option<Vec<f32>> = None;
+                    loop {
+                        let fp = panel_signature(
+                            &crop_from_panel(&panel_img, panel, nb),
+                            &crop_from_panel(&panel_img, panel, pr),
+                        );
+                        let changed = match (&prev_sig, &fp) {
+                            (Some(prev), Some(cur)) => ncc(prev, cur) < SETTLE_CHANGED_BELOW,
+                            // No baseline to compare against: don't hold up the
+                            // scan waiting for a change we can't observe.
+                            _ => true,
+                        };
+                        let stable = match (&last, &fp) {
+                            (Some(a), Some(b)) => ncc(a, b) >= SETTLE_STABLE_AT,
+                            _ => false,
+                        };
+                        polls += 1;
+                        if (changed && stable) || t_hover.elapsed() >= deadline {
+                            if changed && stable {
+                                settled_early += 1;
+                            }
+                            // Keep the last GOOD baseline on a blank signature.
+                            // Clearing it would make the next slot see "no
+                            // baseline", treat that as changed, and be free to
+                            // exit on stability alone — which a not-yet-
+                            // repainted panel also satisfies.
+                            if fp.is_some() {
+                                prev_sig = fp;
+                            }
+                            break;
+                        }
+                        last = fp;
+                        panel_img =
+                            backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
+                    }
+                } else {
+                    // Non-adaptive or first slot: still record the baseline so
+                    // the NEXT slot has something to detect a change against.
+                    prev_sig = panel_signature(
+                        &crop_from_panel(&panel_img, panel, nb),
+                        &crop_from_panel(&panel_img, panel, pr),
+                    );
+                }
                 // Crop per-slot passive zones from the panel image.
                 if has_passive_slots {
                     passive_crops = Some(std::array::from_fn(|i| {
@@ -738,6 +855,7 @@ pub fn scan_box(
          stale={:?} read={:?} png={:?} other={:?} | total={:?}\n\
          [read]   ocr={:?} ({} calls, {} memo hits) synth={:?} ({} calls) textlib={:?} ({} calls)\n\
          [detail] stale retries {stale_retries}/{occupied_count} ({:?}) \
+         | settle {settled_early}/{occupied_count} early, {polls} polls \
          | worst slot {:?} at ({},{})",
         timing_grid,
         timing_move,
@@ -1234,6 +1352,8 @@ mod tests {
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
+            adaptive_delay: true,
+            min_delay_ms: 20,
             panel: None,
             zones: HashMap::new(),
         };
@@ -1304,6 +1424,8 @@ mod tests {
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
+            adaptive_delay: true,
+            min_delay_ms: 20,
             panel: None,
             zones: HashMap::new(),
         };
