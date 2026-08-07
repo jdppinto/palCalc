@@ -466,7 +466,6 @@ pub fn scan_box(
     let monitor = backend.focused_monitor_rect()?;
     let mut layout = PanelLayout::load_validated(calib.panel, monitor);
     let mut discovery_failures = 0u32;
-    let mut row_px: Option<f32> = None;
     let occupied: Vec<usize> = pre
         .iter()
         .enumerate()
@@ -753,17 +752,21 @@ pub fn scan_box(
             }
             gender = classify_gender(gimg.as_ref().unwrap_or(&band));
 
-            (passives, passive_unknowns) = if let Some(ref crops) = passive_crops {
+            (passives, passive_unknowns) = {
                 let expected = calib.panel.map(super::panel::row_px_expected);
+                // One pipeline: per-slot zone crops when the user calibrated
+                // all four, otherwise the same equal-cell 2x2 split of the
+                // passives region that tests/replay.rs replays — the shipped
+                // path is the validated path.
+                let split;
+                let crops = match &passive_crops {
+                    Some(c) => c,
+                    None => {
+                        split = super::panel::split_passives_grid(&pimg);
+                        &split
+                    }
+                };
                 l.read_passive_crops(synth, textlib, crops, &passive_idx, expected)
-            } else {
-                let expected = calib.panel.map(super::panel::row_px_expected);
-                let (k, u, found_px) =
-                    l.read_passive_rows(synth, textlib, &pimg, &passive_idx, row_px, expected);
-                if row_px.is_none() {
-                    row_px = found_px;
-                }
-                (k, u)
             };
             timing_read += t0.elapsed();
 
@@ -1210,17 +1213,23 @@ pub fn debug_read_sheet(
         };
 
     let textlib = TextLib::load(TextLib::default_dir());
-    let (keys, unknowns, px) = if let Some(ref crops) = passive_crops {
-        out.log.push("using per-slot passive crops".into());
-        let expected = calib.panel.map(super::panel::row_px_expected);
-        let (k, u) = l.read_passive_crops(synth, &textlib, crops, &passive_idx, expected);
-        (k, u, None)
-    } else {
-        let expected = calib.panel.map(super::panel::row_px_expected);
-        l.read_passive_rows(synth, &textlib, &pimg, &passive_idx, None, expected)
+    let expected = calib.panel.map(super::panel::row_px_expected);
+    // Same path selection as the live scan loop.
+    let split;
+    let crops = match &passive_crops {
+        Some(c) => {
+            out.log.push("using per-slot passive crops".into());
+            c
+        }
+        None => {
+            out.log.push("using 2x2 split of passives region".into());
+            split = super::panel::split_passives_grid(&pimg);
+            &split
+        }
     };
+    let (keys, unknowns) = l.read_passive_crops(synth, &textlib, crops, &passive_idx, expected);
     out.log.push(format!(
-        "passives: {keys:?} + {} unknown row(s) (row px {px:?}) in {:?}",
+        "passives: {keys:?} + {} unknown row(s) in {:?}",
         unknowns.len(),
         t.elapsed()
     ));

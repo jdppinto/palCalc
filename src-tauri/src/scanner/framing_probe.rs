@@ -66,19 +66,6 @@ fn dumps() -> Vec<(String, PathBuf)> {
     ]
 }
 
-/// Same split the live crops path and tests/replay.rs use: all four cells
-/// the SAME size (equal resize scale — unequal 293/294-wide cells alone cost
-/// ~0.02 NCC, unequal 43/44-tall cells ~0.09).
-fn split_grid_2x2(img: &RgbaImage) -> [RgbaImage; 4] {
-    let (hw, hh) = (img.width() / 2, img.height() / 2);
-    [
-        image::imageops::crop_imm(img, 0, 0, hw, hh).to_image(),
-        image::imageops::crop_imm(img, hw, 0, hw, hh).to_image(),
-        image::imageops::crop_imm(img, 0, hh, hw, hh).to_image(),
-        image::imageops::crop_imm(img, hw, hh, hw, hh).to_image(),
-    ]
-}
-
 /// Trim to the glyph bounding box plus `pad`, so framing follows the TEXT
 /// rather than the cell rect. Vertical half mirrors `synth::text_rows`' idea
 /// (a per-row profile); this adds the column profile.
@@ -388,7 +375,11 @@ fn probe_cell_position_framing() {
                     let Ok(img) = image::open(&p) else { continue };
                     let region = img.to_rgba8();
                     let pitch_cells = split_grid_pitch(&region);
-                    for (pos, crop) in split_grid_2x2(&region).iter().enumerate() {
+                    // The exact production split — panel::split_passives_grid.
+                    for (pos, crop) in super::panel::split_passives_grid(&region)
+                        .iter()
+                        .enumerate()
+                    {
                         let Some(geo) = textlib::fingerprint(crop) else {
                             blanks += 1;
                             continue;

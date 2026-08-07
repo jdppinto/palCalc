@@ -69,6 +69,26 @@ pub fn row_px_expected(panel: (i32, i32, u32, u32)) -> f32 {
     panel.3 as f32 * ROW_PX_PER_PANEL_H
 }
 
+/// Split a passives-region capture into its 2×2 grid of passive cells:
+/// [top-left, top-right, bottom-left, bottom-right]. Empty cells are still
+/// returned — `read_passive_crops` skips them.
+///
+/// All four cells are the SAME size (an odd region drops its last row/
+/// column): unequal sizes resize to the template size at different scales,
+/// which alone drops same-text NCC below 0.98 across positions (see
+/// framing_probe). Shared by the live scan, the doctor report,
+/// tests/replay.rs and the framing probe so the measured pipeline IS the
+/// shipped pipeline.
+pub fn split_passives_grid(region: &RgbaImage) -> [RgbaImage; 4] {
+    let (hw, hh) = (region.width() / 2, region.height() / 2);
+    [
+        image::imageops::crop_imm(region, 0, 0, hw, hh).to_image(),
+        image::imageops::crop_imm(region, hw, 0, hw, hh).to_image(),
+        image::imageops::crop_imm(region, 0, hh, hw, hh).to_image(),
+        image::imageops::crop_imm(region, hw, hh, hw, hh).to_image(),
+    ]
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PanelLayout {
     /// Band holding the pal name, absolute screen coords.
@@ -454,8 +474,9 @@ impl PanelLayout {
     }
 
     /// Fast-path: OCR pre-cropped passive images (one per slot).
-    /// When the user has calibrated `passive_1..4` zones, each crop contains
-    /// a single passive name — no band detection or column splitting needed.
+    /// Each crop contains a single passive name — no band detection or
+    /// column splitting needed. Crops come from `split_passives_grid` (or
+    /// from per-slot calibrated zones when the user drew all four).
     /// Falls back to NCC synth with narrowed sweep range when OCR fails.
     /// Processes all 4 crops in parallel via rayon.
     pub fn read_passive_crops(

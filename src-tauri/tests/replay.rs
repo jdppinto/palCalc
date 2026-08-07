@@ -6,7 +6,7 @@
 use palcalc_core::GameData;
 use palcalc_lib::scanner::dump::{self, load_labels};
 use palcalc_lib::scanner::ocr::{self, VocabIndex};
-use palcalc_lib::scanner::panel::{PanelLayout, PASSIVE_PX_RATIO};
+use palcalc_lib::scanner::panel::{split_passives_grid, PanelLayout, PASSIVE_PX_RATIO};
 use palcalc_lib::scanner::synth::TextSynth;
 use palcalc_lib::scanner::textlib::TextLib;
 use image::RgbaImage;
@@ -18,22 +18,6 @@ fn load_image(dir: &Path, name: &str) -> image::RgbaImage {
         .to_rgba8()
 }
 
-/// Split a 2-column × 2-row passive grid image into 4 quadrants.
-/// Layout: [top-left, top-right, bottom-left, bottom-right].
-/// Empty quadrants (dark pixels) are still returned — read_passive_crops skips them.
-/// All four cells are the SAME size (an odd region drops its last row/column):
-/// unequal sizes resize at different scales and that alone drops same-text
-/// NCC below 0.98 across positions.
-fn split_grid_2x2(img: &RgbaImage) -> [RgbaImage; 4] {
-    let hw = img.width() / 2;
-    let hh = img.height() / 2;
-    [
-        image::imageops::crop_imm(img, 0, 0, hw, hh).to_image(),
-        image::imageops::crop_imm(img, hw, 0, hw, hh).to_image(),
-        image::imageops::crop_imm(img, 0, hh, hw, hh).to_image(),
-        image::imageops::crop_imm(img, hw, hh, hw, hh).to_image(),
-    ]
-}
 
 /// Replay species for a single dump using the real scan's OCR pipeline.
 /// Returns (slot_key, expected_species, got_species, score) for mismatches.
@@ -188,7 +172,7 @@ fn replay_passives(dir: &Path) -> Vec<(String, String, Option<String>)> {
             let region = load_image(&box_dir, &passive_file);
 
             // Split the 2×2 grid into 4 individual passive crops.
-            let crops = split_grid_2x2(&region);
+            let crops = split_passives_grid(&region);
 
             // Call the REAL SCAN's read_passive_crops — per-slot OCR + synth path.
             let (got_keys, unknowns) = layout.read_passive_crops(
