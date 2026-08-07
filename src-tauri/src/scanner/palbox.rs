@@ -334,6 +334,27 @@ fn crop_from_panel(
     image::imageops::crop_imm(panel_img, x, y, w, h).to_image()
 }
 
+/// Force the four user-drawn `passive N` zones to identical dimensions
+/// (the minimum width and height across them, top-left anchored, so no
+/// zone reads outside the rect the user drew). Cells of different sizes
+/// resize to the template size at different scales, which alone drops
+/// same-text NCC below 0.98 across cells (see framing_probe) — the same
+/// defect the equal-cell region split fixes on the uncalibrated path.
+/// The shift sweep in textlib absorbs the few pixels of framing offset
+/// the trim can introduce.
+fn equalize_passive_zones(zones: &mut [(i32, i32, u32, u32)]) {
+    let Some(w) = zones.iter().map(|z| z.2).min() else {
+        return;
+    };
+    let Some(h) = zones.iter().map(|z| z.3).min() else {
+        return;
+    };
+    for z in zones {
+        z.2 = w;
+        z.3 = h;
+    }
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ScanProgress {
     pub current: u32,
@@ -610,7 +631,7 @@ pub fn scan_box(
             );
             // Per-slot passive zones: when calibrated, each captures a single
             // passive name — no band detection or column splitting needed.
-            let passive_zones: Vec<(i32, i32, u32, u32)> = (1..=4)
+            let mut passive_zones: Vec<(i32, i32, u32, u32)> = (1..=4)
                 .filter_map(|i| {
                     let (rect, ovr) = calib.zone_or(
                         &format!("passive {i}"),
@@ -620,6 +641,9 @@ pub fn scan_box(
                 })
                 .collect();
             let has_passive_slots = passive_zones.len() == 4;
+            if has_passive_slots {
+                equalize_passive_zones(&mut passive_zones);
+            }
             if slot_start.elapsed() > Duration::from_secs(3) {
                 return Err("slot capture timed out".into());
             }
@@ -1178,7 +1202,7 @@ pub fn debug_read_sheet(
     let t = std::time::Instant::now();
 
     // Check for per-slot passive calibration zones.
-    let passive_zones: Vec<(i32, i32, u32, u32)> = (1..=4)
+    let mut passive_zones: Vec<(i32, i32, u32, u32)> = (1..=4)
         .filter_map(|i| {
             let (rect, ovr) = calib.zone_or(&format!("passive {i}"), (0, 0, 0, 0));
             if ovr {
@@ -1189,6 +1213,9 @@ pub fn debug_read_sheet(
         })
         .collect();
     let has_passive_slots = passive_zones.len() == 4;
+    if has_passive_slots {
+        equalize_passive_zones(&mut passive_zones);
+    }
     for (i, rect) in passive_zones.iter().enumerate() {
         let (r, ovr) = calib.zone_or(&format!("passive {}", i + 1), *rect);
         out.zones_used.push((format!("passive {}", i + 1), r, ovr));
@@ -1315,6 +1342,23 @@ mod tests {
     use crate::scanner::textlib::TextLib;
     use image::RgbaImage;
     use palcalc_core::GameData;
+
+    #[test]
+    fn equalize_passive_zones_forces_identical_dims() {
+        let mut zones = vec![
+            (100, 200, 296, 44),
+            (400, 200, 293, 43),
+            (100, 250, 295, 46),
+            (400, 250, 294, 45),
+        ];
+        equalize_passive_zones(&mut zones);
+        for z in &zones {
+            assert_eq!((z.2, z.3), (293, 43));
+        }
+        // Anchors untouched.
+        assert_eq!(zones[0].0, 100);
+        assert_eq!(zones[3].1, 250);
+    }
 
     /// Fake compositor: a synthetic screen composed from real icon PNGs.
     struct MockBackend {
