@@ -14,6 +14,8 @@ pub mod matcher;
 #[cfg(test)]
 mod capture_probe;
 #[cfg(test)]
+mod framing_probe;
+#[cfg(test)]
 mod leak_probe;
 #[cfg(test)]
 mod memo_probe;

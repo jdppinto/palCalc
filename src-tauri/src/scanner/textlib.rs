@@ -109,6 +109,12 @@ impl TextLib {
     }
 }
 
+/// Normalized cross-correlation of two fingerprints. Both are zero-mean and
+/// unit-norm, so the dot product IS the correlation.
+pub(crate) fn ncc_pub(a: &[f32], b: &[f32]) -> f32 {
+    a.iter().zip(b).map(|(x, y)| x * y).sum()
+}
+
 /// Canonical NCC fingerprint of a crop: resized to TEMPLATE_SIZE, grayscale,
 /// zero-mean, unit-norm. `None` for a blank crop (stddev below MIN_STDDEV).
 /// The dot product of two fingerprints is their normalized cross-correlation.
