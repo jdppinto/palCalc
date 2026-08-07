@@ -69,8 +69,7 @@ impl TextLib {
     }
 
     fn identify_inner(&self, crop: &RgbaImage) -> TextMatch {
-        let resized = resize_to_template(crop);
-        let Some(v) = normalize(&resized) else {
+        let Some(v) = fingerprint(crop) else {
             return TextMatch::Empty;
         };
         let mut best: Option<(&str, f32)> = None;
@@ -108,6 +107,13 @@ impl TextLib {
         }
         Ok(())
     }
+}
+
+/// Canonical NCC fingerprint of a crop: resized to TEMPLATE_SIZE, grayscale,
+/// zero-mean, unit-norm. `None` for a blank crop (stddev below MIN_STDDEV).
+/// The dot product of two fingerprints is their normalized cross-correlation.
+pub(crate) fn fingerprint(img: &RgbaImage) -> Option<Vec<f32>> {
+    normalize(&resize_to_template(img))
 }
 
 fn normalize(img: &RgbaImage) -> Option<Vec<f32>> {

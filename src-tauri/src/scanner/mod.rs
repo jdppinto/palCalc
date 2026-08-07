@@ -11,6 +11,8 @@
 pub mod config;
 pub mod dump;
 pub mod matcher;
+#[cfg(test)]
+mod memo_probe;
 pub mod metrics;
 pub mod palbox;
 pub mod panel;

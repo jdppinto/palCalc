@@ -398,15 +398,15 @@ pub fn scan_box(
     }
 
     // ---- Pass 1: unhovered grid capture ----
+    let box_start = Instant::now();
+    let t_grid = Instant::now();
     let pre = classify_grid(backend, calib, debug_dir, &mut report, Some(templates), cursor_off_grid)?;
+    // Includes the grid_unhover_ms park sleep, the grid capture and occupancy
+    // classification — none of which had a bucket before.
+    let timing_grid = t_grid.elapsed();
 
     // ---- Pass 2: hover occupied slots, read the panel ----
     let monitor = backend.focused_monitor_rect()?;
-    // Boxes are full of duplicate pals: identical panel captures are read
-    // once and memoized by pixel hash.
-    let mut name_cache: HashMap<u64, Option<(String, f32)>> = HashMap::new();
-    #[allow(clippy::type_complexity)]
-    let mut passive_cache: HashMap<u64, (Vec<String>, Vec<(String, String)>)> = HashMap::new();
     let mut layout = PanelLayout::load_validated(calib.panel, monitor);
     let mut discovery_failures = 0u32;
     let mut row_px: Option<f32> = None;
@@ -426,13 +426,19 @@ pub fn scan_box(
     let mut done = 0u32;
     let mut first_occupied = true;
     let mut timing_move = Duration::ZERO;
+    // The per-slot hover settle: previously between the end of `move` and the
+    // start of `capture`, so it landed in no bucket at all (~60ms x slots).
+    let mut timing_hover = Duration::ZERO;
     let mut timing_capture = Duration::ZERO;
+    // Stale-panel detection: its 50ms sleep and re-capture used to be charged
+    // to `capture`, which hid both their cost and how often they fire.
+    let mut timing_stale = Duration::ZERO;
+    let mut stale_retries = 0u32;
     let mut timing_read = Duration::ZERO;
     let mut timing_png = Duration::ZERO;
     let mut prev_panel_hash: Option<u64> = None;
     // Per-layer breakdown of `timing_read`, recorded where the work happens.
     let metrics_base = super::metrics::snapshot();
-    let (mut name_hits, mut passive_hits) = (0u32, 0u32);
     // Worst single slot: a 30-slot sum hides one pathological slot completely.
     let mut worst_slot = (Duration::ZERO, 0u32, 0u32);
     for (i, p) in pre.iter().enumerate() {
@@ -462,12 +468,16 @@ pub fn scan_box(
         let t0 = Instant::now();
         backend.move_cursor(p.cx, p.cy)?;
         timing_move += t0.elapsed();
+        // Measured elapsed, not nominal: sleep overshoot is exactly what we
+        // want visible here.
+        let t_hover = Instant::now();
         std::thread::sleep(Duration::from_millis(if first_occupied {
             first_occupied = false;
             calib.first_slot_ms.max(calib.delay_ms)
         } else {
             calib.delay_ms
         }));
+        timing_hover += t_hover.elapsed();
         // If the user grabbed the mouse and moved it significantly, abort
         // instead of fighting over cursor control.
         if let Ok((mx, my)) = backend.cursor_pos() {
@@ -568,11 +578,16 @@ pub fn scan_box(
                 let pimg = backend.capture_region(pr.0, pr.1, pr.2, pr.3)?;
                 (band, None, pimg)
             };
+            // Capture proper ends here; the retry below is timed separately so
+            // `capture` stays pure capture.
+            timing_capture += t0.elapsed();
+            let t_stale = Instant::now();
             // Stale-panel detector: if the passives panel image is
             // identical to the previous slot's, the game hasn't repainted
             // the hover panel yet. Sleep an extra 50 ms and re-capture.
             let raw_pkey = img_hash(&pimg);
             if prev_panel_hash == Some(raw_pkey) && prev_panel_hash.is_some() {
+                stale_retries += 1;
                 std::thread::sleep(Duration::from_millis(50));
                 if let Some(panel) = calib.panel {
                     let panel_img =
@@ -591,30 +606,16 @@ pub fn scan_box(
                 }
             }
             prev_panel_hash = Some(img_hash(&pimg));
-            timing_capture += t0.elapsed();
+            timing_stale += t_stale.elapsed();
 
             if let Some(dir) = debug_dir {
                 let _ = band.save(dir.join(format!("name_{}_{}.png", p.row, p.col)));
             }
-            let band_key = img_hash(&band) ^ ((p.row as u64) << 32) ^ ((p.col as u64) << 48);
             let t0 = Instant::now();
-            let name_read = match name_from_discovery.take() {
-                Some(r) => {
-                    name_cache.insert(band_key, Some(r.clone()));
-                    Some(r)
-                }
-                None => match name_cache.get(&band_key) {
-                    Some(cached) => {
-                        name_hits += 1;
-                        cached.clone()
-                    }
-                    None => {
-                        let r = l.read_name(synth, &band, &species_idx);
-                        name_cache.insert(band_key, r.clone());
-                        r
-                    }
-                },
-            };
+            // Discovery already extracted this slot's name; otherwise read it.
+            let name_read = name_from_discovery
+                .take()
+                .or_else(|| l.read_name(synth, &band, &species_idx));
             if let Some((key, s)) = name_read {
                 if s >= NAME_CONFIDENCE {
                     species = Some(key);
@@ -623,34 +624,17 @@ pub fn scan_box(
             }
             gender = classify_gender(gimg.as_ref().unwrap_or(&band));
 
-            let pkey = img_hash(&pimg) ^ ((p.row as u64) << 32) ^ ((p.col as u64) << 48);
-            (passives, passive_unknowns) = match passive_cache.get(&pkey) {
-                Some(cached) => {
-                    passive_hits += 1;
-                    cached.clone()
+            (passives, passive_unknowns) = if let Some(ref crops) = passive_crops {
+                let expected = calib.panel.map(super::panel::row_px_expected);
+                l.read_passive_crops(synth, textlib, crops, &passive_idx, expected)
+            } else {
+                let expected = calib.panel.map(super::panel::row_px_expected);
+                let (k, u, found_px) =
+                    l.read_passive_rows(synth, textlib, &pimg, &passive_idx, row_px, expected);
+                if row_px.is_none() {
+                    row_px = found_px;
                 }
-                None => {
-                    let (keys, unknowns) = if let Some(ref crops) = passive_crops {
-                        let expected = calib.panel.map(super::panel::row_px_expected);
-                        l.read_passive_crops(synth, textlib, crops, &passive_idx, expected)
-                    } else {
-                        let expected = calib.panel.map(super::panel::row_px_expected);
-                        let (k, u, found_px) = l.read_passive_rows(
-                            synth,
-                            textlib,
-                            &pimg,
-                            &passive_idx,
-                            row_px,
-                            expected,
-                        );
-                        if row_px.is_none() {
-                            row_px = found_px;
-                        }
-                        (k, u)
-                    };
-                    passive_cache.insert(pkey, (keys.clone(), unknowns.clone()));
-                    (keys, unknowns)
-                }
+                (k, u)
             };
             timing_read += t0.elapsed();
 
@@ -734,18 +718,36 @@ pub fn scan_box(
     let occupied_count = occupied.len();
     let log: Vec<String> = report.lines().map(String::from).collect();
     let m = super::metrics::snapshot().since(metrics_base);
+    // Every bucket is derived against the box's own wall clock, and `other` is
+    // the residual. Buckets that don't have to sum to anything are how ~43s of
+    // sleeps stayed invisible; this makes any future gap show up by itself.
+    let total = box_start.elapsed();
+    let counted = timing_grid
+        + timing_move
+        + timing_hover
+        + timing_capture
+        + timing_stale
+        + timing_read
+        + timing_png;
+    let other = total.saturating_sub(counted);
     // `read` is the wall time of the whole recognition step; ocr/synth/textlib
     // break it down by layer. They differ by more than an order of magnitude,
     // so a single total can't say which one a slow scan is spending time in.
     let timing_msg = format!(
-        "[timing] {occupied_count} slots | move={:?} capture={:?} read={:?} png={:?}\n\
+        "[timing] {occupied_count} slots | grid={:?} move={:?} hover={:?} capture={:?} \
+         stale={:?} read={:?} png={:?} other={:?} | total={:?}\n\
          [read]   ocr={:?} ({} calls, {} memo hits) synth={:?} ({} calls) textlib={:?} ({} calls)\n\
-         [cache]  name {name_hits}/{occupied_count} passives {passive_hits}/{occupied_count} \
+         [detail] stale retries {stale_retries}/{occupied_count} ({:?}) \
          | worst slot {:?} at ({},{})",
+        timing_grid,
         timing_move,
+        timing_hover,
         timing_capture,
+        timing_stale,
         timing_read,
         timing_png,
+        other,
+        total,
         m.ocr,
         m.ocr_calls,
         m.ocr_hits,
@@ -753,6 +755,7 @@ pub fn scan_box(
         m.synth_calls,
         m.textlib,
         m.textlib_calls,
+        timing_stale,
         worst_slot.0,
         worst_slot.1,
         worst_slot.2,
@@ -801,16 +804,26 @@ pub fn scan_boxes(
     let settle = Duration::from_millis(calib.box_settle_ms);
 
     let mut cursor_parked = false;
+    // The box switch is invisible to scan_box's buckets, so account for it here.
+    let sweep_start = Instant::now();
+    let mut timing_switch = Duration::ZERO;
     for b in 0..box_count {
         if SCAN_ABORT.load(Ordering::Relaxed) {
             break;
         }
+        let mut switch = Duration::ZERO;
         if b > 0 {
+            let t = Instant::now();
             backend.key(super::platform::KEY_E)?;
             std::thread::sleep(settle);
+            switch = t.elapsed();
+            timing_switch += switch;
         }
         let box_dir = debug_dir.map(|d| d.join(format!("box_{b}")));
-        append_timing(&format!("=== box {} of {box_count} ===", b + 1));
+        append_timing(&format!(
+            "=== box {} of {box_count} === switch={switch:?}",
+            b + 1
+        ));
         let (mut slots, log) = scan_box(
             backend,
             templates,
@@ -837,6 +850,10 @@ pub fn scan_boxes(
         all.extend(slots);
         cursor_parked = true; // scan_box parks off-grid at the end
     }
+    append_timing(&format!(
+        "[sweep]  {box_count} boxes | switch={timing_switch:?} | total={:?}",
+        sweep_start.elapsed()
+    ));
     Ok((all, merged_log))
 }
 
