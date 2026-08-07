@@ -2426,6 +2426,7 @@
   "16,3,2": {
     "species": "Sekhmet",
     "passives": [
+      "Nocturnal",
       "CraftSpeed_up2",
       "CraftSpeed_up3",
       "PAL_CorporateSlave"
@@ -2876,6 +2877,7 @@
     "species": "Suzaku",
     "passives": [
       "MoveSpeed_up_2",
+      "Stamina_Up_1",
       "WorkSuitabilityAddRank_MonsterFarm_1",
       "TrainerMining_up1"
     ],

@@ -106,47 +106,22 @@ fn fingerprint_at(img: &RgbaImage, w: u32, h: u32) -> Option<Vec<f32>> {
     Some(v)
 }
 
-/// Known-incomplete labels in the committed dumps, verified by eye against the
-/// slot's own crop. Both omit exactly one passive that is plainly rendered in
-/// the crop (14,3,0 is missing "Infinite Stamina"; 16,3,2 is missing
-/// "Insomnia"), and both of those passives are in the hand-labelled
-/// passive_templates — i.e. the correction wasn't applied to every occurrence.
-///
-/// They matter far beyond this probe: measured against them, a memo that
-/// correctly serves two identical panels looks like a false hit. Left in place
-/// they would also make this dump assert wrong ground truth in replay.
-/// Scoped per dump — both dumps contain slots keyed "14,3,0" and "16,3,2",
-/// and applying one dump's corrections to the other injects errors instead of
-/// removing them.
-const LABEL_FIXES: &[(&str, &str, &str)] = &[
-    ("dump_1786052150591", "14,3,0", "Stamina_Up_1"),
-    ("dump_1786052150591", "16,3,2", "Nocturnal"),
-];
-
+/// Sanity gate: a crop whose fingerprint is >=0.999 correlated with an earlier
+/// crop carrying a DIFFERENT label is almost certainly a ground-truth error,
+/// not a memo hazard — two such cases in dump_1786052150591 (14,3,0 missing
+/// Stamina_Up_1, 16,3,2 missing Nocturnal) were verified by eye against the
+/// crops and fixed in labels.json. `probe_label_consistency` re-checks this so
+/// the next bad label is caught instead of being blamed on the memo.
 /// Load every crop for one path, in the order a live scan would visit them
 /// (box, then row, then col) — that is the order the memo would actually see.
 fn load_crops(dump: &str, dir: &Path, kind: PathKind) -> Vec<Crop> {
-    let mut labels = match load_labels(dir) {
+    let labels = match load_labels(dir) {
         Ok(l) => l,
         Err(e) => {
             eprintln!("[memo] cannot load labels from {}: {e}", dir.display());
             return Vec::new();
         }
     };
-    // Apply the verified label corrections; without them the ground truth
-    // contradicts its own crops and the measurement is meaningless.
-    if std::env::var("PALCALC_RAW_LABELS").is_err() {
-        for (d, key, missing) in LABEL_FIXES {
-            if *d != dump {
-                continue;
-            }
-            if let Some(l) = labels.get_mut(*key) {
-                if !l.passives.iter().any(|p| p == missing) {
-                    l.passives.push((*missing).to_string());
-                }
-            }
-        }
-    }
     let mut keys: Vec<(u32, u32, u32, String)> = labels
         .keys()
         .filter_map(|k| {
@@ -298,6 +273,59 @@ fn measure_ocr_ms(crops_dir: &Path) -> f64 {
         total += t.elapsed().as_secs_f64() * 1000.0;
     }
     total / samples.len() as f64
+}
+
+/// Ground-truth consistency check, not a memo measurement.
+///
+/// Two crops of the same region that correlate at >=0.999 are the same image;
+/// if their labels differ, one label is wrong. That is how the two incomplete
+/// entries in dump_1786052150591 were found — they had been mistaken for stale
+/// captures, then for memo false hits, before the crops settled it.
+///
+/// Fails on any surviving inconsistency so a bad label can't quietly become a
+/// wrong assertion in replay.
+#[test]
+#[ignore = "probe; --release -- --ignored --nocapture"]
+fn probe_label_consistency() {
+    const NEAR_IDENTICAL: f32 = 0.999;
+    let mut bad = Vec::new();
+    for (name, dir) in dumps() {
+        if !dir.is_dir() {
+            continue;
+        }
+        for kind in [PathKind::Name, PathKind::Passives] {
+            let crops = load_crops(&name, &dir, kind);
+            for (i, c) in crops.iter().enumerate() {
+                let Some(fp) = &c.fp else { continue };
+                // Compare against a window of recent slots: a repeated panel
+                // shows up within a few slots, and this keeps it O(n).
+                for prev in crops[i.saturating_sub(6)..i].iter() {
+                    let Some(pfp) = &prev.fp else { continue };
+                    let ncc: f32 = fp.iter().zip(pfp.iter()).map(|(a, b)| a * b).sum();
+                    if ncc >= NEAR_IDENTICAL && prev.label != c.label {
+                        bad.push(format!(
+                            "{name}/{} {} ~ {} (ncc={ncc:.6}) but {:?} != {:?}",
+                            kind.prefix(),
+                            c.key,
+                            prev.key,
+                            c.label,
+                            prev.label
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    for b in &bad {
+        eprintln!("[label] INCONSISTENT {b}");
+    }
+    assert!(
+        bad.is_empty(),
+        "{} near-identical crop pair(s) carry different labels — inspect the crops; \
+         one of each pair's labels is wrong",
+        bad.len()
+    );
+    eprintln!("[label] OK: no near-identical crop pair disagrees on its label");
 }
 
 /// Does the passives path's false-hit problem come from the fingerprint being
