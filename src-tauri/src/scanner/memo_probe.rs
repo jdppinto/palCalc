@@ -106,16 +106,47 @@ fn fingerprint_at(img: &RgbaImage, w: u32, h: u32) -> Option<Vec<f32>> {
     Some(v)
 }
 
+/// Known-incomplete labels in the committed dumps, verified by eye against the
+/// slot's own crop. Both omit exactly one passive that is plainly rendered in
+/// the crop (14,3,0 is missing "Infinite Stamina"; 16,3,2 is missing
+/// "Insomnia"), and both of those passives are in the hand-labelled
+/// passive_templates — i.e. the correction wasn't applied to every occurrence.
+///
+/// They matter far beyond this probe: measured against them, a memo that
+/// correctly serves two identical panels looks like a false hit. Left in place
+/// they would also make this dump assert wrong ground truth in replay.
+/// Scoped per dump — both dumps contain slots keyed "14,3,0" and "16,3,2",
+/// and applying one dump's corrections to the other injects errors instead of
+/// removing them.
+const LABEL_FIXES: &[(&str, &str, &str)] = &[
+    ("dump_1786052150591", "14,3,0", "Stamina_Up_1"),
+    ("dump_1786052150591", "16,3,2", "Nocturnal"),
+];
+
 /// Load every crop for one path, in the order a live scan would visit them
 /// (box, then row, then col) — that is the order the memo would actually see.
-fn load_crops(dir: &Path, kind: PathKind) -> Vec<Crop> {
-    let labels = match load_labels(dir) {
+fn load_crops(dump: &str, dir: &Path, kind: PathKind) -> Vec<Crop> {
+    let mut labels = match load_labels(dir) {
         Ok(l) => l,
         Err(e) => {
             eprintln!("[memo] cannot load labels from {}: {e}", dir.display());
             return Vec::new();
         }
     };
+    // Apply the verified label corrections; without them the ground truth
+    // contradicts its own crops and the measurement is meaningless.
+    if std::env::var("PALCALC_RAW_LABELS").is_err() {
+        for (d, key, missing) in LABEL_FIXES {
+            if *d != dump {
+                continue;
+            }
+            if let Some(l) = labels.get_mut(*key) {
+                if !l.passives.iter().any(|p| p == missing) {
+                    l.passives.push((*missing).to_string());
+                }
+            }
+        }
+    }
     let mut keys: Vec<(u32, u32, u32, String)> = labels
         .keys()
         .filter_map(|k| {
@@ -281,7 +312,7 @@ fn probe_passives_fingerprint_size() {
         }
         eprintln!("\n[fpsize] dump={name} path=passives");
         for (w, h) in [(128u32, 32u32), (256, 64), (256, 128), (384, 128)] {
-            let mut crops = load_crops(&dir, PathKind::Passives);
+            let mut crops = load_crops(&name, &dir, PathKind::Passives);
             // Re-fingerprint from the original crops at this size.
             for c in &mut crops {
                 let p = c.path.clone();
@@ -327,7 +358,7 @@ fn probe_verified_memo() {
         let ocr_ms = measure_ocr_ms(&dir);
 
         for kind in [PathKind::Name, PathKind::Passives] {
-            let crops = load_crops(&dir, kind);
+            let crops = load_crops(&name, &dir, kind);
             if crops.is_empty() {
                 eprintln!("[memo] SKIP {name}/{}: no crops", kind.prefix());
                 continue;
