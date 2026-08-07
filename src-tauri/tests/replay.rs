@@ -21,16 +21,17 @@ fn load_image(dir: &Path, name: &str) -> image::RgbaImage {
 /// Split a 2-column × 2-row passive grid image into 4 quadrants.
 /// Layout: [top-left, top-right, bottom-left, bottom-right].
 /// Empty quadrants (dark pixels) are still returned — read_passive_crops skips them.
+/// All four cells are the SAME size (an odd region drops its last row/column):
+/// unequal sizes resize at different scales and that alone drops same-text
+/// NCC below 0.98 across positions.
 fn split_grid_2x2(img: &RgbaImage) -> [RgbaImage; 4] {
-    let w = img.width();
-    let h = img.height();
-    let hw = w / 2;
-    let hh = h / 2;
+    let hw = img.width() / 2;
+    let hh = img.height() / 2;
     [
         image::imageops::crop_imm(img, 0, 0, hw, hh).to_image(),
-        image::imageops::crop_imm(img, hw, 0, w - hw, hh).to_image(),
-        image::imageops::crop_imm(img, 0, hh, hw, h - hh).to_image(),
-        image::imageops::crop_imm(img, hw, hh, w - hw, h - hh).to_image(),
+        image::imageops::crop_imm(img, hw, 0, hw, hh).to_image(),
+        image::imageops::crop_imm(img, 0, hh, hw, hh).to_image(),
+        image::imageops::crop_imm(img, hw, hh, hw, hh).to_image(),
     ]
 }
 

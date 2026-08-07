@@ -138,7 +138,7 @@ fn profile_sheet_read_layers() {
     for &(by, bh) in &bands {
         let y0 = by.saturating_sub(4);
         let h = (bh + 8).min(region.height() - y0);
-        for (cx, cw) in [(0u32, half), (half, region.width() - half)] {
+        for (cx, cw) in [(0u32, half), (half, half)] {
             let cell = image::imageops::crop_imm(&region, cx, y0, cw, h).to_image();
             ocr::clear_cache();
             let t = Instant::now();

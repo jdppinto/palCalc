@@ -2,7 +2,11 @@
 //!
 //! Templates are stored at original resolution but compared at a fixed
 //! canonical size (`TEMPLATE_SIZE`) so the same passive name matches across
-//! different screen resolutions and UI scales.
+//! different screen resolutions and UI scales. Matching is also
+//! shift-tolerant: templates fingerprint a centered sub-window and queries
+//! sweep that window over a small margin (`SHIFT_MARGIN_X/Y`), so a template
+//! learned in one passive-grid cell matches the same text framed a few
+//! pixels differently in another cell.
 
 use std::io::Cursor;
 use std::path::PathBuf;
@@ -17,11 +21,36 @@ pub const EMPTY_LABEL: &str = "-empty-"; // no underscores: "__" is the stored-f
 
 /// Below this stddev a zone crop is an empty row.
 const MIN_STDDEV: f32 = 4.0;
-/// Same-UI re-renders of the same text score ~0.99; unrelated text far lower.
-const MATCH_THRESHOLD: f32 = 0.9;
+/// Same-UI re-renders of the same text score ~0.99 under the shift sweep
+/// (framing probe: cross-position p05 = 0.990 on both dumps), while the
+/// highest DIFFERENT-text score the sweep can inflate to is 0.88 (19,800
+/// impostor pairs). 0.95 splits those with margin on both sides; a genuine
+/// match that somehow scores below it falls back to OCR — slower, not wrong.
+const MATCH_THRESHOLD: f32 = 0.95;
 /// Canonical size for scale-invariant template matching. All crops and
 /// templates are resized to this before NCC comparison.
 const TEMPLATE_SIZE: (u32, u32) = (128, 32);
+/// Sweep margins for shift-tolerant matching, as a fraction of the crop.
+/// Cells cut from the passives region frame their text at position-dependent
+/// offsets (the region's half-dimensions don't equal the true cell pitch:
+/// ~3.5px horizontal, ~1px vertical at 2560x1440), and NCC at TEMPLATE_SIZE
+/// collapses under ~2px of misalignment. Templates fingerprint the CENTER
+/// window; queries sweep the window across the margin and keep the best
+/// score, so one template serves all four cell positions. Fractions chosen
+/// to give ±5px horizontal / ±3px vertical on a ~293x43 cell.
+const SHIFT_MARGIN_X: f32 = 0.017;
+const SHIFT_MARGIN_Y: f32 = 0.07;
+/// Stop sweeping once a template scores this high — genuine matches at the
+/// right offset score ~0.99+, impostors stay far lower, so nothing better
+/// is left to find.
+const SWEEP_EARLY_EXIT: f32 = 0.97;
+/// Window fingerprints clip luma below this before normalizing. The passive
+/// box fill is translucent — the world renders through it — and the panel
+/// has a dark gradient, both of which vary with what's behind/around the
+/// cell while the glyphs, borders, and rank chevrons are rendered bright.
+/// Clipping the dark range keeps only the stable content (measured: lifts a
+/// cross-row same-text pair from 0.91 to 0.999 at TEMPLATE_SIZE).
+const DARK_CLIP: f32 = 140.0;
 
 pub enum TextMatch {
     Empty,
@@ -55,8 +84,7 @@ impl TextLib {
                     continue;
                 };
                 let img = img.to_rgba8();
-                let resized = resize_to_template(&img);
-                if let Some(v) = normalize(&resized) {
+                if let Some(v) = fingerprint_centered(&img) {
                     entries.push((label.to_string(), v));
                 }
             }
@@ -69,14 +97,35 @@ impl TextLib {
     }
 
     fn identify_inner(&self, crop: &RgbaImage) -> TextMatch {
-        let Some(v) = fingerprint(crop) else {
+        let (mx, my) = shift_margins(crop.width(), crop.height());
+        let Some(center) = fingerprint_window(crop, mx, my) else {
             return TextMatch::Empty;
         };
+        if self.entries.is_empty() {
+            return TextMatch::Unknown;
+        }
         let mut best: Option<(&str, f32)> = None;
-        for (label, t) in &self.entries {
-            let score: f32 = v.iter().zip(t).map(|(a, b)| a * b).sum();
-            if best.is_none() || score > best.unwrap().1 {
-                best = Some((label, score));
+        for (i, (dx, dy)) in sweep_offsets(mx, my).into_iter().enumerate() {
+            let owned;
+            let v = if i == 0 {
+                &center // first offset is the center, already computed
+            } else {
+                match fingerprint_window(crop, dx, dy) {
+                    Some(f) => {
+                        owned = f;
+                        &owned
+                    }
+                    None => continue,
+                }
+            };
+            for (label, t) in &self.entries {
+                let score = ncc_pub(v, t);
+                if best.map_or(true, |(_, b)| score > b) {
+                    best = Some((label, score));
+                }
+            }
+            if best.is_some_and(|(_, s)| s >= SWEEP_EARLY_EXIT) {
+                break;
             }
         }
         match best {
@@ -101,8 +150,7 @@ impl TextLib {
             .count();
         let path = self.dir.join(format!("{label}__{n}.png"));
         crop.save(&path).map_err(|e| e.to_string())?;
-        let resized = resize_to_template(crop);
-        if let Some(v) = normalize(&resized) {
+        if let Some(v) = fingerprint_centered(crop) {
             self.entries.push((label.to_string(), v));
         }
         Ok(())
@@ -118,15 +166,68 @@ pub(crate) fn ncc_pub(a: &[f32], b: &[f32]) -> f32 {
 /// Canonical NCC fingerprint of a crop: resized to TEMPLATE_SIZE, grayscale,
 /// zero-mean, unit-norm. `None` for a blank crop (stddev below MIN_STDDEV).
 /// The dot product of two fingerprints is their normalized cross-correlation.
+///
+/// Full-frame — no shift tolerance. Used where both sides share identical
+/// framing (`panel_signature` change detection). Template matching uses
+/// `fingerprint_centered` / `fingerprint_window` instead.
 pub(crate) fn fingerprint(img: &RgbaImage) -> Option<Vec<f32>> {
     normalize(&resize_to_template(img))
 }
 
+/// Sweep margins for a crop of the given size, clamped so the window keeps
+/// at least one pixel per axis.
+pub(crate) fn shift_margins(w: u32, h: u32) -> (u32, u32) {
+    let mx = ((w as f32 * SHIFT_MARGIN_X).round() as u32).min(w.saturating_sub(1) / 2);
+    let my = ((h as f32 * SHIFT_MARGIN_Y).round() as u32).min(h.saturating_sub(1) / 2);
+    (mx, my)
+}
+
+/// Fingerprint of the sub-window at offset `(dx, dy)` (each in `0..=2*margin`),
+/// sized `(w - 2*mx, h - 2*my)`. The window size is fixed per crop size, so
+/// every offset resizes at the same scale — sweeping is pure translation.
+pub(crate) fn fingerprint_window(img: &RgbaImage, dx: u32, dy: u32) -> Option<Vec<f32>> {
+    let (w, h) = img.dimensions();
+    let (mx, my) = shift_margins(w, h);
+    let win = image::imageops::crop_imm(
+        img,
+        dx.min(2 * mx),
+        dy.min(2 * my),
+        w - 2 * mx,
+        h - 2 * my,
+    )
+    .to_image();
+    normalize_clipped(&resize_to_template(&win), DARK_CLIP)
+}
+
+/// Canonical template fingerprint: the window at its centered offset.
+pub(crate) fn fingerprint_centered(img: &RgbaImage) -> Option<Vec<f32>> {
+    let (mx, my) = shift_margins(img.width(), img.height());
+    fingerprint_window(img, mx, my)
+}
+
+/// All window offsets, ordered center-out so an aligned match is found on
+/// the first few tries and the early-exit fires immediately.
+pub(crate) fn sweep_offsets(mx: u32, my: u32) -> Vec<(u32, u32)> {
+    let mut v: Vec<(u32, u32)> = (0..=2 * my)
+        .flat_map(|dy| (0..=2 * mx).map(move |dx| (dx, dy)))
+        .collect();
+    v.sort_by_key(|&(dx, dy)| {
+        let ex = dx as i64 - mx as i64;
+        let ey = dy as i64 - my as i64;
+        ex * ex + ey * ey
+    });
+    v
+}
+
 fn normalize(img: &RgbaImage) -> Option<Vec<f32>> {
+    normalize_clipped(img, 0.0)
+}
+
+fn normalize_clipped(img: &RgbaImage, clip: f32) -> Option<Vec<f32>> {
     let n = (img.width() * img.height()) as f32;
     let mut v: Vec<f32> = img
         .pixels()
-        .map(|p| 0.299 * p[0] as f32 + 0.587 * p[1] as f32 + 0.114 * p[2] as f32)
+        .map(|p| (0.299 * p[0] as f32 + 0.587 * p[1] as f32 + 0.114 * p[2] as f32).max(clip))
         .collect();
     let mean = v.iter().sum::<f32>() / n;
     let var = v.iter().map(|x| (x - mean).powi(2)).sum::<f32>() / n;

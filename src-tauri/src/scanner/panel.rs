@@ -340,9 +340,11 @@ impl PanelLayout {
         let mut found_px: Option<f32> = None;
         // Passives render in a 2-COLUMN grid (field capture: Swift | Artisan
         // on one line), so each vertical band holds up to two independent
-        // cells split at the region midline.
+        // cells split at the region midline. Both cells are cut to the SAME
+        // width (an odd region drops its last column) — unequal widths resize
+        // at different scales and that alone drops same-text NCC below 0.98.
         let half = region.width() / 2;
-        let cells = [(0u32, half), (half, region.width() - half)];
+        let cells = [(0u32, half), (half, half)];
         for (by, bh) in bands {
             let band_center = by as f32 + bh as f32 / 2.0;
             if band_center <= area_top || band_center >= area_bottom {

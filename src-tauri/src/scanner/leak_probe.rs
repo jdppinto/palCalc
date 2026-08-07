@@ -212,7 +212,7 @@ fn probe_passive_layers_rss() {
         for (by, bh) in bands {
             let y0 = by.saturating_sub(4);
             let h = (bh + 8).min(img.height() - y0);
-            for (cx, cw) in [(0u32, half), (half, img.width() - half)] {
+            for (cx, cw) in [(0u32, half), (half, half)] {
                 let cell = image::imageops::crop_imm(img, cx, y0, cw, h).to_image();
                 let _ = lib.identify(&cell);
             }
