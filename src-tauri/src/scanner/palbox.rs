@@ -901,6 +901,8 @@ pub fn scan_box(
         calib.slot_center(0, 0).0 - calib.slot_size as i32,
         calib.slot_center(0, 0).1 - calib.slot_size as i32,
     );
+    // Give this box's OCR arena back before starting the next one.
+    release_arena();
     Ok((results, log))
 }
 
@@ -1233,6 +1235,28 @@ pub fn debug_read_sheet(
     let _ = write_report_meta("sheet", &out.log);
     Ok(out)
 }
+
+/// Hand freed heap pages back to the OS.
+///
+/// A sweep's OCR leaves ~200MB of glibc arena behind: measured, 1800 OCR calls
+/// grow RSS to ~260MB and a trim returns it to ~40MB, so the memory is
+/// reusable rather than leaked. Reusable is not the same as harmless on a box
+/// that has already been OOM-killed once, and the scanner is the only thing
+/// running at that scale, so it gives the pages back at each box boundary.
+///
+/// glibc-specific; a no-op everywhere else.
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+fn release_arena() {
+    unsafe extern "C" {
+        fn malloc_trim(pad: usize) -> i32;
+    }
+    unsafe {
+        malloc_trim(0);
+    }
+}
+
+#[cfg(not(all(target_os = "linux", target_env = "gnu")))]
+fn release_arena() {}
 
 pub fn timing_log_path() -> std::path::PathBuf {
     super::config::palcalc_dir().join("timing.log")
