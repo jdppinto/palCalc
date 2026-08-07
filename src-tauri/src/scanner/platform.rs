@@ -463,6 +463,34 @@ mod linux {
         /// way to trigger a game's hover detection; compositor warps teleport
         /// the cursor without the event stream games listen for.
         ydotool: Option<bool>,
+        /// Captures taken on the current `wayshot` connection. Hyprland keeps a
+        /// full-output framebuffer per screencopy capture for the LIFETIME OF
+        /// THE CLIENT CONNECTION, so this counter drives a periodic reconnect —
+        /// see `RECONNECT_EVERY`.
+        captures: u32,
+    }
+
+    /// Reconnect the screencopy client every N captures.
+    ///
+    /// Measured against Hyprland 0.56.1 (headless, 1920x1080): each capture on a
+    /// long-lived connection adds 7.95MB to the compositor's RSS — exactly one
+    /// 1920x1080x4 framebuffer — and it is released only when the client
+    /// disconnects. Over a 32-box sweep (~733 captures at 2560x1440) that is
+    /// ~10GB, which OOM'd a 32GB machine and took the session with it.
+    ///
+    /// A fresh connection costs a few ms, so amortised over 32 captures it is
+    /// nothing, and it caps the compositor's outstanding frames at
+    /// 32 x one framebuffer (~470MB at 1440p) instead of unbounded.
+    const RECONNECT_EVERY: u32 = 32;
+
+    /// `PALCALC_RECONNECT_EVERY` overrides the interval; 0 disables reconnecting
+    /// (which reproduces the unbounded growth, for A/B measurement).
+    fn reconnect_every() -> u32 {
+        std::env::var("PALCALC_RECONNECT_EVERY")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(RECONNECT_EVERY)
+            .max(1)
     }
 
     /// Candidate movecursor forms, classic first. Which one a given Hyprland
@@ -480,9 +508,20 @@ mod linux {
         pub fn new() -> Result<Self, String> {
             Ok(Self {
                 socket: socket_path()?,
-                wayshot: WayshotConnection::new().ok(),
+                // PALCALC_FORCE_GRIM skips libwayshot entirely. A grim
+                // subprocess per capture is slower, but it disconnects after
+                // every frame, so anything the compositor scopes to a client
+                // connection is released each time — which makes it both a
+                // diagnostic and a possible workaround for the compositor
+                // memory growth seen during sweeps.
+                wayshot: if std::env::var_os("PALCALC_FORCE_GRIM").is_some() {
+                    None
+                } else {
+                    WayshotConnection::new().ok()
+                },
                 move_form: None,
                 ydotool: None,
+                captures: 0,
             })
         }
 
@@ -696,14 +735,33 @@ mod linux {
                 // Flushing here is cheap (a write on an already-open socket) and
                 // cannot change what was captured — the image is already decoded
                 // into `shot` by this point.
-                if let Err(e) = ws.conn.flush() {
-                    eprintln!("wayland flush after capture failed: {e}");
+                // NOTE: measured on the affected machine, this flush did NOT
+                // reduce the compositor's growth, so the retention is not a
+                // queued-destroy problem. Kept because it is correct hygiene
+                // and free; PALCALC_NO_FLUSH disables it for A/B testing.
+                if std::env::var_os("PALCALC_NO_FLUSH").is_none() {
+                    if let Err(e) = ws.conn.flush() {
+                        eprintln!("wayland flush after capture failed: {e}");
+                    }
                 }
-                match shot {
-                    Ok(img) => return Ok(img.to_rgba8()),
+                let out = match shot {
+                    Ok(img) => Some(img.to_rgba8()),
                     Err(e) => {
                         eprintln!("libwayshot capture failed ({e}), falling back to grim");
+                        None
                     }
+                };
+                // Recycle the connection periodically: the compositor holds one
+                // full-output framebuffer per capture until the client goes
+                // away, so a long-lived connection grows without bound.
+                self.captures += 1;
+                if self.captures >= reconnect_every() {
+                    self.captures = 0;
+                    self.wayshot = None; // disconnect: compositor frees its frames
+                    self.wayshot = WayshotConnection::new().ok();
+                }
+                if let Some(img) = out {
+                    return Ok(img);
                 }
             }
             Self::capture_grim(x, y, w, h)

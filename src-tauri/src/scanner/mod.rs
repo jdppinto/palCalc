@@ -12,6 +12,10 @@ pub mod config;
 pub mod dump;
 pub mod matcher;
 #[cfg(test)]
+mod capture_probe;
+#[cfg(test)]
+mod leak_probe;
+#[cfg(test)]
 mod memo_probe;
 pub mod metrics;
 pub mod palbox;
