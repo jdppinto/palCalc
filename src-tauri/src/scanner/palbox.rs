@@ -31,6 +31,13 @@ pub static SCAN_ABORT: AtomicBool = AtomicBool::new(false);
 const SETTLE_CHANGED_BELOW: f32 = 0.995;
 const SETTLE_STABLE_AT: f32 = 0.999;
 
+/// Hard cap on captures per slot while settling, independent of the deadline.
+/// The deadline alone is not a bound on CAPTURE COUNT: it bounds elapsed time,
+/// so a fast backend just polls more times inside the same window. Captures are
+/// the expensive, leak-prone resource (a full panel is megabytes and, on
+/// wlr-screencopy, is allocated compositor-side), so they get their own bound.
+const MAX_SETTLE_POLLS: u32 = 4;
+
 /// Normalized cross-correlation of two equal-length fingerprints.
 fn ncc(a: &[f32], b: &[f32]) -> f32 {
     a.iter().zip(b).map(|(x, y)| x * y).sum()
@@ -99,7 +106,7 @@ pub struct GridCalibration {
 }
 
 fn default_grid_unhover() -> u64 { 20 }
-fn default_adaptive() -> bool { true }
+fn default_adaptive() -> bool { false }
 fn default_min_delay() -> u64 { 20 }
 fn default_first_slot() -> u64 { 50 }
 fn default_box_settle() -> u64 { 50 }
@@ -116,7 +123,7 @@ impl Default for GridCalibration {
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
-            adaptive_delay: true,
+            adaptive_delay: false,
             min_delay_ms: 20,
             panel: None,
             zones: HashMap::new(),
@@ -636,6 +643,7 @@ pub fn scan_box(
                     backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
                 if adaptive && !first {
                     let deadline = Duration::from_millis(calib.delay_ms);
+                    let mut slot_polls = 0u32;
                     let mut last: Option<Vec<f32>> = None;
                     loop {
                         let fp = panel_signature(
@@ -653,7 +661,11 @@ pub fn scan_box(
                             _ => false,
                         };
                         polls += 1;
-                        if (changed && stable) || t_hover.elapsed() >= deadline {
+                        slot_polls += 1;
+                        if (changed && stable)
+                            || slot_polls >= MAX_SETTLE_POLLS
+                            || t_hover.elapsed() >= deadline
+                        {
                             if changed && stable {
                                 settled_early += 1;
                             }
@@ -1352,7 +1364,7 @@ mod tests {
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
-            adaptive_delay: true,
+            adaptive_delay: false,
             min_delay_ms: 20,
             panel: None,
             zones: HashMap::new(),
@@ -1424,7 +1436,7 @@ mod tests {
             grid_unhover_ms: 20,
             first_slot_ms: 50,
             box_settle_ms: 50,
-            adaptive_delay: true,
+            adaptive_delay: false,
             min_delay_ms: 20,
             panel: None,
             zones: HashMap::new(),
