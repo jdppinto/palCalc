@@ -680,7 +680,26 @@ mod linux {
                         },
                     },
                 };
-                match ws.screenshot(region, false) {
+                let shot = ws.screenshot(region, false);
+                // Push the frame's teardown to the compositor NOW.
+                //
+                // libwayshot allocates a wl_shm_pool + wl_buffer per capture and
+                // destroys both in FrameGuard::drop, which happens inside
+                // screenshot(). But destroy() only QUEUES a Wayland request —
+                // until the connection is flushed the compositor still owns its
+                // side. Field evidence: over a 32-box sweep Hyprland's RSS climbed
+                // steadily and only fell back to ~61MB when the scan ended, i.e.
+                // every capture's pool was held for the whole scan. At ~2.7MB per
+                // panel capture that is gigabytes of compositor memory, and it
+                // contributed to an OOM that killed the session.
+                //
+                // Flushing here is cheap (a write on an already-open socket) and
+                // cannot change what was captured — the image is already decoded
+                // into `shot` by this point.
+                if let Err(e) = ws.conn.flush() {
+                    eprintln!("wayland flush after capture failed: {e}");
+                }
+                match shot {
                     Ok(img) => return Ok(img.to_rgba8()),
                     Err(e) => {
                         eprintln!("libwayshot capture failed ({e}), falling back to grim");
