@@ -13,7 +13,15 @@
     cols: number;
     rows: number;
     slot_size: number;
+    /// Hover settle. With adaptive_delay on this is the CEILING, not a fixed wait.
     delay_ms: number;
+    grid_unhover_ms: number;
+    first_slot_ms: number;
+    box_settle_ms: number;
+    /// Poll the panel until it has repainted instead of always waiting delay_ms.
+    adaptive_delay: boolean;
+    /// Floor before the first poll when adaptive_delay is on.
+    min_delay_ms: number;
     panel: Rect | null;
     // Zone overrides stored as FRACTIONS of the panel (fx,fy,fw,fh), so they
     // track the sheet. Resolve to absolute screen px via zoneAbs().
@@ -57,7 +65,14 @@
     cols: 6,
     rows: 5,
     slot_size: 90,
-    delay_ms: 300,
+    // Mirrors the Rust defaults in GridCalibration::default(); this literal is
+    // only used before the backend calibration loads.
+    delay_ms: 60,
+    grid_unhover_ms: 20,
+    first_slot_ms: 50,
+    box_settle_ms: 50,
+    adaptive_delay: true,
+    min_delay_ms: 20,
     panel: null,
     zones: {},
   });
@@ -735,11 +750,37 @@
       <label>cols <input type="number" min="1" bind:value={calib.cols} /></label>
       <label>rows <input type="number" min="1" bind:value={calib.rows} /></label>
       <label>slot px <input type="number" min="20" bind:value={calib.slot_size} /></label>
-      <label>
-        delay {calib.delay_ms} ms
-        <input type="range" min="100" max="1000" step="50" bind:value={calib.delay_ms} />
-      </label>
       <button class="save" onclick={saveCalib}>Save calibration</button>
+    </div>
+    <div class="row">
+      <label title="Poll the panel until it has visibly repainted instead of always waiting the full delay. Falls back to the full wait whenever the change can't be observed, so it never risks reading a stale panel.">
+        <input type="checkbox" bind:checked={calib.adaptive_delay} />
+        adaptive settle
+      </label>
+      <label title="Hover settle. With adaptive settle on this is the CEILING — the scan waits at most this long.">
+        {calib.adaptive_delay ? "delay ceiling" : "delay"}
+        <input type="number" min="10" max="1000" step="10" bind:value={calib.delay_ms} /> ms
+      </label>
+      {#if calib.adaptive_delay}
+        <label title="Floor before the first poll: the game needs some time to begin repainting, and polling before that just wastes captures.">
+          floor
+          <input type="number" min="0" max="200" step="5" bind:value={calib.min_delay_ms} /> ms
+        </label>
+      {/if}
+    </div>
+    <div class="row">
+      <label title="Wait after parking the cursor off-grid before the unhovered grid capture.">
+        grid unhover
+        <input type="number" min="0" max="500" step="5" bind:value={calib.grid_unhover_ms} /> ms
+      </label>
+      <label title="Wait on the first occupied slot of each box — the panel has to appear from scratch, so it always waits in full.">
+        first slot
+        <input type="number" min="0" max="1000" step="10" bind:value={calib.first_slot_ms} /> ms
+      </label>
+      <label title="Wait after pressing E to switch boxes; the page change animates.">
+        box settle
+        <input type="number" min="0" max="1000" step="10" bind:value={calib.box_settle_ms} /> ms
+      </label>
     </div>
 
     <h4>Reading zones (precise, zoomable)</h4>
