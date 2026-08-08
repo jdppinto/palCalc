@@ -76,8 +76,6 @@
     panel: null,
     zones: {},
   });
-  // Panel corner staging (top-left captured, waiting for bottom-right)
-  let panelTl = $state<[number, number] | null>(null);
   let calibSaved = $state(false);
   // Whether the calibration <details> is expanded. Deliberately NOT derived
   // from calibSaved: saving a zone mid-calibration must not snap the panel
@@ -582,7 +580,7 @@
     }
   }
 
-  async function captureCorner(which: 1 | 2 | 3 | 4) {
+  async function captureCorner(which: 1 | 2) {
     capturing = which;
     for (let i = 5; i > 0; i--) {
       countdown = i;
@@ -592,21 +590,23 @@
     try {
       const [x, y] = await invoke<[number, number]>("get_cursor_pos");
       if (which === 1) calib.slot_tl = [x, y];
-      else if (which === 2) calib.slot_br = [x, y];
-      else if (which === 3) panelTl = [x, y];
-      else if (panelTl) {
-        calib.panel = [
-          Math.min(panelTl[0], x),
-          Math.min(panelTl[1], y),
-          Math.abs(x - panelTl[0]),
-          Math.abs(y - panelTl[1]),
-        ];
-        calibSaved = false;
-      }
+      else calib.slot_br = [x, y];
     } catch (e) {
       error = String(e);
     }
     capturing = 0;
+  }
+
+  // Persist the adaptive-settle toggle immediately — it sits in Setup with no
+  // save button of its own. Before any calibration exists there is nothing
+  // meaningful to persist; the next save/defaults will carry it.
+  async function saveAdaptiveToggle() {
+    if (!calibSaved) return;
+    try {
+      await invoke("save_calibration", { calib });
+    } catch (e) {
+      error = String(e);
+    }
   }
 
   async function saveCalib() {
@@ -710,13 +710,107 @@
   {/if}
 
   <details bind:open={calibOpen}>
-    <summary>Grid calibration {calibSaved ? "✓" : "(needed before scanning)"}</summary>
+    <summary>Setup {calibSaved ? "✓" : "(needed before scanning)"}</summary>
+    <p class="dim-text">
+      One click sets the standard 16:9 layout scaled to your monitor. Then
+      open the Palbox in Palworld, hover any pal, and run a test read — if
+      species, gender and passives come back right, you're ready to scan.
+    </p>
     <div class="row">
-      <button class="save" onclick={useDefaults}>
-        Use default layout (16:9, scaled to your monitor)
+      <button class="save" onclick={useDefaults}>Set up for my monitor</button>
+      <button onclick={() => runDebug("sheet")} disabled={debugRunning || savingDump || !calibSaved}>
+        {debugRunning ? "Reading…" : "Test read (2s) — hover a pal first"}
       </button>
-      <span class="hint-inline">— resets panel + all zones, or calibrate manually below</span>
+      <label title="Poll the panel until it has visibly repainted instead of always waiting the full delay. Falls back to the full wait whenever the change can't be observed, so it never risks reading a stale panel.">
+        <input type="checkbox" bind:checked={calib.adaptive_delay} onchange={saveAdaptiveToggle} />
+        adaptive settle (experimental)
+      </label>
     </div>
+    {#if debugSheet}
+      <div class="debug-sheet">
+        <p>
+          species: <strong>{debugSheet.species ? (pal(debugSheet.species)?.name ?? debugSheet.species) : "—"}</strong>
+          ({debugSheet.name_score.toFixed(3)})
+          {genderSymbol(debugSheet.gender)}
+          · passives: {debugSheet.passives.map(passiveName).join(", ") || "none"}
+        </p>
+        {#if debugSheet.name_band_png}
+          <p class="dim-text">name band capture:</p>
+          <img class="debug-img" src={"data:image/png;base64," + debugSheet.name_band_png} alt="name band" />
+        {/if}
+        {#if debugSheet.passives_png}
+          <p class="dim-text">passives region capture:</p>
+          <img class="debug-img" src={"data:image/png;base64," + debugSheet.passives_png} alt="passives region" />
+        {/if}
+        {#if debugSheet.panel_png && debugSheet.panel_rect}
+          <p class="dim-text">
+            panel capture with the zones the read used — drag on the image to
+            propose a better <strong style={`color:${ZONE_COLORS[zoneAspect]}`}>{zoneAspect}</strong>
+            zone, save it, then run the sheet test again:
+          </p>
+          <!-- svelte-ignore a11y_no_static_element_interactions -->
+          <div
+            class="zone-editor"
+            onmousedown={zoneDown}
+            onmousemove={zoneMove}
+            onmouseup={zoneUp}
+            onmouseleave={zoneUp}
+          >
+            <img
+              bind:this={panelImgEl}
+              src={"data:image/png;base64," + debugSheet.panel_png}
+              alt="panel"
+              draggable="false"
+            />
+            {#each debugSheet.zones_used as [key, rect, ovr] (key)}
+              <div
+                class="zone-box"
+                style={`${zonePct(rect)}border-color:${ZONE_COLORS[key] ?? "#fff"};`}
+                title={`${key}${ovr ? " (override)" : ""}`}
+              >
+                <span style={`background:${ZONE_COLORS[key] ?? "#fff"}`}>{key}{ovr ? " ✎" : ""}</span>
+              </div>
+            {/each}
+            {#each ["passive 1", "passive 2", "passive 3", "passive 4"] as key}
+              {@const def = defaultZoneRect(key)}
+              {#if def && !debugSheet.zones_used.find((z) => z[0] === key)}
+                <div
+                  class="zone-box dashed"
+                  style={`${zonePct(def)}border-color:${ZONE_COLORS[key]};`}
+                  title={`${key} (default)`}
+                >
+                  <span style={`background:${ZONE_COLORS[key]}`}>{key}</span>
+                </div>
+              {/if}
+            {/each}
+            {#if zoneSel}
+              <div
+                class="zone-sel"
+                style={`left:${zoneSel.x}px;top:${zoneSel.y}px;width:${zoneSel.w}px;height:${zoneSel.h}px;border-color:${ZONE_COLORS[zoneAspect]};`}
+              ></div>
+            {/if}
+          </div>
+          <div class="row">
+            <select bind:value={zoneAspect}>
+              <option value="name">name</option>
+              <option value="gender">gender</option>
+              <option value="passives">passives (full grid)</option>
+              <option value="passive 1">passive 1 (top-left)</option>
+              <option value="passive 2">passive 2 (top-right)</option>
+              <option value="passive 3">passive 3 (bottom-left)</option>
+              <option value="passive 4">passive 4 (bottom-right)</option>
+            </select>
+            <button onclick={saveZone} disabled={!zoneSel}>Save {zoneAspect} zone</button>
+            {#each debugSheet.zones_used.filter((z) => z[2]) as [key] (key)}
+              <button onclick={() => clearZoneMain(key)}>Clear {key} override</button>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    <details>
+      <summary>Grid doesn't match? Capture the slot corners manually</summary>
     <ol>
       <li>Open the Palbox in Palworld.</li>
       <li>
@@ -735,23 +829,9 @@
       </button>
       <span class="pos">({calib.slot_br[0]}, {calib.slot_br[1]})</span>
     </div>
-    <h4>Pal sheet (hover panel) bounds</h4>
-    <p class="dim-text">
-      Hover any pal so its info sheet shows, then capture its top-left and
-      bottom-right corners. All name/passive reading happens ONLY inside this
-      rectangle.
-    </p>
-    <div class="row">
-      <button onclick={() => captureCorner(3)} disabled={capturing !== 0}>
-        {capturing === 3 && countdown ? `…${countdown}` : "Capture sheet top-left"}
-      </button>
-      <button onclick={() => captureCorner(4)} disabled={capturing !== 0}>
-        {capturing === 4 && countdown ? `…${countdown}` : "Capture sheet bottom-right"}
-      </button>
-      <span class="pos">
-        {calib.panel ? `(${calib.panel.join(", ")})` : panelTl ? "top-left set…" : "not set"}
-      </span>
-    </div>
+    </details>
+    <details>
+      <summary>Advanced — grid dimensions, timings, reading zones</summary>
     <div class="row">
       <label>cols <input type="number" min="1" bind:value={calib.cols} /></label>
       <label>rows <input type="number" min="1" bind:value={calib.rows} /></label>
@@ -759,10 +839,6 @@
       <button class="save" onclick={saveCalib}>Save calibration</button>
     </div>
     <div class="row">
-      <label title="Poll the panel until it has visibly repainted instead of always waiting the full delay. Falls back to the full wait whenever the change can't be observed, so it never risks reading a stale panel.">
-        <input type="checkbox" bind:checked={calib.adaptive_delay} />
-        adaptive settle
-      </label>
       <label title="Hover settle. With adaptive settle on this is the CEILING — the scan waits at most this long.">
         {calib.adaptive_delay ? "delay ceiling" : "delay"}
         <input type="number" min="10" max="1000" step="10" bind:value={calib.delay_ms} /> ms
@@ -885,6 +961,7 @@
         </div>
       </div>
     {/if}
+    </details>
   </details>
 
   <div class="row scan-row">
@@ -938,9 +1015,6 @@
       <button onclick={() => runDebug("grid")} disabled={debugRunning || savingDump}>
         Test empty detection (2s)
       </button>
-      <button onclick={() => runDebug("sheet")} disabled={debugRunning || savingDump}>
-        Test sheet read (2s) — hover a pal first
-      </button>
     </div>
     {#if debugReportPath}
       <p class="dim-text">
@@ -964,89 +1038,6 @@
         {/each}
       </div>
     {/if}
-    {#if debugSheet}
-      <div class="debug-sheet">
-        <p>
-          species: <strong>{debugSheet.species ? (pal(debugSheet.species)?.name ?? debugSheet.species) : "—"}</strong>
-          ({debugSheet.name_score.toFixed(3)})
-          {genderSymbol(debugSheet.gender)}
-          · passives: {debugSheet.passives.map(passiveName).join(", ") || "none"}
-        </p>
-        {#if debugSheet.name_band_png}
-          <p class="dim-text">name band capture:</p>
-          <img class="debug-img" src={"data:image/png;base64," + debugSheet.name_band_png} alt="name band" />
-        {/if}
-        {#if debugSheet.passives_png}
-          <p class="dim-text">passives region capture:</p>
-          <img class="debug-img" src={"data:image/png;base64," + debugSheet.passives_png} alt="passives region" />
-        {/if}
-        {#if debugSheet.panel_png && debugSheet.panel_rect}
-          <p class="dim-text">
-            panel capture with the zones the read used — drag on the image to
-            propose a better <strong style={`color:${ZONE_COLORS[zoneAspect]}`}>{zoneAspect}</strong>
-            zone, save it, then run the sheet test again:
-          </p>
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <div
-            class="zone-editor"
-            onmousedown={zoneDown}
-            onmousemove={zoneMove}
-            onmouseup={zoneUp}
-            onmouseleave={zoneUp}
-          >
-            <img
-              bind:this={panelImgEl}
-              src={"data:image/png;base64," + debugSheet.panel_png}
-              alt="panel"
-              draggable="false"
-            />
-            {#each debugSheet.zones_used as [key, rect, ovr] (key)}
-              <div
-                class="zone-box"
-                style={`${zonePct(rect)}border-color:${ZONE_COLORS[key] ?? "#fff"};`}
-                title={`${key}${ovr ? " (override)" : ""}`}
-              >
-                <span style={`background:${ZONE_COLORS[key] ?? "#fff"}`}>{key}{ovr ? " ✎" : ""}</span>
-              </div>
-            {/each}
-            {#each ["passive 1", "passive 2", "passive 3", "passive 4"] as key}
-              {@const def = defaultZoneRect(key)}
-              {#if def && !debugSheet.zones_used.find((z) => z[0] === key)}
-                <div
-                  class="zone-box dashed"
-                  style={`${zonePct(def)}border-color:${ZONE_COLORS[key]};`}
-                  title={`${key} (default)`}
-                >
-                  <span style={`background:${ZONE_COLORS[key]}`}>{key}</span>
-                </div>
-              {/if}
-            {/each}
-            {#if zoneSel}
-              <div
-                class="zone-sel"
-                style={`left:${zoneSel.x}px;top:${zoneSel.y}px;width:${zoneSel.w}px;height:${zoneSel.h}px;border-color:${ZONE_COLORS[zoneAspect]};`}
-              ></div>
-            {/if}
-          </div>
-          <div class="row">
-            <select bind:value={zoneAspect}>
-              <option value="name">name</option>
-              <option value="gender">gender</option>
-              <option value="passives">passives (full grid)</option>
-              <option value="passive 1">passive 1 (top-left)</option>
-              <option value="passive 2">passive 2 (top-right)</option>
-              <option value="passive 3">passive 3 (bottom-left)</option>
-              <option value="passive 4">passive 4 (bottom-right)</option>
-            </select>
-            <button onclick={saveZone} disabled={!zoneSel}>Save {zoneAspect} zone</button>
-            {#each debugSheet.zones_used.filter((z) => z[2]) as [key] (key)}
-              <button onclick={() => clearZoneMain(key)}>Clear {key} override</button>
-            {/each}
-          </div>
-        {/if}
-      </div>
-    {/if}
-
     <!-- Dump & replay testing -->
     <hr />
     <h4>Validate scan</h4>
