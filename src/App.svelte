@@ -38,17 +38,6 @@
 <main>
   <header>
     <h1>PalCalc</h1>
-    {#if ver}
-      <span
-        class="version"
-        class:prerelease={ver.prerelease || ver.dev}
-        title={ver.version}
-      >
-        {#if ver.prerelease}PRE-RELEASE {ver.version}
-        {:else if ver.dev}DEV {ver.version}
-        {:else}{ver.version}{/if}
-      </span>
-    {/if}
     <nav>
       {#each tabs as [id, name] (id)}
         <button class:active={tab === id} onclick={() => (tab = id)}>
@@ -56,6 +45,13 @@
         </button>
       {/each}
     </nav>
+    <!-- Only shown for prerelease/dev builds, floated to the far right so it
+         never displaces the nav. A clean release shows nothing. -->
+    {#if ver && (ver.prerelease || ver.dev)}
+      <span class="version prerelease" title={ver.version}>
+        {ver.prerelease ? "PRE-RELEASE" : "DEV"} {ver.version}
+      </span>
+    {/if}
   </header>
 
   <!-- Views stay mounted (hidden, not removed) so tab switches never lose state -->
@@ -86,25 +82,21 @@
   }
 
   .version {
+    margin-left: auto;
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.03em;
-    color: var(--text-dim);
     padding: 0.1rem 0.4rem;
-    border: 1px solid var(--border);
     border-radius: 4px;
     white-space: nowrap;
-  }
-  .version.prerelease {
     color: #fff;
     background: #b4541e;
-    border-color: #d0652a;
+    border: 1px solid #d0652a;
   }
 
   nav {
     display: flex;
     gap: 0.25rem;
-    margin-left: auto;
   }
 
   nav button {
