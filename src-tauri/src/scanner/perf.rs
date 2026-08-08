@@ -231,3 +231,69 @@ fn profile_box_scan_with_duplicates() {
 
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+/// Rows path vs crops path, per-slot wall time over real dump regions.
+/// Written after a field report that scan times doubled when the live scan
+/// moved from `read_passive_rows` to the replay-validated crops path
+/// (2610a49) — replay gates accuracy, not time. Uses an empty TextLib
+/// (worst case: nothing short-circuits) and keeps the OCR memo warm within
+/// each path, like a live sweep.
+#[test]
+#[ignore = "profiling; --release -- --ignored --nocapture"]
+fn profile_rows_vs_crops_paths() {
+    let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .join("gaming-debug/dump_1785863907672");
+    let mut regions: Vec<RgbaImage> = Vec::new();
+    for b in 0..4 {
+        for r in 0..5 {
+            for c in 0..6 {
+                let p = base.join(format!("box_{b}")).join(format!("passives_{r}_{c}.png"));
+                if let Ok(img) = image::open(&p) {
+                    regions.push(img.to_rgba8());
+                }
+            }
+        }
+    }
+    assert!(!regions.is_empty(), "no dump regions found");
+    let px_name = super::dump::load_layout_px(&base).unwrap_or(43.5);
+    let layout = PanelLayout { name_band: (0, 0, 100, 60), px_name };
+    let gd = GameData::load().unwrap();
+    let pv = passives(&gd);
+    let pv_idx = ocr::VocabIndex::build(&pv);
+    let synth = TextSynth::new().unwrap();
+    let dir = std::env::temp_dir().join(format!("palcalc-perf-rvc-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    let lib = TextLib::load(dir.clone());
+    let expected = Some(px_name * super::panel::PASSIVE_PX_RATIO);
+
+    ocr::clear_cache();
+    let t = Instant::now();
+    let mut rows_keys = 0usize;
+    for r in &regions {
+        let (k, _, _) = layout.read_passive_rows(&synth, &lib, r, &pv_idx, None, expected);
+        rows_keys += k.len();
+    }
+    let rows_ms = ms(t);
+
+    ocr::clear_cache();
+    let t = Instant::now();
+    let mut crops_keys = 0usize;
+    for r in &regions {
+        let crops = super::panel::split_passives_grid(r);
+        let (k, _) = layout.read_passive_crops(&synth, &lib, &crops, &pv_idx, expected);
+        crops_keys += k.len();
+    }
+    let crops_ms = ms(t);
+
+    let n = regions.len() as f64;
+    eprintln!(
+        "[rows-vs-crops] {} regions\n  rows : {rows_ms:.0}ms total, {:.1}ms/slot, {rows_keys} passives\n  crops: {crops_ms:.0}ms total, {:.1}ms/slot, {crops_keys} passives\n  ratio: {:.2}x",
+        regions.len(),
+        rows_ms / n,
+        crops_ms / n,
+        crops_ms / rows_ms,
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}

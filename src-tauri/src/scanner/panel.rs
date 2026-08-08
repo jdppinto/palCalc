@@ -502,9 +502,23 @@ impl PanelLayout {
                 match textlib.identify(crop) {
                     TextMatch::Known(label) if label == EMPTY_LABEL => return None,
                     TextMatch::Known(label) => return Some(CropResult::Known(label)),
-                    _ => {}
+                    // Blank cell (below-noise stddev): nothing to read. Without
+                    // this early-out every EMPTY cell paid a full OCR call plus
+                    // a synth sweep over the whole passive vocabulary — the
+                    // rows path skipped textless cells before synth, and
+                    // shipping the crops path (2610a49) tripled per-slot time.
+                    TextMatch::Empty => return None,
+                    TextMatch::Unknown => {}
                 }
                 let ocr_lines = ocr::read_lines_boxed(crop).unwrap_or_default();
+                // No OCR text at all: an empty grid slot whose background
+                // texture cleared the stddev floor. The rows path treats
+                // these as empty too (`region_cell_lines.is_empty()`); the
+                // synth sweep is a fallback for text OCR saw but couldn't
+                // match, not a second reader for cells with no text.
+                if ocr_lines.is_empty() {
+                    return None;
+                }
                 for (text, _) in &ocr_lines {
                     if let Some((key, _)) =
                         ocr::best_vocab_match(text, passive_idx, OCR_MIN_SIM_PASSIVE)
@@ -523,15 +537,13 @@ impl PanelLayout {
                 );
                 if let Some((key, _)) = hits.first() {
                     Some(CropResult::Known(key.clone()))
-                } else if !ocr_lines.is_empty() {
+                } else {
                     png_base64(crop)
                         .ok()
                         .map(|b64| {
                             let id = format!("{:016x}", fx(crop));
                             CropResult::Unknown(id, b64)
                         })
-                } else {
-                    None
                 }
             })
             .collect();
