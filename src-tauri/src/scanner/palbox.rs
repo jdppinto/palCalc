@@ -1246,14 +1246,19 @@ pub fn debug_read_sheet(
     let _ = pimg.save(report_dir.join("passives_region.png"));
     out.passives_png = Some(png_base64(&pimg)?);
 
-    // Crop per-slot passive zones out of the passives-region capture. pimg was
-    // captured at `pr`, so zone rects resolve relative to pr's origin — NOT the
-    // full panel origin (that would land ~900px outside this ~87px-tall image
-    // and read nothing, making Test read contradict the working live scan).
-    let passive_crops: Option<[image::RgbaImage; 4]> = if has_passive_slots {
-        Some(std::array::from_fn(|i| crop_from_panel(&pimg, pr, passive_zones[i])))
-    } else {
-        None
+    // Per-slot zone crops, taken exactly as the live scan does: from a
+    // full-panel capture, cropped panel-relative. Only when a panel rect is
+    // calibrated — that mirrors the live loop, which populates passive_crops
+    // only inside `if let Some(panel)`. Cropping from the pr-sized `pimg`
+    // instead would misframe any zone lying above pr's top edge.
+    let passive_crops: Option<[image::RgbaImage; 4]> = match (has_passive_slots, calib.panel) {
+        (true, Some(panel)) => {
+            let panel_img = backend.capture_region(panel.0, panel.1, panel.2, panel.3)?;
+            Some(std::array::from_fn(|i| {
+                crop_from_panel(&panel_img, panel, passive_zones[i])
+            }))
+        }
+        _ => None,
     };
 
     let textlib = TextLib::load(TextLib::default_dir());
