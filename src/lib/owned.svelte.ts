@@ -66,6 +66,13 @@ export function addManyOwned(ps: OwnedPal[]) {
   save();
 }
 
+/// Replace the whole list — a full-box sweep is a complete inventory
+/// snapshot, not an increment.
+export function replaceAllOwned(ps: OwnedPal[]) {
+  ownedStore.list = ps;
+  save();
+}
+
 export function removeOwnedAt(i: number) {
   ownedStore.list = ownedStore.list.filter((_, j) => j !== i);
   save();

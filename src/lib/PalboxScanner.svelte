@@ -2,7 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
   import { onMount } from "svelte";
-  import { addManyOwned, clearAllOwned, ownedStore } from "./owned.svelte";
+  import { addManyOwned, clearAllOwned, ownedStore, replaceAllOwned } from "./owned.svelte";
   import type { Gender, PalEntry, PassiveEntry } from "./types";
 
   type Rect = [number, number, number, number];
@@ -97,6 +97,8 @@
   // Species correction: teaches the matcher this game's own rendering
   let fixing = $state<string | null>(null); // "boxIndex,row,col"
   let fixQuery = $state("");
+  // Tile selected in the palbox preview; its details render under the grid.
+  let selectedTile = $state<string | null>(null);
 
   // Unknown passive-row labeling (label once, exact matches forever)
   let labelQuery = $state("");
@@ -628,6 +630,7 @@
     results = null;
     scanReportPath = null;
     progress = null;
+    selectedTile = null;
     try {
       const r = await invoke<{ slots: SlotResult[]; report_path: string }>(
         command,
@@ -641,9 +644,16 @@
       scanning = false;
     }
   }
-  const scan = () => runScan("scan_current_box");
+  // A full sweep REPLACES the owned list (the confirm below promises as
+  // much); a single-box scan appends to it.
+  let replaceOnAdd = false;
+  const scan = () => {
+    replaceOnAdd = false;
+    runScan("scan_current_box");
+  };
   function scanAll() {
     if (ownedStore.list.length > 0 && !confirm(`You have ${ownedStore.list.length} owned pals. Scanning will replace them. Continue?`)) return;
+    replaceOnAdd = true;
     runScan("scan_all_boxes");
   }
 
@@ -686,7 +696,7 @@
   }
 
   function addAll() {
-    addManyOwned(
+    (replaceOnAdd ? replaceAllOwned : addManyOwned)(
       found.map((r) => ({
         species: r.species!,
         label: `${pal(r.species)?.name ?? r.species} (scan)`,
@@ -1145,62 +1155,76 @@
 
   {#if results}
     <p class="dim-text">
-      Wrong or unknown species? Click ✎ and pick the right pal — the app
-      learns your game's rendering and matches it exactly from then on.
+      Click a tile to inspect it — species, gender and passives. Use ✎ on a
+      wrong or unknown pal to teach the app your game's rendering.
     </p>
     <!-- Numeric sort: the default .sort() is lexicographic and orders 32
          boxes as 1, 10, 11, …, 2, 20, … -->
     {#each [...new Set(results.map(r => r.box_index))].sort((a, b) => a - b) as bi}
       {@const box = results.filter(r => r.box_index === bi)}
+      {@const sel = selectedTile?.startsWith(bi + ",") ? findSlot(selectedTile) : undefined}
       {#if results.some(r => r.box_index !== 0)}<p class="dim-text">Box {bi + 1}</p>{/if}
-      <!-- Text wraps down inside the cards; tracks bottom out at the longest
-           word (nothing clips), and the .results rule centers the rare
-           overhang so a too-wide grid grows past the section symmetrically. -->
-      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, minmax(min-content, 1fr))`}>
+      <div class="tilegrid" style={`grid-template-columns: repeat(${calib.cols}, var(--tile))`}>
         {#each box as r (r.box_index + "," + r.row + "," + r.col)}
           {@const slotKey = r.box_index + "," + r.row + "," + r.col}
-          <div
-            class="slot"
-            class:empty={!r.species && !r.unidentified}
+          {@const occupied = r.species !== null || r.unidentified}
+          <button
+            class="tile"
+            class:empty={!occupied}
+            class:selected={selectedTile === slotKey}
             style={`grid-row: ${r.row + 1}; grid-column: ${r.col + 1}`}
+            disabled={!occupied}
+            onclick={() => {
+              selectedTile = selectedTile === slotKey ? null : slotKey;
+              fixing = null;
+              fixQuery = "";
+            }}
+            title={occupied ? (pal(r.species ?? "")?.name ?? (r.unidentified ? "unknown pal" : r.species)) : "empty"}
           >
-            {#if fixing === slotKey}
-              <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="slot" />
+            {#if r.species && pal(r.species)?.icon}
+              <img src={"/icons/" + pal(r.species)?.icon} alt={pal(r.species)?.name} />
+            {:else if r.unidentified}
+              <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="unknown pal" />
+              <span class="unknown-mark">?</span>
+            {/if}
+            {#if r.gender}<span class="g">{genderSymbol(r.gender)}</span>{/if}
+          </button>
+        {/each}
+      </div>
+      {#if sel}
+        {@const selKey = sel.box_index + "," + sel.row + "," + sel.col}
+        <div class="tile-detail">
+          {#if sel.species && pal(sel.species)?.icon}
+            <img src={"/icons/" + pal(sel.species)?.icon} alt="" />
+          {:else}
+            <img class="crop" src={"data:image/png;base64," + sel.crop_png} alt="slot" />
+          {/if}
+          <div class="tile-detail-info">
+            <span>
+              <strong>{sel.species ? (pal(sel.species)?.name ?? sel.species) : "unknown pal"}</strong>
+              {genderSymbol(sel.gender)}
+              {#if sel.species}<span class="score">{sel.score.toFixed(2)}</span>{/if}
+            </span>
+            <span class="passives">
+              {sel.passives.map(passiveName).join(", ") || "no passives read"}
+            </span>
+            {#if fixing === selKey}
               <div class="fix-box">
                 <input placeholder="Correct pal…" bind:value={fixQuery} />
                 <div class="fix-options">
                   {#each fixMatches as m (m.key)}
-                    <button class="pick" onclick={() => fixSpecies(slotKey, m.key)}>{m.name}</button>
+                    <button class="pick" onclick={() => { fixSpecies(selKey, m.key); fixing = null; }}>{m.name}</button>
                   {/each}
                 </div>
               </div>
-              <button class="fix" onclick={() => (fixing = null)}>✕</button>
             {:else}
-              {#if r.species}
-                {@const p = pal(r.species)}
-                {#if p?.icon}<img src={"/icons/" + p.icon} alt="" />{/if}
-                <div class="slot-info">
-                  <span title={p?.name ?? r.species}>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
-                  <span class="passives" title={r.passives.map(passiveName).join(", ")}>
-                    {r.passives.map(passiveName).join(", ") || "no passives read"}
-                  </span>
-                </div>
-                <span class="score">{r.score.toFixed(2)}</span>
-              {:else if r.unidentified}
-                <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="unknown pal" />
-                <span class="dim">unknown pal — ✎ to teach</span>
-              {:else}
-                <span class="dim">empty</span>
-              {/if}
-              {#if r.unidentified}
-                <button class="fix" title="Correct species" onclick={() => { fixing = slotKey; fixQuery = ""; }}>
-                  ✎
-                </button>
-              {/if}
+              <button class="fix-inline" onclick={() => { fixing = selKey; fixQuery = ""; }}>
+                ✎ correct species
+              </button>
             {/if}
           </div>
-        {/each}
-      </div>
+        </div>
+      {/if}
     {/each}
     {#if found.length > 0}
       <button class="add-all" onclick={addAll}>
@@ -1316,49 +1340,106 @@
     font-size: 0.85rem;
   }
 
-  .results {
+  /* Game-like palbox: compact icon tiles, details for the selected tile
+     render in a strip under the grid. */
+  .tilegrid {
+    --tile: 52px;
     display: grid;
-    gap: 0.4rem;
-    /* Size to content, but never narrower than the section; when wider,
-       stay centered so the overhang extends equally to both sides. Cap at
-       the viewport and scroll within rather than pushing the page wide. */
+    gap: 4px;
     width: max-content;
-    min-width: 100%;
-    max-width: calc(100vw - 3rem);
-    overflow-x: auto;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
   }
 
-  .slot {
+  .tile {
+    position: relative;
+    width: var(--tile);
+    height: var(--tile);
+    padding: 2px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .tile.empty {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .tile.selected {
+    border-color: var(--accent);
+  }
+
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .tile img.crop {
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .tile .g {
+    position: absolute;
+    right: 1px;
+    bottom: 0;
+    font-size: 0.7rem;
+    line-height: 1;
+    text-shadow: 0 0 3px var(--bg, #000);
+  }
+
+  .tile .unknown-mark {
+    position: absolute;
+    left: 3px;
+    top: 1px;
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-shadow: 0 0 3px var(--bg, #000);
+  }
+
+  .tile-detail {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
     padding: 0.5rem;
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: 8px;
+    max-width: 420px;
   }
 
-  .slot.empty {
-    opacity: 0.45;
-  }
-
-  .slot img {
-    width: 30px;
-    height: 30px;
-  }
-
-  .slot .crop {
+  .tile-detail img {
     width: 44px;
     height: 44px;
+    object-fit: contain;
   }
 
-  .slot-info {
+  .tile-detail img.crop {
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .tile-detail-info {
     display: flex;
     flex-direction: column;
+    gap: 0.15rem;
     min-width: 0;
+  }
+
+  .fix-inline {
+    align-self: flex-start;
+    padding: 0.1rem 0;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+
+  .fix-inline:hover {
+    color: var(--accent);
   }
 
   .passives {
@@ -1367,21 +1448,9 @@
   }
 
   .score {
-    margin-left: auto;
+    margin-left: 0.4rem;
     color: var(--text-dim);
     font-size: 0.75rem;
-  }
-
-  .fix {
-    padding: 0.15rem 0.4rem;
-    font-size: 0.8rem;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-  }
-
-  .fix:hover {
-    color: var(--accent);
   }
 
   .fix-box {
