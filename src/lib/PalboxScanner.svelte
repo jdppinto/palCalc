@@ -1153,10 +1153,10 @@
     {#each [...new Set(results.map(r => r.box_index))].sort((a, b) => a - b) as bi}
       {@const box = results.filter(r => r.box_index === bi)}
       {#if results.some(r => r.box_index !== 0)}<p class="dim-text">Box {bi + 1}</p>{/if}
-      <!-- minmax(0, 1fr): plain 1fr tracks refuse to shrink below their
-           content, so a wordy slot pushes the grid past the section's right
-           edge instead of staying six equal columns. -->
-      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, minmax(0, 1fr))`}>
+      <!-- Tracks never shrink below their content (everything stays
+           readable); the .results rule centers any overhang so a wide grid
+           grows past the section symmetrically instead of spilling right. -->
+      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, minmax(max-content, 1fr))`}>
         {#each box as r (r.box_index + "," + r.row + "," + r.col)}
           {@const slotKey = r.box_index + "," + r.row + "," + r.col}
           <div
@@ -1319,6 +1319,16 @@
   .results {
     display: grid;
     gap: 0.4rem;
+    /* Size to content, but never narrower than the section; when wider,
+       stay centered so the overhang extends equally to both sides. Cap at
+       the viewport and scroll within rather than pushing the page wide. */
+    width: max-content;
+    min-width: 100%;
+    max-width: calc(100vw - 3rem);
+    overflow-x: auto;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .slot {
@@ -1329,9 +1339,6 @@
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: 8px;
-    /* Grid items default to min-width auto and refuse to shrink below
-       their content, defeating the equal-column layout. */
-    min-width: 0;
   }
 
   .slot.empty {
@@ -1355,8 +1362,6 @@
   }
   .slot-info span {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .passives {
