@@ -1152,71 +1152,61 @@
 
   {#if results}
     <p class="dim-text">
-      Wrong or unknown species? Use ✎ on its row — the app learns your
-      game's rendering and matches it exactly from then on.
+      Wrong or unknown species? Click ✎ and pick the right pal — the app
+      learns your game's rendering and matches it exactly from then on.
     </p>
     <!-- Numeric sort: the default .sort() is lexicographic and orders 32
          boxes as 1, 10, 11, …, 2, 20, … -->
     {#each [...new Set(results.map(r => r.box_index))].sort((a, b) => a - b) as bi}
       {@const box = results.filter(r => r.box_index === bi)}
-      {@const occupiedSlots = box.filter(r => r.species !== null || r.unidentified)}
       {#if results.some(r => r.box_index !== 0)}<p class="dim-text">Box {bi + 1}</p>{/if}
-      <div class="box-preview">
-        <!-- The box as the game shows it: a spatial map of icon tiles. -->
-        <div class="tilegrid" style={`grid-template-columns: repeat(${calib.cols}, var(--tile))`}>
-          {#each box as r (r.box_index + "," + r.row + "," + r.col)}
-            {@const occupied = r.species !== null || r.unidentified}
-            <div
-              class="tile"
-              class:empty={!occupied}
-              style={`grid-row: ${r.row + 1}; grid-column: ${r.col + 1}`}
-              title={occupied ? (pal(r.species ?? "")?.name ?? (r.unidentified ? "unknown pal" : r.species)) : "empty"}
-            >
-              {#if r.species && pal(r.species)?.icon}
-                <img src={"/icons/" + pal(r.species)?.icon} alt={pal(r.species)?.name} />
+      <!-- Text wraps down inside the cards; tracks bottom out at the longest
+           word (nothing clips), and the .results rule centers the rare
+           overhang so a too-wide grid grows past the section symmetrically. -->
+      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, minmax(min-content, 1fr))`}>
+        {#each box as r (r.box_index + "," + r.row + "," + r.col)}
+          {@const slotKey = r.box_index + "," + r.row + "," + r.col}
+          <div
+            class="slot"
+            class:empty={!r.species && !r.unidentified}
+            style={`grid-row: ${r.row + 1}; grid-column: ${r.col + 1}`}
+          >
+            {#if fixing === slotKey}
+              <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="slot" />
+              <div class="fix-box">
+                <input placeholder="Correct pal…" bind:value={fixQuery} />
+                <div class="fix-options">
+                  {#each fixMatches as m (m.key)}
+                    <button class="pick" onclick={() => fixSpecies(slotKey, m.key)}>{m.name}</button>
+                  {/each}
+                </div>
+              </div>
+              <button class="fix" onclick={() => (fixing = null)}>✕</button>
+            {:else}
+              {#if r.species}
+                {@const p = pal(r.species)}
+                {#if p?.icon}<img src={"/icons/" + p.icon} alt="" />{/if}
+                <div class="slot-info">
+                  <span title={p?.name ?? r.species}>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
+                  <span class="passives" title={r.passives.map(passiveName).join(", ")}>
+                    {r.passives.map(passiveName).join(", ") || "no passives read"}
+                  </span>
+                </div>
+                <span class="score">{r.score.toFixed(2)}</span>
               {:else if r.unidentified}
                 <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="unknown pal" />
-                <span class="unknown-mark">?</span>
-              {/if}
-              {#if r.gender}<span class="g">{genderSymbol(r.gender)}</span>{/if}
-            </div>
-          {/each}
-        </div>
-        <!-- Every occupied slot, fully spelled out — no clicking around. -->
-        <div class="box-list">
-          {#each occupiedSlots as r (r.box_index + "," + r.row + "," + r.col)}
-            {@const slotKey = r.box_index + "," + r.row + "," + r.col}
-            <div class="pal-row">
-              {#if r.species && pal(r.species)?.icon}
-                <img src={"/icons/" + pal(r.species)?.icon} alt="" />
+                <span class="dim">unknown pal — ✎ to teach</span>
               {:else}
-                <img class="crop" src={"data:image/png;base64," + r.crop_png} alt="unknown pal" />
+                <span class="dim">empty</span>
               {/if}
-              <div class="pal-row-info">
-                <span>
-                  <strong>{r.species ? (pal(r.species)?.name ?? r.species) : "unknown pal"}</strong>
-                  {genderSymbol(r.gender)}
-                  {#if r.species}<span class="score">{r.score.toFixed(2)}</span>{/if}
-                </span>
-                <span class="passives">
-                  {r.passives.map(passiveName).join(", ") || "no passives read"}
-                </span>
-              </div>
-              {#if fixing === slotKey}
-                <div class="fix-box">
-                  <input placeholder="Correct pal…" bind:value={fixQuery} />
-                  <div class="fix-options">
-                    {#each fixMatches as m (m.key)}
-                      <button class="pick" onclick={() => { fixSpecies(slotKey, m.key); fixing = null; }}>{m.name}</button>
-                    {/each}
-                  </div>
-                </div>
-              {:else}
-                <button class="fix-inline" title="Correct species" onclick={() => { fixing = slotKey; fixQuery = ""; }}>✎</button>
+              {#if r.unidentified}
+                <button class="fix" title="Correct species" onclick={() => { fixing = slotKey; fixQuery = ""; }}>
+                  ✎
+                </button>
               {/if}
-            </div>
-          {/each}
-        </div>
+            {/if}
+          </div>
+        {/each}
       </div>
     {/each}
     {#if found.length > 0}
@@ -1333,112 +1323,49 @@
     font-size: 0.85rem;
   }
 
-  /* Game-like palbox: compact icon tiles, details for the selected tile
-     render in a strip under the grid. */
-  .tilegrid {
-    --tile: 52px;
+  .results {
     display: grid;
-    gap: 4px;
+    gap: 0.4rem;
+    /* Size to content, but never narrower than the section; when wider,
+       stay centered so the overhang extends equally to both sides. Cap at
+       the viewport and scroll within rather than pushing the page wide. */
     width: max-content;
-  }
-
-  .tile {
+    min-width: 100%;
+    max-width: calc(100vw - 3rem);
+    overflow-x: auto;
     position: relative;
-    width: var(--tile);
-    height: var(--tile);
-    padding: 2px;
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
-  .tile.empty {
-    opacity: 0.35;
-  }
-
-  .tile img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .tile img.crop {
-    object-fit: cover;
-    border-radius: 4px;
-  }
-
-  .tile .g {
-    position: absolute;
-    right: 1px;
-    bottom: 0;
-    font-size: 0.7rem;
-    line-height: 1;
-    text-shadow: 0 0 3px var(--bg, #000);
-  }
-
-  .tile .unknown-mark {
-    position: absolute;
-    left: 3px;
-    top: 1px;
-    font-size: 0.75rem;
-    color: var(--accent);
-    text-shadow: 0 0 3px var(--bg, #000);
-  }
-
-  .box-preview {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .box-list {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .pal-row {
+  .slot {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem;
     background: var(--bg-raised);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
   }
 
-  .pal-row img {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    flex-shrink: 0;
+  .slot.empty {
+    opacity: 0.45;
   }
 
-  .pal-row img.crop {
-    object-fit: cover;
-    border-radius: 4px;
+  .slot img {
+    width: 30px;
+    height: 30px;
   }
 
-  .pal-row-info {
+  .slot .crop {
+    width: 44px;
+    height: 44px;
+  }
+
+  .slot-info {
     display: flex;
     flex-direction: column;
     min-width: 0;
-  }
-
-  .fix-inline {
-    align-self: flex-start;
-    padding: 0.1rem 0;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-size: 0.8rem;
-    cursor: pointer;
-  }
-
-  .fix-inline:hover {
-    color: var(--accent);
   }
 
   .passives {
@@ -1447,9 +1374,21 @@
   }
 
   .score {
-    margin-left: 0.4rem;
+    margin-left: auto;
     color: var(--text-dim);
     font-size: 0.75rem;
+  }
+
+  .fix {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.8rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+  }
+
+  .fix:hover {
+    color: var(--accent);
   }
 
   .fix-box {
