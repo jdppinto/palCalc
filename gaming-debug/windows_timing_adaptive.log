@@ -1,0 +1,129 @@
+=== box 1 of 32 === switch=0ns
+[timing] 30 slots | grid=210.0307ms move=15.4238ms hover=647.7227ms capture=649.2975ms stale=9.3177ms read=4.9783371s png=3.0135ms other=66.7248ms | total=6.5798678s
+[read]   ocr=5.6477945s (60 calls, 0 memo hits) synth=0ns (0 calls) textlib=22.7311ms (120 calls)
+[detail] stale retries 0/30 (9.3177ms) | settle 22/30 early, 96 polls | worst slot 347.0085ms at (1,2)
+=== box 2 of 32 === switch=150.7906ms
+[timing] 30 slots | grid=184.2838ms move=9.2353ms hover=649.0422ms capture=716.8351ms stale=9.4822ms read=5.4967819s png=2.9246ms other=58.8981ms | total=7.1274832s
+[read]   ocr=6.4630295s (63 calls, 0 memo hits) synth=0ns (0 calls) textlib=22.2981ms (120 calls)
+[detail] stale retries 0/30 (9.4822ms) | settle 24/30 early, 97 polls | worst slot 362.9589ms at (2,4)
+=== box 3 of 32 === switch=150.8668ms
+[timing] 30 slots | grid=189.1313ms move=13.1665ms hover=646.8761ms capture=805.2377ms stale=9.4051ms read=10.8051054s png=3.072ms other=161.8583ms | total=12.6338524s
+[read]   ocr=33.5582417s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.6887ms (120 calls)
+[detail] stale retries 0/30 (9.4051ms) | settle 3/30 early, 111 polls | worst slot 486.4726ms at (0,1)
+=== box 4 of 32 === switch=150.6114ms
+[timing] 30 slots | grid=188.9712ms move=9.4791ms hover=647.125ms capture=795.7059ms stale=9.347ms read=10.6032875s png=3.0329ms other=111.6594ms | total=12.368608s
+[read]   ocr=33.1246155s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.4968ms (120 calls)
+[detail] stale retries 0/30 (9.347ms) | settle 2/30 early, 113 polls | worst slot 454.0627ms at (0,0)
+=== box 5 of 32 === switch=150.4046ms
+[timing] 30 slots | grid=200.7319ms move=3.3875ms hover=647.2117ms capture=810.2077ms stale=9.3123ms read=10.5871692s png=2.8617ms other=85.3151ms | total=12.3461971s
+[read]   ocr=33.2354065s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=21.3075ms (120 calls)
+[detail] stale retries 0/30 (9.3123ms) | settle 2/30 early, 114 polls | worst slot 436.8409ms at (0,2)
+=== box 6 of 32 === switch=150.4922ms
+[timing] 30 slots | grid=183.9924ms move=14.2573ms hover=647.3003ms capture=793.2502ms stale=9.3243ms read=10.6615478s png=2.8894ms other=70.3907ms | total=12.3829524s
+[read]   ocr=33.1185872s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=21.7544ms (120 calls)
+[detail] stale retries 0/30 (9.3243ms) | settle 3/30 early, 110 polls | worst slot 437.7802ms at (3,4)
+=== box 7 of 32 === switch=150.4942ms
+[timing] 30 slots | grid=200.5046ms move=10.1783ms hover=646.4377ms capture=818.3162ms stale=9.3644ms read=10.383699s png=2.8477ms other=77.5424ms | total=12.1488903s
+[read]   ocr=32.3313426s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=21.065ms (120 calls)
+[detail] stale retries 0/30 (9.3644ms) | settle 2/30 early, 115 polls | worst slot 422.0745ms at (0,0)
+=== box 8 of 32 === switch=151.0298ms
+[timing] 30 slots | grid=190.0598ms move=10.514ms hover=648.415ms capture=780.8319ms stale=9.3266ms read=10.3993272s png=2.9323ms other=82.8883ms | total=12.1242951s
+[read]   ocr=32.3878809s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.1547ms (120 calls)
+[detail] stale retries 0/30 (9.3266ms) | settle 3/30 early, 112 polls | worst slot 424.9957ms at (0,0)
+=== box 9 of 32 === switch=150.5617ms
+[timing] 30 slots | grid=184.5218ms move=2.9714ms hover=646.5636ms capture=781.476ms stale=9.5131ms read=10.3241403s png=2.9718ms other=88.2429ms | total=12.0404009s
+[read]   ocr=32.407727s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.2464ms (120 calls)
+[detail] stale retries 0/30 (9.5131ms) | settle 2/30 early, 115 polls | worst slot 419.7803ms at (0,0)
+=== box 10 of 32 === switch=150.79ms
+[timing] 30 slots | grid=189.4636ms move=17.6827ms hover=647.3493ms capture=782.88ms stale=9.6352ms read=10.3964961s png=3.0449ms other=88.8485ms | total=12.1354003s
+[read]   ocr=32.6138503s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=21.0203ms (120 calls)
+[detail] stale retries 0/30 (9.6352ms) | settle 3/30 early, 112 polls | worst slot 431.702ms at (0,0)
+=== box 11 of 32 === switch=150.5002ms
+[timing] 30 slots | grid=185.842ms move=3.103ms hover=646.1879ms capture=796.283ms stale=9.3271ms read=10.3883969s png=3.1197ms other=82.2222ms | total=12.1144818s
+[read]   ocr=32.3223731s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=19.8699ms (120 calls)
+[detail] stale retries 0/30 (9.3271ms) | settle 2/30 early, 112 polls | worst slot 417.1327ms at (2,5)
+=== box 12 of 32 === switch=150.4213ms
+[timing] 30 slots | grid=186.9536ms move=17.299ms hover=646.8039ms capture=719.7461ms stale=9.2975ms read=9.5937041s png=2.8583ms other=84.237ms | total=11.2608995s
+[read]   ocr=28.1308997s (136 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.2583ms (120 calls)
+[detail] stale retries 0/30 (9.2975ms) | settle 6/30 early, 110 polls | worst slot 436.4624ms at (0,0)
+=== box 13 of 32 === switch=150.5588ms
+[timing] 30 slots | grid=186.4589ms move=19.2848ms hover=648.3253ms capture=710.0401ms stale=9.3609ms read=9.2904864s png=2.7331ms other=83.5899ms | total=10.9502794s
+[read]   ocr=27.7627384s (134 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.003ms (120 calls)
+[detail] stale retries 0/30 (9.3609ms) | settle 11/30 early, 100 polls | worst slot 413.5931ms at (1,0)
+=== box 14 of 32 === switch=150.8197ms
+[timing] 30 slots | grid=185.1938ms move=25.3359ms hover=646.4483ms capture=624.9596ms stale=9.3492ms read=10.2761575s png=2.8186ms other=87.0927ms | total=11.8573556s
+[read]   ocr=32.1371336s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.3291ms (120 calls)
+[detail] stale retries 0/30 (9.3492ms) | settle 15/30 early, 91 polls | worst slot 408.1272ms at (2,3)
+=== box 15 of 32 === switch=150.7033ms
+[timing] 30 slots | grid=187.7444ms move=16.1538ms hover=648.1705ms capture=725.2448ms stale=9.3344ms read=9.7925388s png=2.7407ms other=80.79ms | total=11.4627174s
+[read]   ocr=29.8210845s (140 calls, 0 memo hits) synth=0ns (0 calls) textlib=19.9638ms (120 calls)
+[detail] stale retries 0/30 (9.3344ms) | settle 6/30 early, 108 polls | worst slot 415.0662ms at (2,2)
+=== box 16 of 32 === switch=150.4308ms
+[timing] 30 slots | grid=181.7915ms move=10.4475ms hover=648.3053ms capture=766.4767ms stale=9.3145ms read=10.4819507s png=3.8574ms other=82.88ms | total=12.1850236s
+[read]   ocr=32.4970183s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.463ms (120 calls)
+[detail] stale retries 0/30 (9.3145ms) | settle 4/30 early, 111 polls | worst slot 423.0627ms at (0,0)
+=== box 17 of 32 === switch=150.4955ms
+[timing] 30 slots | grid=178.9391ms move=5.7096ms hover=647.9578ms capture=743.2515ms stale=9.3452ms read=10.4688717s png=2.7679ms other=113.9059ms | total=12.1707487s
+[read]   ocr=32.620595s (150 calls, 0 memo hits) synth=0ns (0 calls) textlib=19.2255ms (120 calls)
+[detail] stale retries 0/30 (9.3452ms) | settle 6/30 early, 107 polls | worst slot 431.8424ms at (0,0)
+=== box 18 of 32 === switch=150.4349ms
+[timing] 30 slots | grid=182.3238ms move=14.5768ms hover=648.1419ms capture=704.7491ms stale=9.4095ms read=9.985453s png=2.7365ms other=80.6135ms | total=11.6280041s
+[read]   ocr=29.4084957s (143 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.7125ms (120 calls)
+[detail] stale retries 0/30 (9.4095ms) | settle 9/30 early, 101 polls | worst slot 414.3081ms at (0,0)
+=== box 19 of 32 === switch=150.7951ms
+[timing] 30 slots | grid=191.1225ms move=9.8686ms hover=647.2536ms capture=739.5038ms stale=9.3446ms read=8.5561006s png=2.8438ms other=83.9525ms | total=10.23999s
+[read]   ocr=19.964342s (120 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.7924ms (120 calls)
+[detail] stale retries 0/30 (9.3446ms) | settle 7/30 early, 109 polls | worst slot 368.7124ms at (0,0)
+=== box 20 of 32 === switch=150.4337ms
+[timing] 30 slots | grid=180.8261ms move=18.6968ms hover=647.3538ms capture=806.2486ms stale=9.3238ms read=8.6475151s png=2.8363ms other=82.4122ms | total=10.3952127s
+[read]   ocr=19.9958364s (120 calls, 0 memo hits) synth=0ns (0 calls) textlib=20.0731ms (120 calls)
+[detail] stale retries 0/30 (9.3238ms) | settle 5/30 early, 114 polls | worst slot 369.2667ms at (0,0)
+=== box 21 of 32 === switch=150.7074ms
+[timing] 4 slots | grid=45.9578ms move=305.3µs hover=121.0326ms capture=88.0174ms stale=1.2343ms read=1.1517263s png=376.7µs other=11.6502ms | total=1.4203006s
+[read]   ocr=2.6922444s (16 calls, 0 memo hits) synth=0ns (0 calls) textlib=2.6903ms (16 calls)
+[detail] stale retries 0/4 (1.2343ms) | settle 0/4 early, 12 polls | worst slot 366.8698ms at (0,0)
+=== box 22 of 32 === switch=150.7429ms
+[timing] 0 slots | grid=24.963ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=851.6µs | total=25.8146ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 23 of 32 === switch=150.4146ms
+[timing] 0 slots | grid=21.7559ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=183.3µs | total=21.9392ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 24 of 32 === switch=150.3683ms
+[timing] 0 slots | grid=31.8079ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=192.3µs | total=32.0002ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 25 of 32 === switch=150.7675ms
+[timing] 0 slots | grid=24.8263ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=190.8µs | total=25.0171ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 26 of 32 === switch=150.5456ms
+[timing] 0 slots | grid=26.3473ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=207µs | total=26.5543ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 27 of 32 === switch=150.7118ms
+[timing] 0 slots | grid=27.8034ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=410.6µs | total=28.214ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 28 of 32 === switch=150.3864ms
+[timing] 0 slots | grid=25.6894ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=277.1µs | total=25.9665ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 29 of 32 === switch=150.7053ms
+[timing] 0 slots | grid=25.6202ms move=0ns hover=0ns capture=0ns stale=0ns read=0ns png=0ns other=170.6µs | total=25.7908ms
+[read]   ocr=0ns (0 calls, 0 memo hits) synth=0ns (0 calls) textlib=0ns (0 calls)
+[detail] stale retries 0/0 (0ns) | settle 0/0 early, 0 polls | worst slot 0ns at (0,0)
+=== box 30 of 32 === switch=150.5587ms
+[timing] 7 slots | grid=65.3032ms move=598.4µs hover=181.4179ms capture=147.6418ms stale=2.1884ms read=2.4614941s png=719.9µs other=18.0444ms | total=2.8774081s
+[read]   ocr=7.7033296s (35 calls, 0 memo hits) synth=0ns (0 calls) textlib=4.5683ms (28 calls)
+[detail] stale retries 0/7 (2.1884ms) | settle 3/7 early, 19 polls | worst slot 424.1339ms at (0,0)
+=== box 31 of 32 === switch=150.4112ms
+[timing] 15 slots | grid=105.3632ms move=4.5051ms hover=343.6745ms capture=260.8984ms stale=4.6386ms read=5.1711202s png=1.5414ms other=38.3956ms | total=5.930137s
+[read]   ocr=16.3041926s (75 calls, 0 memo hits) synth=0ns (0 calls) textlib=10.2024ms (60 calls)
+[detail] stale retries 0/15 (4.6386ms) | settle 13/15 early, 36 polls | worst slot 409.5053ms at (0,2)
+=== box 32 of 32 === switch=150.814ms
+[timing] 30 slots | grid=189.1622ms move=13.3298ms hover=646.3944ms capture=669.5531ms stale=9.2874ms read=5.0994366s png=2.757ms other=66.9014ms | total=6.6968219s
+[read]   ocr=5.3586324s (62 calls, 0 memo hits) synth=0ns (0 calls) textlib=19.2353ms (120 calls)
+[detail] stale retries 0/30 (9.2874ms) | settle 23/30 early, 98 polls | worst slot 273.6685ms at (3,0)
+[sweep]  32 boxes | switch=4.6687683s | total=248.0195542s
