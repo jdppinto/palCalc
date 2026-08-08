@@ -1,6 +1,12 @@
 name: Windows Tauri Build
 
+# Also runs on pushes to the default branch: caches saved there are the only
+# ones a tag-triggered release run is allowed to restore (Actions cache scoping
+# is per-ref + default branch, and every release tag is a fresh ref), so the
+# main build is what keeps the release workflow's Rust cache warm.
 on:
+  push:
+    branches: [main, master]
   pull_request:
     branches: [main, master]
   workflow_dispatch:
@@ -26,6 +32,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
+          # Same key the release workflow restores — see the trigger comment.
+          shared-key: windows-release
 
       - name: Install Node dependencies
         run: npm ci
