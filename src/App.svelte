@@ -79,6 +79,12 @@
     padding: 0.75rem 1.5rem;
     background: var(--bg-raised);
     border-bottom: 1px solid var(--border);
+    /* Pin the nav so it can't scroll away when a tab's content (e.g. a tall
+       breeding tree) overflows the viewport. Opaque background + z-index so
+       content scrolls under it. */
+    position: sticky;
+    top: 0;
+    z-index: 20;
   }
 
   h1 {
