@@ -22,6 +22,11 @@
     adaptive_delay: boolean;
     /// Floor before the first poll when adaptive_delay is on.
     min_delay_ms: number;
+    /// Closed-loop cursor-move timing (Linux): bigger chunk + smaller step/
+    /// settle = faster mouse; too aggressive oscillates on slow compositors.
+    cursor_chunk_px: number;
+    cursor_step_ms: number;
+    cursor_settle_ms: number;
     panel: Rect | null;
     // Zone overrides stored as FRACTIONS of the panel (fx,fy,fw,fh), so they
     // track the sheet. Resolve to absolute screen px via zoneAbs().
@@ -73,6 +78,9 @@
     box_settle_ms: 150,
     adaptive_delay: true,
     min_delay_ms: 20,
+    cursor_chunk_px: 40,
+    cursor_step_ms: 5,
+    cursor_settle_ms: 20,
     panel: null,
     zones: {},
   });
@@ -878,6 +886,25 @@
       <label title="Wait after pressing E to switch boxes; the page change animates.">
         box settle
         <input type="number" min="0" max="1000" step="10" bind:value={calib.box_settle_ms} /> ms
+      </label>
+    </div>
+    <p class="dim-text">
+      Cursor movement (Linux). Larger chunk + smaller step/settle = faster
+      mouse and faster scans, but too aggressive can make the cursor overshoot
+      and the scan abort on a slow compositor. The move self-corrects up to 5×.
+    </p>
+    <div class="row">
+      <label title="Pixels moved per step. Bigger = fewer steps = faster, but more overshoot.">
+        cursor chunk
+        <input type="number" min="4" max="200" step="4" bind:value={calib.cursor_chunk_px} /> px
+      </label>
+      <label title="Pause between cursor steps.">
+        cursor step
+        <input type="number" min="0" max="50" step="1" bind:value={calib.cursor_step_ms} /> ms
+      </label>
+      <label title="Pause after moving before re-checking the cursor position. Too short reads stale coordinates and the correction oscillates.">
+        cursor settle
+        <input type="number" min="0" max="100" step="1" bind:value={calib.cursor_settle_ms} /> ms
       </label>
     </div>
 

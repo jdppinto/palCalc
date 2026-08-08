@@ -93,6 +93,16 @@ pub struct GridCalibration {
     /// repainting at all, and polling before that is wasted captures.
     #[serde(default = "default_min_delay")]
     pub min_delay_ms: u64,
+    /// Closed-loop cursor-move timing (Linux/ydotool). Bigger chunk + smaller
+    /// step/settle = faster mouse; too aggressive on a slow compositor makes
+    /// the correction loop oscillate. Defaults are the faster tier; the loop
+    /// self-corrects, so these are safe to push on responsive hardware.
+    #[serde(default = "default_cursor_chunk_px")]
+    pub cursor_chunk_px: u32,
+    #[serde(default = "default_cursor_step_ms")]
+    pub cursor_step_ms: u64,
+    #[serde(default = "default_cursor_settle_ms")]
+    pub cursor_settle_ms: u64,
     /// The hover-panel ("pal sheet") bounds, absolute screen rect. All text
     /// reads are constrained inside it — nothing else on screen is processed.
     #[serde(default)]
@@ -110,6 +120,9 @@ fn default_adaptive() -> bool { false }
 fn default_min_delay() -> u64 { 20 }
 fn default_first_slot() -> u64 { 50 }
 fn default_box_settle() -> u64 { 150 }
+fn default_cursor_chunk_px() -> u32 { 40 }
+fn default_cursor_step_ms() -> u64 { 5 }
+fn default_cursor_settle_ms() -> u64 { 20 }
 
 impl Default for GridCalibration {
     fn default() -> Self {
@@ -125,6 +138,9 @@ impl Default for GridCalibration {
             box_settle_ms: 150,
             adaptive_delay: false,
             min_delay_ms: 20,
+            cursor_chunk_px: 40,
+            cursor_step_ms: 5,
+            cursor_settle_ms: 20,
             panel: None,
             zones: HashMap::new(),
         }
@@ -472,6 +488,13 @@ pub fn scan_box(
     if SCAN_ABORT.load(Ordering::Relaxed) {
         return Err("scan aborted".into());
     }
+    // Apply this calibration's cursor-move timing before any move (grid park
+    // and slot hovers both go through the closed loop).
+    super::platform::set_cursor_timing(
+        calib.cursor_chunk_px,
+        calib.cursor_step_ms,
+        calib.cursor_settle_ms,
+    );
     let mut report = String::new();
     if let Some(dir) = debug_dir {
         let _ = std::fs::remove_dir_all(dir);
@@ -1476,6 +1499,9 @@ mod tests {
             box_settle_ms: 50,
             adaptive_delay: false,
             min_delay_ms: 20,
+            cursor_chunk_px: 40,
+            cursor_step_ms: 5,
+            cursor_settle_ms: 20,
             panel: None,
             zones: HashMap::new(),
         };
@@ -1550,6 +1576,9 @@ mod tests {
             box_settle_ms: 50,
             adaptive_delay: false,
             min_delay_ms: 20,
+            cursor_chunk_px: 40,
+            cursor_step_ms: 5,
+            cursor_settle_ms: 20,
             panel: None,
             zones: HashMap::new(),
         };

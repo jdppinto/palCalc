@@ -7,6 +7,26 @@ use serde::Serialize;
 /// Palworld advances the palbox to the next page on E.
 pub const KEY_E: u16 = 18;
 
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
+
+/// Closed-loop cursor-move timing, configurable per calibration and set once
+/// at scan start via `set_cursor_timing`. Globals (like `SCAN_ABORT`) rather
+/// than trait params so the deep ydotool move path needs no plumbing. Defaults
+/// are the faster tier — the loop self-corrects and abort-checks, so a too-slow
+/// compositor degrades to more iterations, not a wrong read. Slow rigs raise
+/// these in Advanced; fast rigs can lower them further.
+static CURSOR_CHUNK_PX: AtomicU32 = AtomicU32::new(40);
+static CURSOR_STEP_MS: AtomicU64 = AtomicU64::new(5);
+static CURSOR_SETTLE_MS: AtomicU64 = AtomicU64::new(20);
+
+/// Set the closed-loop cursor-move timing for subsequent moves. `chunk_px` is
+/// clamped to at least 1 (a 0 chunk would divide by zero into infinite steps).
+pub fn set_cursor_timing(chunk_px: u32, step_ms: u64, settle_ms: u64) {
+    CURSOR_CHUNK_PX.store(chunk_px.max(1), Ordering::Relaxed);
+    CURSOR_STEP_MS.store(step_ms, Ordering::Relaxed);
+    CURSOR_SETTLE_MS.store(settle_ms, Ordering::Relaxed);
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct WindowInfo {
     pub title: String,
@@ -544,10 +564,15 @@ mod linux {
         /// to the game, which is the whole reason ydotool is here.
         fn move_relative_closed_loop(&mut self, x: i32, y: i32) -> Result<(), String> {
             const TOLERANCE: i32 = 4;
-            // Conservative chunk size: pointer accel is ~1:1 only for slow
-            // motion, so large chunks overshoot and the corrections oscillate
-            // across the target. 16px was measured stable; 80px was not.
-            const CHUNK_PX: f64 = 16.0;
+            // Timing is configurable (set_cursor_timing) — pointer accel is
+            // ~1:1 only for slow motion, so larger chunks overshoot and the
+            // corrections oscillate. The loop self-corrects up to 5 times, so
+            // an aggressive setting degrades to more iterations before it
+            // errors; a too-short settle measures stale coordinates.
+            use super::{Ordering, CURSOR_CHUNK_PX, CURSOR_SETTLE_MS, CURSOR_STEP_MS};
+            let chunk_px = (CURSOR_CHUNK_PX.load(Ordering::Relaxed) as f64).max(1.0);
+            let step_ms = CURSOR_STEP_MS.load(Ordering::Relaxed);
+            let settle_ms = CURSOR_SETTLE_MS.load(Ordering::Relaxed);
             for _ in 0..5 {
                 let (cx, cy) = self.query_cursor()?;
                 let (dx, dy) = (x - cx, y - cy);
@@ -555,7 +580,7 @@ mod linux {
                     return Ok(());
                 }
                 let dist = ((dx * dx + dy * dy) as f64).sqrt();
-                let steps = (dist / CHUNK_PX).ceil().max(1.0) as i32;
+                let steps = (dist / chunk_px).ceil().max(1.0) as i32;
                 let (mut sent_x, mut sent_y) = (0, 0);
                 for i in 1..=steps {
                     let tx = (dx as f64 * i as f64 / steps as f64).round() as i32;
@@ -572,12 +597,15 @@ mod linux {
                     if !status.success() {
                         return Err("ydotool mousemove failed".into());
                     }
-                    std::thread::sleep(std::time::Duration::from_millis(10));
+                    if step_ms > 0 {
+                        std::thread::sleep(std::time::Duration::from_millis(step_ms));
+                    }
                 }
                 // Let the events propagate before measuring, or the correction
-                // works from stale coordinates (8ms proved too short on a
-                // loaded compositor — the loop then oscillated and aborted).
-                std::thread::sleep(std::time::Duration::from_millis(40));
+                // works from stale coordinates.
+                if settle_ms > 0 {
+                    std::thread::sleep(std::time::Duration::from_millis(settle_ms));
+                }
             }
             Err(
                 "cursor did not settle on the target slot — pointer acceleration may be \

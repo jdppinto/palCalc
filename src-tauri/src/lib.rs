@@ -613,6 +613,9 @@ fn apply_default_calibration() -> Result<GridCalibration, String> {
         box_settle_ms: 150,
         adaptive_delay: true,
         min_delay_ms: 20,
+        cursor_chunk_px: 40,
+        cursor_step_ms: 5,
+        cursor_settle_ms: 20,
         panel: Some(panel),
         zones,
     };
