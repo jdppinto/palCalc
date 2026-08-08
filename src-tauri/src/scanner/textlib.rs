@@ -97,29 +97,25 @@ impl TextLib {
     }
 
     fn identify_inner(&self, crop: &RgbaImage) -> TextMatch {
-        let (mx, my) = shift_margins(crop.width(), crop.height());
-        let Some(center) = fingerprint_window(crop, mx, my) else {
+        // Blankness is decided on the UNCLIPPED crop: only a genuinely flat
+        // cell is Empty. Matching below uses the dark-clipped window, and
+        // clipping can flatten a dim-but-text-bearing crop to zero variance —
+        // that must read as Unknown (so callers fall back to OCR), never as
+        // Empty (which callers treat as "no passive here" and skip).
+        if fingerprint(crop).is_none() {
             return TextMatch::Empty;
-        };
+        }
         if self.entries.is_empty() {
             return TextMatch::Unknown;
         }
+        let (mx, my) = shift_margins(crop.width(), crop.height());
         let mut best: Option<(&str, f32)> = None;
-        for (i, (dx, dy)) in sweep_offsets(mx, my).into_iter().enumerate() {
-            let owned;
-            let v = if i == 0 {
-                &center // first offset is the center, already computed
-            } else {
-                match fingerprint_window(crop, dx, dy) {
-                    Some(f) => {
-                        owned = f;
-                        &owned
-                    }
-                    None => continue,
-                }
+        for (dx, dy) in sweep_offsets(mx, my) {
+            let Some(v) = fingerprint_window(crop, dx, dy) else {
+                continue;
             };
             for (label, t) in &self.entries {
-                let score = ncc_pub(v, t);
+                let score = ncc_pub(&v, t);
                 if best.map_or(true, |(_, b)| score > b) {
                     best = Some((label, score));
                 }

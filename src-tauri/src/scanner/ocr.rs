@@ -57,15 +57,23 @@ impl<'a> VocabIndex<'a> {
 
     /// Return indices of vocab entries whose normalized name starts with
     /// `c` or any OCR-confusable neighbor of `c`.
-    fn candidates_for(&self, c: char) -> impl Iterator<Item = usize> + '_ {
-        ocr_neighbors(c)
-            .iter()
-            .flat_map(move |&nc| {
-                self.by_first
-                    .get(&nc)
-                    .map_or(&[] as &[usize], |v| v.as_slice())
-            })
-            .copied()
+    ///
+    /// Falls back to the FULL vocabulary when the first-char bucket can't
+    /// help: an unlisted first char (a digit like a mis-OCR'd 'A'→'4', or a
+    /// symbol) or a listed char whose buckets are all absent would otherwise
+    /// yield zero candidates and silently drop a match the old full scan
+    /// made. The bucket is a speed optimization, never a correctness gate.
+    fn candidates_for(&self, c: char) -> Vec<usize> {
+        let mut out = Vec::new();
+        for &nc in ocr_neighbors(c) {
+            if let Some(v) = self.by_first.get(&nc) {
+                out.extend_from_slice(v);
+            }
+        }
+        if out.is_empty() {
+            return (0..self.vocab.len()).collect();
+        }
+        out
     }
 }
 

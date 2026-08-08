@@ -109,7 +109,7 @@ fn default_grid_unhover() -> u64 { 20 }
 fn default_adaptive() -> bool { false }
 fn default_min_delay() -> u64 { 20 }
 fn default_first_slot() -> u64 { 50 }
-fn default_box_settle() -> u64 { 50 }
+fn default_box_settle() -> u64 { 150 }
 
 impl Default for GridCalibration {
     fn default() -> Self {
@@ -398,10 +398,13 @@ pub fn classify_grid(
     let gh = (tly.max(bry) + half - gy).max(1) as u32;
     report.push_str(&format!("grid rect: ({gx}, {gy}) {gw}x{gh}\n"));
 
-    // Park away from the grid so no slot is hover-highlighted.
+    // Park away from the grid so no slot is hover-highlighted. Floor the wait:
+    // the hover highlight and the hover panel's dismiss animation must finish
+    // before capture, or occupied slots read empty (and a sweep then drops
+    // them from the owned list). 20ms was too short; main used max(250).
     if !cursor_off_grid {
         backend.move_cursor(gx - slot as i32, gy - slot as i32)?;
-        std::thread::sleep(Duration::from_millis(calib.grid_unhover_ms));
+        std::thread::sleep(Duration::from_millis(calib.grid_unhover_ms.max(250)));
     }
     let grid_img = backend.capture_region(gx, gy, gw, gh)?;
     if let Some(dir) = debug_dir {
@@ -487,6 +490,9 @@ pub fn scan_box(
     let monitor = backend.focused_monitor_rect()?;
     let mut layout = PanelLayout::load_validated(calib.panel, monitor);
     let mut discovery_failures = 0u32;
+    // Cross-slot row-height hint for the uncalibrated (read_passive_rows) path;
+    // the first slot that resolves it seeds the rest. Unused on the panel path.
+    let mut row_px: Option<f32> = None;
     let occupied: Vec<usize> = pre
         .iter()
         .enumerate()
@@ -778,19 +784,29 @@ pub fn scan_box(
 
             (passives, passive_unknowns) = {
                 let expected = calib.panel.map(super::panel::row_px_expected);
-                // One pipeline: per-slot zone crops when the user calibrated
-                // all four, otherwise the same equal-cell 2x2 split of the
-                // passives region that tests/replay.rs replays — the shipped
-                // path is the validated path.
-                let split;
-                let crops = match &passive_crops {
-                    Some(c) => c,
-                    None => {
-                        split = super::panel::split_passives_grid(&pimg);
-                        &split
+                if let Some(crops) = &passive_crops {
+                    // All four per-slot zones calibrated.
+                    l.read_passive_crops(synth, textlib, crops, &passive_idx, expected)
+                } else if calib.panel.is_some() {
+                    // Panel calibrated: `pimg` is the exact passive grid, so
+                    // the equal-cell 2x2 split that tests/replay.rs validates
+                    // aligns with the cells.
+                    let split = super::panel::split_passives_grid(&pimg);
+                    l.read_passive_crops(synth, textlib, &split, &passive_idx, expected)
+                } else {
+                    // No panel rect: `pimg` is the oversized discovery search
+                    // rect (l.passives_rect()), which includes the "Passive
+                    // Skills" header and offset rows. A blind halving would
+                    // misframe every cell — this path needs the band
+                    // detection + header anchoring read_passive_rows provides.
+                    let (k, u, found_px) = l.read_passive_rows(
+                        synth, textlib, &pimg, &passive_idx, row_px, expected,
+                    );
+                    if row_px.is_none() {
+                        row_px = found_px;
                     }
-                };
-                l.read_passive_crops(synth, textlib, crops, &passive_idx, expected)
+                    (k, u)
+                }
             };
             timing_read += t0.elapsed();
 
@@ -959,8 +975,10 @@ pub fn scan_boxes(
     let mut all: Vec<SlotResult> = Vec::new();
     let mut merged_log: Vec<String> = Vec::new();
     // Box-switch settle: the page change animates; capturing too soon grabs a
-    // mid-transition frame.
-    let settle = Duration::from_millis(calib.box_settle_ms);
+    // mid-transition frame that misclassifies slots — and a sweep replaces the
+    // owned list, so a too-low value is a data-loss risk, not just a bad read.
+    // Floor at 150ms regardless of a stale/low saved value.
+    let settle = Duration::from_millis(calib.box_settle_ms.max(150));
 
     let mut cursor_parked = false;
     // The box switch is invisible to scan_box's buckets, so account for it here.
@@ -968,7 +986,10 @@ pub fn scan_boxes(
     let mut timing_switch = Duration::ZERO;
     for b in 0..box_count {
         if SCAN_ABORT.load(Ordering::Relaxed) {
-            break;
+            // Return Err, not Ok(partial): a sweep feeds replaceAllOwned,
+            // and a partial inventory must never silently overwrite the
+            // user's owned list. Matches scan_box's own abort behavior.
+            return Err("scan aborted".into());
         }
         let mut switch = Duration::ZERO;
         if b > 0 {
@@ -1225,36 +1246,34 @@ pub fn debug_read_sheet(
     let _ = pimg.save(report_dir.join("passives_region.png"));
     out.passives_png = Some(png_base64(&pimg)?);
 
-    // Crop per-slot passive zones from the panel image if calibrated.
-    let passive_crops: Option<[image::RgbaImage; 4]> =
-        if has_passive_slots {
-            if let Some(panel) = calib.panel {
-                Some(std::array::from_fn(|i| {
-                    crop_from_panel(&pimg, panel, passive_zones[i])
-                }))
-            } else {
-                None
-            }
-        } else {
-            None
-        };
+    // Crop per-slot passive zones out of the passives-region capture. pimg was
+    // captured at `pr`, so zone rects resolve relative to pr's origin — NOT the
+    // full panel origin (that would land ~900px outside this ~87px-tall image
+    // and read nothing, making Test read contradict the working live scan).
+    let passive_crops: Option<[image::RgbaImage; 4]> = if has_passive_slots {
+        Some(std::array::from_fn(|i| crop_from_panel(&pimg, pr, passive_zones[i])))
+    } else {
+        None
+    };
 
     let textlib = TextLib::load(TextLib::default_dir());
     let expected = calib.panel.map(super::panel::row_px_expected);
-    // Same path selection as the live scan loop.
-    let split;
-    let crops = match &passive_crops {
-        Some(c) => {
-            out.log.push("using per-slot passive crops".into());
-            c
-        }
-        None => {
-            out.log.push("using 2x2 split of passives region".into());
-            split = super::panel::split_passives_grid(&pimg);
-            &split
-        }
+    // Same path selection as the live scan loop: zone crops when all four are
+    // calibrated; equal 2x2 split when the panel (exact grid) is calibrated;
+    // band-detecting read_passive_rows when no panel rect exists (pimg is then
+    // the oversized search rect a blind split would misframe).
+    let (keys, unknowns) = if let Some(crops) = &passive_crops {
+        out.log.push("using per-slot passive crops".into());
+        l.read_passive_crops(synth, &textlib, crops, &passive_idx, expected)
+    } else if calib.panel.is_some() {
+        out.log.push("using 2x2 split of passives region".into());
+        let split = super::panel::split_passives_grid(&pimg);
+        l.read_passive_crops(synth, &textlib, &split, &passive_idx, expected)
+    } else {
+        out.log.push("using band detection (no panel rect)".into());
+        let (k, u, _) = l.read_passive_rows(synth, &textlib, &pimg, &passive_idx, None, expected);
+        (k, u)
     };
-    let (keys, unknowns) = l.read_passive_crops(synth, &textlib, crops, &passive_idx, expected);
     out.log.push(format!(
         "passives: {keys:?} + {} unknown row(s) in {:?}",
         unknowns.len(),
@@ -1343,6 +1362,13 @@ mod tests {
     use image::RgbaImage;
     use palcalc_core::GameData;
 
+    /// Serializes tests that read or write the global SCAN_ABORT flag. Cargo
+    /// runs tests in parallel, so without this the abort test's brief window
+    /// of SCAN_ABORT=true could be observed by a concurrent scan test and make
+    /// it abort spuriously (a scan now returns Err on abort). A poisoned lock
+    /// is fine — we only need mutual exclusion.
+    static SCAN_ABORT_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
     #[test]
     fn equalize_passive_zones_forces_identical_dims() {
         let mut zones = vec![
@@ -1398,6 +1424,8 @@ mod tests {
     /// empty — the occupancy classification is what pass 1 owns.
     #[test]
     fn scan_classifies_occupancy_from_grid_capture() {
+        let _guard = SCAN_ABORT_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        SCAN_ABORT.store(false, Ordering::Relaxed);
         let gd = GameData::load().unwrap();
         let templates =
             IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd), None).unwrap();
@@ -1491,6 +1519,8 @@ mod tests {
     /// each slot with its box index, and reports box counters in progress.
     #[test]
     fn scan_boxes_presses_e_and_tags_box_index() {
+        let _guard = SCAN_ABORT_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        SCAN_ABORT.store(false, Ordering::Relaxed);
         let gd = GameData::load().unwrap();
         let templates =
             IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd), None).unwrap();
@@ -1557,6 +1587,7 @@ mod tests {
 
     #[test]
     fn abort_stops_scan() {
+        let _guard = SCAN_ABORT_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let gd = GameData::load().unwrap();
         let templates =
             IconTemplates::load(&crate::scanner::matcher::pal_icon_map(&gd), None).unwrap();

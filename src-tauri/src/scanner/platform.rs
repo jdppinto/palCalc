@@ -544,7 +544,10 @@ mod linux {
         /// to the game, which is the whole reason ydotool is here.
         fn move_relative_closed_loop(&mut self, x: i32, y: i32) -> Result<(), String> {
             const TOLERANCE: i32 = 4;
-            const CHUNK_PX: f64 = 80.0;
+            // Conservative chunk size: pointer accel is ~1:1 only for slow
+            // motion, so large chunks overshoot and the corrections oscillate
+            // across the target. 16px was measured stable; 80px was not.
+            const CHUNK_PX: f64 = 16.0;
             for _ in 0..5 {
                 let (cx, cy) = self.query_cursor()?;
                 let (dx, dy) = (x - cx, y - cy);
@@ -569,11 +572,12 @@ mod linux {
                     if !status.success() {
                         return Err("ydotool mousemove failed".into());
                     }
-                    std::thread::sleep(std::time::Duration::from_millis(2));
+                    std::thread::sleep(std::time::Duration::from_millis(10));
                 }
                 // Let the events propagate before measuring, or the correction
-                // works from stale coordinates.
-                std::thread::sleep(std::time::Duration::from_millis(8));
+                // works from stale coordinates (8ms proved too short on a
+                // loaded compositor — the loop then oscillated and aborted).
+                std::thread::sleep(std::time::Duration::from_millis(40));
             }
             Err(
                 "cursor did not settle on the target slot — pointer acceleration may be \

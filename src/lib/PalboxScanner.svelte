@@ -280,9 +280,18 @@
     savingDump = true;
     try {
       const labels = computeLabels(results, calib.rows, calib.cols);
+      // The file stores internal keys (what replay asserts against), but the
+      // editor state must hold display NAMES — same convention as
+      // loadDumpLabels. Without this the editor showed raw keys and its
+      // name-based dedup let the same passive be added twice into labels.json.
       const path = await invoke<string>("save_last_scan_for_replay", { labels });
       selectedDump = path;
-      dumpLabels = labels;
+      dumpLabels = Object.fromEntries(
+        Object.entries(labels).map(([k, lbl]) => [
+          k,
+          { ...lbl, passives: lbl.passives.map((key) => passiveName(key)) },
+        ]),
+      );
       await refreshDumps();
     } catch (e) {
       error = String(e);
@@ -1094,10 +1103,14 @@
                     <button class="passive-rm" onclick={() => removePassive(slotKey, i)}>×</button>
                   </span>
                 {/each}
+                <!-- passiveSearch is a single global; show it only in the
+                     active slot's input so typing in one slot doesn't render
+                     the same text in every other slot's box. -->
                 <input
                   class="passive-input"
                   placeholder={lbl.passives.length === 0 ? "add passive…" : ""}
-                  bind:value={passiveSearch}
+                  value={activePassiveSlot === slotKey ? passiveSearch : ""}
+                  oninput={(e) => { passiveSearch = e.currentTarget.value; }}
                   onfocus={() => { activePassiveSlot = slotKey; }}
                   onblur={() => { setTimeout(() => { activePassiveSlot = null; passiveSearch = ""; }, 150); }}
                   onkeydown={(e) => passiveDropdownKeydown(e, slotKey)}
