@@ -320,3 +320,80 @@ fn replay_gaming_debug() {
         passive_failures.len()
     );
 }
+
+/// Auto-learn must change SPEED, not RESULTS. First pass reads the dump crops
+/// with an empty library (OCR resolves them and queues templates); after
+/// flush, a second pass reads the same crops with those templates present.
+/// Every slot's resolved passives must be identical across the two passes —
+/// a learned template may only ever reproduce the read that taught it, never
+/// alter it. Capped at 8 boxes to bound OCR time.
+#[test]
+#[ignore = "slow: OCRs dump crops twice; --release -- --ignored --nocapture"]
+fn auto_learn_preserves_results() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("gaming-debug")
+        .join("dump_1785863907672");
+    assert!(dir.is_dir(), "gaming-debug dump not found at {dir:?}");
+
+    let gd = GameData::load().expect("GameData");
+    let synth = TextSynth::new().expect("TextSynth");
+    let passive_names: Vec<(String, String)> = gd
+        .passives
+        .iter()
+        .map(|(k, p)| (k.clone(), p.name.clone()))
+        .collect();
+    let passive_idx = VocabIndex::build(&passive_names);
+    let px_name = dump::load_layout_px(&dir).unwrap_or(43.5);
+    let layout = PanelLayout { name_band: (0, 0, 0, 0), px_name };
+    let expected_px = Some(px_name * PASSIVE_PX_RATIO);
+
+    // Collect every occupied crop set from the first 8 boxes.
+    let mut crop_sets: Vec<(String, [RgbaImage; 4])> = Vec::new();
+    for b in 0..8u32 {
+        let box_dir = dir.join(format!("box_{b}"));
+        if !box_dir.is_dir() {
+            continue;
+        }
+        for r in 0..5u32 {
+            for c in 0..6u32 {
+                let f = format!("passives_{r}_{c}.png");
+                if box_dir.join(&f).exists() {
+                    crop_sets.push((format!("{b},{r},{c}"), split_passives_grid(&load_image(&box_dir, &f))));
+                }
+            }
+        }
+    }
+    assert!(!crop_sets.is_empty(), "no crops found");
+
+    let tmp = std::env::temp_dir().join(format!("palcalc-autolearn-replay-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&tmp);
+    let mut textlib = TextLib::load(tmp.clone());
+
+    let read_all = |lib: &TextLib| -> Vec<Vec<String>> {
+        crop_sets
+            .iter()
+            .map(|(_, crops)| {
+                let (mut k, _) = layout.read_passive_crops(&synth, lib, crops, &passive_idx, expected_px);
+                k.sort();
+                k
+            })
+            .collect()
+    };
+
+    let pass1 = read_all(&textlib);
+    let learned = textlib.flush_learned();
+    eprintln!("[auto-learn] learned {learned} templates from {} crop sets", crop_sets.len());
+    assert!(learned > 0, "expected auto-learn to populate templates");
+    let pass2 = read_all(&textlib);
+
+    let mut mismatches = 0;
+    for (i, (key, _)) in crop_sets.iter().enumerate() {
+        if pass1[i] != pass2[i] {
+            mismatches += 1;
+            eprintln!("  MISMATCH {key}: pass1={:?} pass2={:?}", pass1[i], pass2[i]);
+        }
+    }
+    let _ = std::fs::remove_dir_all(&tmp);
+    assert_eq!(mismatches, 0, "auto-learn changed results on {mismatches} slots");
+}

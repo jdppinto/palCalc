@@ -25,6 +25,13 @@ pub const OCR_MIN_SIM: f64 = 0.72;
 /// words snap to short passive names at 0.72 ("attack" -> "Attack Up" is
 /// 0.75). Real rows read at ~1.00, so passives demand near-exact similarity.
 pub const OCR_MIN_SIM_PASSIVE: f64 = 0.85;
+/// Auto-learn a template only from an OCR read this certain — well above the
+/// 0.85 record bar. A learned template then matches the same rendering at
+/// >=0.95 NCC forever, so a mislabeled one would persist silently; requiring
+/// a near-exact OCR match (correct reads score ~1.0) keeps that from
+/// happening. Synth-resolved cells are never auto-learned — synth is the
+/// last-resort fuzzy fallback, too risky to cache.
+pub const AUTO_LEARN_MIN_SIM: f64 = 0.97;
 /// The panel shows at most this many passive rows.
 pub const MAX_PASSIVES: usize = 4;
 
@@ -520,9 +527,16 @@ impl PanelLayout {
                     return None;
                 }
                 for (text, _) in &ocr_lines {
-                    if let Some((key, _)) =
+                    if let Some((key, sim)) =
                         ocr::best_vocab_match(text, passive_idx, OCR_MIN_SIM_PASSIVE)
                     {
+                        // Cache a near-exact OCR read as a template so the next
+                        // encounter of this passive (any cell) is a fast
+                        // template hit instead of another OCR pass. Queued now,
+                        // persisted after the scan; never affects this read.
+                        if sim >= AUTO_LEARN_MIN_SIM {
+                            textlib.queue_learn(key, crop);
+                        }
                         return Some(CropResult::Known(key.to_string()));
                     }
                 }

@@ -62,6 +62,13 @@ pub struct TextLib {
     dir: PathBuf,
     /// (label key, grayscale zero-mean unit-norm vector at TEMPLATE_SIZE)
     entries: Vec<(String, Vec<f32>)>,
+    /// Auto-learn queue: crops the reader resolved confidently to a label
+    /// that has no template yet. Filled during the parallel read (behind a
+    /// lock, so `&self` suffices), drained by `flush_learned` after the scan.
+    /// Kept off `entries` until flush so the hot `identify` path stays
+    /// lock-free and the in-flight scan's results can't depend on templates
+    /// learned from itself.
+    pending: std::sync::Mutex<Vec<(String, RgbaImage)>>,
 }
 
 impl TextLib {
@@ -89,7 +96,65 @@ impl TextLib {
                 }
             }
         }
-        Self { dir, entries }
+        Self {
+            dir,
+            entries,
+            pending: std::sync::Mutex::new(Vec::new()),
+        }
+    }
+
+    /// Whether a template already exists for `label` — either persisted in
+    /// `entries` or already queued this scan. Auto-learn keeps ONE template
+    /// per passive (the position-invariant sweep makes that sufficient), so
+    /// callers skip the queue when this is true.
+    pub fn has_label(&self, label: &str) -> bool {
+        if self.entries.iter().any(|(l, _)| l == label) {
+            return true;
+        }
+        self.pending
+            .lock()
+            .map(|q| q.iter().any(|(l, _)| l == label))
+            .unwrap_or(false)
+    }
+
+    /// Queue a confidently-read crop to be learned as `label`'s template
+    /// after the scan. No-op if a template for `label` already exists or is
+    /// queued. Thread-safe (`&self` + lock) so the parallel reader can call
+    /// it. Does NOT affect this scan's results — `identify` never reads the
+    /// queue.
+    pub fn queue_learn(&self, label: &str, crop: &RgbaImage) {
+        if self.has_label(label) {
+            return;
+        }
+        if let Ok(mut q) = self.pending.lock() {
+            // Re-check under the lock: another thread may have queued it
+            // between has_label and here.
+            if !q.iter().any(|(l, _)| l == label) {
+                q.push((label.to_string(), crop.clone()));
+            }
+        }
+    }
+
+    /// Persist every queued crop as a template and add it to the live set.
+    /// Returns how many were learned. Call once after a scan completes, when
+    /// no reader threads are running.
+    pub fn flush_learned(&mut self) -> usize {
+        let pending = match self.pending.get_mut() {
+            Ok(q) => std::mem::take(q),
+            Err(e) => std::mem::take(e.into_inner()),
+        };
+        let mut learned = 0;
+        for (label, crop) in pending {
+            // has_label was checked at queue time, but guard again: a manual
+            // label between queue and flush could have created it.
+            if self.entries.iter().any(|(l, _)| l == &label) {
+                continue;
+            }
+            if self.learn(&label, &crop).is_ok() {
+                learned += 1;
+            }
+        }
+        learned
     }
 
     pub fn identify(&self, crop: &RgbaImage) -> TextMatch {
@@ -296,6 +361,32 @@ mod tests {
         assert!(matches!(lib2.identify(&pattern(9)), TextMatch::Unknown));
         let flat = RgbaImage::from_pixel(180, 26, image::Rgba([50, 50, 55, 255]));
         assert!(matches!(lib2.identify(&flat), TextMatch::Empty));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn auto_learn_queue_flushes_one_template_per_label() {
+        let dir = std::env::temp_dir().join(format!("palcalc-autolearn-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let mut lib = TextLib::load(dir.clone());
+
+        let crop = pattern(4);
+        // Unknown before learning.
+        assert!(matches!(lib.identify(&crop), TextMatch::Unknown));
+        // Queue does not affect identify (still Unknown until flushed).
+        lib.queue_learn("Swift", &crop);
+        assert!(matches!(lib.identify(&crop), TextMatch::Unknown));
+        // Duplicate queue of the same label is a no-op.
+        lib.queue_learn("Swift", &pattern(7));
+        assert_eq!(lib.flush_learned(), 1);
+        // Now it matches, and re-scanning the same content won't re-queue.
+        assert!(matches!(lib.identify(&crop), TextMatch::Known(k) if k == "Swift"));
+        lib.queue_learn("Swift", &crop);
+        assert_eq!(lib.flush_learned(), 0);
+        // Persisted to disk: a fresh load sees it.
+        let lib2 = TextLib::load(dir.clone());
+        assert!(matches!(lib2.identify(&crop), TextMatch::Known(k) if k == "Swift"));
 
         let _ = std::fs::remove_dir_all(&dir);
     }

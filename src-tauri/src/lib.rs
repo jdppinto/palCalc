@@ -318,11 +318,11 @@ async fn scan_current_box(
             Some(&scanner::matcher::user_templates_dir()),
         )?;
         let synth = TextSynth::new()?;
-        let textlib = TextLib::load(TextLib::default_dir());
+        let mut textlib = TextLib::load(TextLib::default_dir());
         // Dump captures into the shareable debug-report bundle, same as the
         // other debug actions, so a full scan can be handed over for tuning.
         let report_dir = scanner::palbox::reset_report_dir()?;
-        let (slots, log) = scan_box(
+        let (slots, mut log) = scan_box(
             backend.as_mut(),
             &templates,
             &synth,
@@ -336,6 +336,11 @@ async fn scan_current_box(
                 let _ = app.emit("scan-progress", &p);
             },
         )?;
+        // Persist templates auto-learned from confident OCR reads this scan.
+        let learned = textlib.flush_learned();
+        if learned > 0 {
+            log.push(format!("learned {learned} new passive template(s)"));
+        }
         let report_path = scanner::palbox::write_report_meta("scan", &log)?;
         Ok(ScanResult { slots, report_path })
     })
@@ -378,9 +383,9 @@ async fn scan_all_boxes(
         let templates =
             IconTemplates::load(&pal_icons, Some(&scanner::matcher::user_templates_dir()))?;
         let synth = TextSynth::new()?;
-        let textlib = TextLib::load(TextLib::default_dir());
+        let mut textlib = TextLib::load(TextLib::default_dir());
         let report_dir = scanner::palbox::reset_report_dir()?;
-        let (slots, log) = scan_boxes(
+        let (slots, mut log) = scan_boxes(
             backend.as_mut(),
             &templates,
             &synth,
@@ -394,6 +399,11 @@ async fn scan_all_boxes(
                 let _ = app.emit("scan-progress", &p);
             },
         )?;
+        // Persist templates auto-learned from confident OCR reads this sweep.
+        let learned = textlib.flush_learned();
+        if learned > 0 {
+            log.push(format!("learned {learned} new passive template(s)"));
+        }
         let report_path = scanner::palbox::write_report_meta("scan-all", &log)?;
         Ok(ScanResult { slots, report_path })
     })
