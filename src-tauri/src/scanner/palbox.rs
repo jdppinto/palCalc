@@ -122,7 +122,7 @@ impl Default for GridCalibration {
             delay_ms: 60,
             grid_unhover_ms: 20,
             first_slot_ms: 50,
-            box_settle_ms: 50,
+            box_settle_ms: 150,
             adaptive_delay: false,
             min_delay_ms: 20,
             panel: None,
