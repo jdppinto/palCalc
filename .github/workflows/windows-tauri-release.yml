@@ -54,6 +54,9 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
+          # Semver pre-identifiers (v0.5.1-rc.7) are hyphenated: mark those
+          # as prereleases so they never claim the "Latest" badge.
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             src-tauri/target/release/palcalc.exe
         env:
