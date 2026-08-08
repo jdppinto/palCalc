@@ -1067,7 +1067,7 @@
     {#if Object.keys(dumpLabels).length > 0}
       <details open>
         <summary>Edit labels ({Object.keys(dumpLabels).length} slots)</summary>
-        <div class="label-grid" style="grid-template-columns: repeat(6, 1fr);">
+        <div class="label-grid" style="grid-template-columns: repeat(6, minmax(0, 1fr));">
           {#each Object.entries(dumpLabels) as [slotKey, lbl] (slotKey)}
             <div class="label-slot">
               <span class="dim-text" style="font-size:0.65rem;">{slotKey}</span>
@@ -1148,10 +1148,15 @@
       Wrong or unknown species? Click ✎ and pick the right pal — the app
       learns your game's rendering and matches it exactly from then on.
     </p>
-    {#each [...new Set(results.map(r => r.box_index))].sort() as bi}
+    <!-- Numeric sort: the default .sort() is lexicographic and orders 32
+         boxes as 1, 10, 11, …, 2, 20, … -->
+    {#each [...new Set(results.map(r => r.box_index))].sort((a, b) => a - b) as bi}
       {@const box = results.filter(r => r.box_index === bi)}
       {#if results.some(r => r.box_index !== 0)}<p class="dim-text">Box {bi + 1}</p>{/if}
-      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, 1fr)`}>
+      <!-- minmax(0, 1fr): plain 1fr tracks refuse to shrink below their
+           content, so a wordy slot pushes the grid past the section's right
+           edge instead of staying six equal columns. -->
+      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, minmax(0, 1fr))`}>
         {#each box as r (r.box_index + "," + r.row + "," + r.col)}
           {@const slotKey = r.box_index + "," + r.row + "," + r.col}
           <div
@@ -1175,8 +1180,8 @@
                 {@const p = pal(r.species)}
                 {#if p?.icon}<img src={"/icons/" + p.icon} alt="" />{/if}
                 <div class="slot-info">
-                  <span>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
-                  <span class="passives">
+                  <span title={p?.name ?? r.species}>{p?.name ?? r.species} {genderSymbol(r.gender)}</span>
+                  <span class="passives" title={r.passives.map(passiveName).join(", ")}>
                     {r.passives.map(passiveName).join(", ") || "no passives read"}
                   </span>
                 </div>
@@ -1324,6 +1329,9 @@
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: 8px;
+    /* Grid items default to min-width auto and refuse to shrink below
+       their content, defeating the equal-column layout. */
+    min-width: 0;
   }
 
   .slot.empty {
@@ -1344,6 +1352,11 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+  }
+  .slot-info span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .passives {
