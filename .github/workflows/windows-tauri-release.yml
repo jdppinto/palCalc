@@ -47,6 +47,11 @@ jobs:
         run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - name: Build Tauri app
+        # PALCALC_RELEASE_TAG is read at compile time (option_env!) so the exe
+        # knows the tag it was built from and shows PRE-RELEASE for a
+        # hyphenated tag. The build step is the only place the tag is baked in.
+        env:
+          PALCALC_RELEASE_TAG: ${{ github.ref_name }}
         run: npm run tauri build
 
       - name: Create GitHub release

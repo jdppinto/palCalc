@@ -3,7 +3,7 @@ pub mod scanner;
 use palcalc_core::{plan_routes, GameData, Gender, OwnedPal, PlanOutcome, PlanRequest};
 use serde::Serialize;
 use std::sync::atomic::Ordering;
-use tauri::{Emitter, State};
+use tauri::{Emitter, Manager, State};
 
 use scanner::matcher::IconTemplates;
 use scanner::palbox::{scan_box, scan_boxes, GridCalibration, SCAN_ABORT};
@@ -640,13 +640,60 @@ fn extract_webview2_loader() {
     }
 }
 
+/// Build identity surfaced to the UI and stamped into the window title.
+/// `tag` is the git tag the release workflow built from (via the
+/// PALCALC_RELEASE_TAG env at compile time); absent for local dev builds.
+/// A hyphenated semver tag (v0.5.1-rc.8) is a prerelease.
+#[derive(Serialize, Clone)]
+struct AppVersion {
+    /// Display string: the tag if built from one, else the crate version.
+    version: String,
+    tag: Option<String>,
+    prerelease: bool,
+    dev: bool,
+}
+
+fn app_version_info() -> AppVersion {
+    let tag = option_env!("PALCALC_RELEASE_TAG").map(str::to_string);
+    let dev = tag.is_none();
+    let prerelease = tag.as_deref().is_some_and(|t| t.contains('-'));
+    let version = tag
+        .clone()
+        .unwrap_or_else(|| format!("v{}-dev", env!("CARGO_PKG_VERSION")));
+    AppVersion {
+        version,
+        tag,
+        prerelease,
+        dev,
+    }
+}
+
+#[tauri::command]
+fn app_version() -> AppVersion {
+    app_version_info()
+}
+
 pub fn run() {
     #[cfg(windows)]
     extract_webview2_loader();
     let data = GameData::load().expect("failed to parse embedded game data");
     tauri::Builder::default()
         .manage(data)
+        .setup(|app| {
+            // Stamp the window title so a prerelease/dev build is unmistakable
+            // even before the UI paints its badge.
+            let v = app_version_info();
+            if v.prerelease || v.dev {
+                if let Some(w) = app.get_webview_window("main") {
+                    let base = w.title().unwrap_or_default();
+                    let tag = if v.dev { "DEV" } else { "PRE-RELEASE" };
+                    let _ = w.set_title(&format!("{base} — {tag} {}", v.version));
+                }
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
+            app_version,
             list_pals,
             calculate_simple,
             list_passives,
