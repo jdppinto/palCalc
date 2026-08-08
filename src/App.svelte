@@ -4,6 +4,7 @@
   import BreedingTree from "./lib/BreedingTree.svelte";
   import Calculator from "./lib/Calculator.svelte";
   import { flushSave, initOwnedStore } from "./lib/owned.svelte";
+  import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
   import PalboxScanner from "./lib/PalboxScanner.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import type { Route } from "./lib/types";
@@ -17,9 +18,11 @@
 
   onMount(() => {
     initOwnedStore();
+    initBookmarksStore();
     invoke<AppVersion>("app_version").then((v) => (ver = v)).catch(() => {});
-    window.addEventListener("beforeunload", flushSave);
-    return () => window.removeEventListener("beforeunload", flushSave);
+    const flush = () => { flushSave(); flushBookmarks(); };
+    window.addEventListener("beforeunload", flush);
+    return () => window.removeEventListener("beforeunload", flush);
   });
 
   function showTree(route: Route) {

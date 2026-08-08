@@ -61,6 +61,15 @@ export interface Route {
   reversers_used: number;
 }
 
+/// A saved breeding-tree result, persisted so a route can be recalled without
+/// recomputing. `route` is the exact Route that was displayed.
+export interface Bookmark {
+  id: string;
+  label: string;
+  saved_at: number;
+  route: Route;
+}
+
 export interface PlanStats {
   max_steps: number;
   rounds: number;

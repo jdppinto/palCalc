@@ -1,9 +1,31 @@
 <script lang="ts">
   import { select } from "d3-selection";
   import { zoom, type D3ZoomEvent } from "d3-zoom";
-  import type { Gender, Route, RouteNode } from "./types";
+  import type { Bookmark, Gender, Route, RouteNode } from "./types";
+  import { addBookmark, bookmarksStore, removeBookmark } from "./bookmarks.svelte";
 
   let { route }: { route: Route | null } = $props();
+
+  // A recalled bookmark overrides the incoming prop; a freshly planned route
+  // (prop change) takes over and clears the pick. `current` is what's drawn.
+  let picked = $state<Route | null>(null);
+  $effect(() => {
+    void route;
+    picked = null;
+  });
+  const current = $derived(picked ?? route);
+
+  function bookmarkCurrent() {
+    if (!current) return;
+    const r = current.root;
+    const passives = current.covered.length ? current.covered.join(", ") : "no passives";
+    addBookmark({
+      id: crypto.randomUUID(),
+      label: `${r.name} · ${current.steps} step${current.steps === 1 ? "" : "s"} · ${passives}`,
+      saved_at: Date.now(),
+      route: current,
+    });
+  }
 
   const NODE_W = 172;
   const NODE_H = 68;
@@ -40,15 +62,15 @@
     return () => { sel.on(".zoom", null); };
   });
 
-  // Reset view state when a different route arrives
+  // Reset view state when a different route arrives (prop or bookmark).
   $effect(() => {
-    void route;
+    void current;
     collapsed = new Set();
     selectedChain = new Set();
   });
 
   const layout = $derived.by(() => {
-    if (!route) return null;
+    if (!current) return null;
     let nextLeaf = 0;
     let maxDepth = 0;
     const nodes: Laid[] = [];
@@ -86,7 +108,7 @@
       return laid;
     }
 
-    const root = place(route.root, "r", 0, null);
+    const root = place(current.root, "r", 0, null);
     for (const l of nodes) {
       l.y = (maxDepth - l.depth) * GAP_Y;
     }
@@ -149,19 +171,33 @@
 
 </script>
 
-{#if !route || !layout}
-  <p class="hint">
-    Plan a route first (Route Planner tab), then open it here with “Show tree”.
-  </p>
-{:else}
-  <div class="wrap">
-    <div class="legend">
-      <span class="key target">target</span>
-      <span class="key bred">bred (intermediate)</span>
-      <span class="key owned">owned</span>
-      <span class="key wild">wild catch</span>
-      <span class="tip">scroll to zoom · drag to pan · click a node to collapse/expand</span>
+<div class="tree-view">
+  {#if bookmarksStore.list.length > 0}
+    <div class="bookmarks-bar">
+      <span class="bm-title">Saved trees</span>
+      {#each bookmarksStore.list as b (b.id)}
+        <span class="bm-chip">
+          <button class="bm-load" title={b.label} onclick={() => (picked = b.route)}>{b.label}</button>
+          <button class="bm-rm" title="Remove bookmark" onclick={() => removeBookmark(b.id)}>×</button>
+        </span>
+      {/each}
     </div>
+  {/if}
+
+  {#if !current || !layout}
+    <p class="hint">
+      Plan a route first (Route Planner tab), then open it here with “Show tree”.{#if bookmarksStore.list.length > 0} Or click a saved tree above.{/if}
+    </p>
+  {:else}
+    <div class="wrap">
+      <div class="legend">
+        <span class="key target">target</span>
+        <span class="key bred">bred (intermediate)</span>
+        <span class="key owned">owned</span>
+        <span class="key wild">wild catch</span>
+        <span class="tip">scroll to zoom · drag to pan · click a node to collapse/expand</span>
+        <button class="bookmark-btn" onclick={bookmarkCurrent}>★ Bookmark this tree</button>
+      </div>
     <svg bind:this={svgEl} role="img" aria-label="Breeding tree">
       <defs>
         <marker
@@ -291,14 +327,78 @@
         </g>
       </g>
     </svg>
-  </div>
-{/if}
+    </div>
+  {/if}
+</div>
 
 <style>
   .hint {
     padding: 3rem;
     text-align: center;
     color: var(--text-dim);
+  }
+
+  .bookmarks-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .bm-title {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-right: 0.25rem;
+  }
+  .bm-chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  .bm-load {
+    border: none;
+    background: none;
+    color: var(--text);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    max-width: 34ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bm-load:hover {
+    color: var(--accent);
+  }
+  .bm-rm {
+    border: none;
+    border-left: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    padding: 0.2rem 0.45rem;
+    cursor: pointer;
+  }
+  .bm-rm:hover {
+    color: #d0652a;
+  }
+  .bookmark-btn {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    cursor: pointer;
+  }
+  .bookmark-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   .wrap {

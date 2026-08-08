@@ -204,6 +204,31 @@ fn save_owned_pals(pals: Vec<OwnedPal>) -> Result<(), String> {
     std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
 }
 
+/// Saved breeding-tree bookmarks. Stored as opaque JSON — the frontend owns
+/// the Bookmark shape (id, label, saved_at, route), so the backend just
+/// persists the blob rather than duplicating the Route type in Rust.
+#[tauri::command]
+fn load_bookmarks() -> Result<serde_json::Value, String> {
+    let path = scanner::config::palcalc_dir().join("breeding_bookmarks.json");
+    if !path.exists() {
+        return Ok(serde_json::json!([]));
+    }
+    let data = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    serde_json::from_str(&data).map_err(|e| e.to_string())
+}
+
+// SAFETY: synchronous for serialized file access, like save_owned_pals.
+#[tauri::command]
+fn save_bookmarks(bookmarks: serde_json::Value) -> Result<(), String> {
+    let dir = scanner::config::palcalc_dir();
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let path = dir.join("breeding_bookmarks.json");
+    let data = serde_json::to_string_pretty(&bookmarks).map_err(|e| e.to_string())?;
+    let tmp = dir.join("breeding_bookmarks.json.tmp");
+    std::fs::write(&tmp, data).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
+}
+
 #[derive(Serialize)]
 struct FrozenFrame {
     data_url: String,
@@ -721,7 +746,9 @@ pub fn run() {
             delete_dump,
             load_dump_labels,
             load_owned_pals,
-            save_owned_pals
+            save_owned_pals,
+            load_bookmarks,
+            save_bookmarks
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
