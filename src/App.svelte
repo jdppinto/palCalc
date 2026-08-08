@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import BreedingTree from "./lib/BreedingTree.svelte";
-  import Bookmarks from "./lib/Bookmarks.svelte";
+  import Bookmarks from "./lib/BookmarksTab.svelte";
   import Calculator from "./lib/Calculator.svelte";
   import { flushSave, initOwnedStore } from "./lib/owned.svelte";
   import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
