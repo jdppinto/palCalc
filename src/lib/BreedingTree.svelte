@@ -2,7 +2,7 @@
   import { select } from "d3-selection";
   import { zoom, type D3ZoomEvent } from "d3-zoom";
   import type { Bookmark, Gender, Route, RouteNode } from "./types";
-  import { addBookmark, bookmarksStore, makeBookmark, removeBookmark } from "./bookmarks.svelte";
+  import { bookmarksStore, isBookmarked, removeBookmark, toggleBookmark } from "./bookmarks.svelte";
 
   let { route }: { route: Route | null } = $props();
 
@@ -16,7 +16,7 @@
   const current = $derived(picked ?? route);
 
   function bookmarkCurrent() {
-    if (current) addBookmark(makeBookmark(current));
+    if (current) toggleBookmark(current);
   }
 
   const NODE_W = 172;
@@ -188,7 +188,14 @@
         <span class="key owned">owned</span>
         <span class="key wild">wild catch</span>
         <span class="tip">scroll to zoom · drag to pan · click a node to collapse/expand</span>
-        <button class="bookmark-btn" onclick={bookmarkCurrent}>★ Bookmark this tree</button>
+        <button
+          class="bookmark-btn"
+          class:saved={current && isBookmarked(current)}
+          title={current && isBookmarked(current) ? "Remove bookmark" : "Bookmark this tree"}
+          onclick={bookmarkCurrent}
+        >
+          {current && isBookmarked(current) ? "★ Bookmarked" : "☆ Bookmark this tree"}
+        </button>
       </div>
     <svg bind:this={svgEl} role="img" aria-label="Breeding tree">
       <defs>
@@ -391,6 +398,14 @@
   .bookmark-btn:hover {
     color: var(--accent);
     border-color: var(--accent);
+  }
+  .bookmark-btn.saved {
+    color: var(--accent);
+  }
+  /* When saved, hovering hints removal rather than re-adding. */
+  .bookmark-btn.saved:hover {
+    color: #d0652a;
+    border-color: #d0652a;
   }
 
   .wrap {
