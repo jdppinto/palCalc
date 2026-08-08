@@ -77,3 +77,13 @@ export function removeBookmark(id: string) {
   bookmarksStore.list = bookmarksStore.list.filter((b) => b.id !== id);
   save();
 }
+
+/// Add the route if not bookmarked, remove it if it is — matched by label.
+export function toggleBookmark(route: Route) {
+  const existing = bookmarksStore.list.find((b) => b.label === bookmarkLabel(route));
+  if (existing) {
+    removeBookmark(existing.id);
+  } else {
+    addBookmark(makeBookmark(route));
+  }
+}

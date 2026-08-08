@@ -2,7 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
   import { addOwnedPal, ownedStore, removeOwnedAt } from "./owned.svelte";
-  import { addBookmark, isBookmarked, makeBookmark } from "./bookmarks.svelte";
+  import { isBookmarked, toggleBookmark } from "./bookmarks.svelte";
   import PalSelect from "./PalSelect.svelte";
   import PassivePicker from "./PassivePicker.svelte";
   import type {
@@ -246,9 +246,8 @@
               <button
                 class="bookmark"
                 class:saved={isBookmarked(r)}
-                title={isBookmarked(r) ? "Bookmarked" : "Bookmark this route"}
-                disabled={isBookmarked(r)}
-                onclick={() => addBookmark(makeBookmark(r))}
+                title={isBookmarked(r) ? "Remove bookmark" : "Bookmark this route"}
+                onclick={() => toggleBookmark(r)}
               >
                 {isBookmarked(r) ? "★ Saved" : "☆ Bookmark"}
               </button>
@@ -447,13 +446,17 @@
     font-size: 0.85rem;
     color: var(--text-dim);
   }
-  .bookmark:hover:not(:disabled) {
+  .bookmark:hover {
     color: var(--accent);
     border-color: var(--accent);
   }
   .bookmark.saved {
     color: var(--accent);
-    cursor: default;
+  }
+  /* When saved, hovering hints removal rather than re-adding. */
+  .bookmark.saved:hover {
+    color: #d0652a;
+    border-color: #d0652a;
   }
   .show-tree {
     padding: 0.3rem 0.8rem;
