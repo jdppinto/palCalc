@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import BreedingTree from "./lib/BreedingTree.svelte";
+  import Bookmarks from "./lib/Bookmarks.svelte";
   import Calculator from "./lib/Calculator.svelte";
   import { flushSave, initOwnedStore } from "./lib/owned.svelte";
   import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
@@ -9,7 +10,7 @@
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import type { Route } from "./lib/types";
 
-  type Tab = "calculator" | "planner" | "scanner" | "tree";
+  type Tab = "calculator" | "planner" | "scanner" | "tree" | "bookmarks";
   let tab = $state<Tab>("calculator");
   let treeRoute = $state<Route | null>(null);
 
@@ -35,6 +36,7 @@
     ["planner", "Route Planner"],
     ["scanner", "Scanner"],
     ["tree", "Tree"],
+    ["bookmarks", "Bookmarks"],
   ];
 </script>
 
@@ -62,6 +64,7 @@
   <div hidden={tab !== "planner"}><RoutePlanner onShowTree={showTree} /></div>
   <div hidden={tab !== "scanner"}><PalboxScanner /></div>
   <div hidden={tab !== "tree"}><BreedingTree route={treeRoute} /></div>
+  <div hidden={tab !== "bookmarks"}><Bookmarks onOpen={showTree} /></div>
 </main>
 
 <style>
