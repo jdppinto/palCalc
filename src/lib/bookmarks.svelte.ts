@@ -1,5 +1,28 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { Bookmark } from "./types";
+import type { Bookmark, Route } from "./types";
+
+/// Build a Bookmark from a route — the single source of the label format, so
+/// the Route Planner and the Tree view produce identical labels for the same
+/// route (which is also what the bookmarked() dedup check compares on).
+export function bookmarkLabel(route: Route): string {
+  const passives = route.covered.length ? route.covered.join(", ") : "no passives";
+  return `${route.root.name} · ${route.steps} step${route.steps === 1 ? "" : "s"} · ${passives}`;
+}
+
+export function makeBookmark(route: Route): Bookmark {
+  return {
+    id: crypto.randomUUID(),
+    label: bookmarkLabel(route),
+    saved_at: Date.now(),
+    route,
+  };
+}
+
+/// Whether a route with this label is already bookmarked.
+export function isBookmarked(route: Route): boolean {
+  const label = bookmarkLabel(route);
+  return bookmarksStore.list.some((b) => b.label === label);
+}
 
 // Saved breeding-tree bookmarks, persisted to disk via the backend — same
 // pattern as the owned-pals store (debounced save, load on startup).
@@ -42,10 +65,10 @@ export function flushBookmarks() {
   }
 }
 
-/// Add a bookmark, newest first. No-op if an identical one (same label) is
-/// already the most recent — a double-click shouldn't duplicate it.
+/// Add a bookmark, newest first. No-op if one with the same label already
+/// exists (the same route bookmarked twice from either view).
 export function addBookmark(b: Bookmark) {
-  if (bookmarksStore.list[0]?.label === b.label) return;
+  if (bookmarksStore.list.some((x) => x.label === b.label)) return;
   bookmarksStore.list = [b, ...bookmarksStore.list];
   save();
 }

@@ -2,7 +2,7 @@
   import { select } from "d3-selection";
   import { zoom, type D3ZoomEvent } from "d3-zoom";
   import type { Bookmark, Gender, Route, RouteNode } from "./types";
-  import { addBookmark, bookmarksStore, removeBookmark } from "./bookmarks.svelte";
+  import { addBookmark, bookmarksStore, makeBookmark, removeBookmark } from "./bookmarks.svelte";
 
   let { route }: { route: Route | null } = $props();
 
@@ -16,15 +16,7 @@
   const current = $derived(picked ?? route);
 
   function bookmarkCurrent() {
-    if (!current) return;
-    const r = current.root;
-    const passives = current.covered.length ? current.covered.join(", ") : "no passives";
-    addBookmark({
-      id: crypto.randomUUID(),
-      label: `${r.name} · ${current.steps} step${current.steps === 1 ? "" : "s"} · ${passives}`,
-      saved_at: Date.now(),
-      route: current,
-    });
+    if (current) addBookmark(makeBookmark(current));
   }
 
   const NODE_W = 172;

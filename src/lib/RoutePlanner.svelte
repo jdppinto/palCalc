@@ -2,6 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
   import { addOwnedPal, ownedStore, removeOwnedAt } from "./owned.svelte";
+  import { addBookmark, isBookmarked, makeBookmark } from "./bookmarks.svelte";
   import PalSelect from "./PalSelect.svelte";
   import PassivePicker from "./PassivePicker.svelte";
   import type {
@@ -242,6 +243,15 @@
               {#each r.missing as p (p)}
                 <span class="tag missing">✗ {p}</span>
               {/each}
+              <button
+                class="bookmark"
+                class:saved={isBookmarked(r)}
+                title={isBookmarked(r) ? "Bookmarked" : "Bookmark this route"}
+                disabled={isBookmarked(r)}
+                onclick={() => addBookmark(makeBookmark(r))}
+              >
+                {isBookmarked(r) ? "★ Saved" : "☆ Bookmark"}
+              </button>
               <button class="show-tree" onclick={() => onShowTree(r)}>
                 Show tree →
               </button>
@@ -425,8 +435,27 @@
     color: var(--text-dim);
   }
 
-  .show-tree {
+  /* Bookmark sits just left of Show tree; it carries the margin-left:auto so
+     the pair floats to the right edge together. */
+  .bookmark {
     margin-left: auto;
+    padding: 0.3rem 0.8rem;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .bookmark:hover:not(:disabled) {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .bookmark.saved {
+    color: var(--accent);
+    cursor: default;
+  }
+  .show-tree {
     padding: 0.3rem 0.8rem;
     background: var(--bg-hover);
     border: 1px solid var(--border);
