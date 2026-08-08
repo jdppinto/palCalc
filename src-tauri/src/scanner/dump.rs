@@ -38,6 +38,31 @@ pub fn dumps_dir() -> PathBuf {
     palcalc_dir().join("dumps")
 }
 
+/// Resolve a webview-supplied dump path and confine it to `dumps_dir()`.
+///
+/// The dump commands are reachable over the Tauri IPC boundary, which is a
+/// trust boundary: the path string is untrusted. Without this a caller could
+/// pass any absolute path and have `delete_dump` `remove_dir_all` it. We
+/// canonicalize both sides (resolving `..` and symlinks) and require the
+/// target to sit under the dumps root. The directory must already exist —
+/// every command here operates on an existing dump — so canonicalize can't
+/// fail for a legitimate call.
+pub fn resolve_dump_dir(path: &str) -> Result<PathBuf, String> {
+    let root = dumps_dir();
+    // Canonicalize the root if it exists; if it doesn't, no dump can, so any
+    // path is out of bounds.
+    let root = root
+        .canonicalize()
+        .map_err(|_| "no dumps directory yet".to_string())?;
+    let dir = Path::new(path)
+        .canonicalize()
+        .map_err(|e| format!("invalid dump path: {e}"))?;
+    if !dir.starts_with(&root) {
+        return Err("dump path outside the dumps directory".to_string());
+    }
+    Ok(dir)
+}
+
 /// Create a new timestamped dump directory and return its path.
 /// If the directory already exists, appends a counter suffix.
 pub fn create_dump_dir() -> Result<PathBuf, String> {
@@ -170,6 +195,15 @@ pub fn delete_dump(dir: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn resolve_dump_dir_rejects_paths_outside_root() {
+        // A path that exists but is not under dumps_dir() (the temp dir) must
+        // be refused, so delete_dump can't recurse outside the dumps root.
+        let outside = std::env::temp_dir();
+        let err = resolve_dump_dir(&outside.display().to_string());
+        assert!(err.is_err(), "temp dir must not resolve as a dump");
+    }
 
     #[test]
     fn labels_from_results_covers_all_slots() {

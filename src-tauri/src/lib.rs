@@ -534,23 +534,22 @@ fn list_dumps() -> Vec<scanner::dump::DumpInfo> {
 /// Save/update labels for a dump directory.
 #[tauri::command]
 fn save_dump_labels(path: String, labels: scanner::dump::Labels) -> Result<(), String> {
-    let dir = std::path::Path::new(&path);
-    if !dir.is_dir() {
-        return Err(format!("not a directory: {path}"));
-    }
-    scanner::dump::save_labels(dir, &labels)
+    let dir = scanner::dump::resolve_dump_dir(&path)?;
+    scanner::dump::save_labels(&dir, &labels)
 }
 
 /// Delete a dump directory.
 #[tauri::command]
 fn delete_dump(path: String) -> Result<(), String> {
-    scanner::dump::delete_dump(std::path::Path::new(&path))
+    let dir = scanner::dump::resolve_dump_dir(&path)?;
+    scanner::dump::delete_dump(&dir)
 }
 
 /// Load labels from a dump directory.
 #[tauri::command]
 fn load_dump_labels(path: String) -> Result<scanner::dump::Labels, String> {
-    scanner::dump::load_labels(std::path::Path::new(&path))
+    let dir = scanner::dump::resolve_dump_dir(&path)?;
+    scanner::dump::load_labels(&dir)
 }
 
 /// One-click calibration: grid geometry measured on the 2560x1440 reference
