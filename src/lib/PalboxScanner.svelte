@@ -1153,10 +1153,10 @@
     {#each [...new Set(results.map(r => r.box_index))].sort((a, b) => a - b) as bi}
       {@const box = results.filter(r => r.box_index === bi)}
       {#if results.some(r => r.box_index !== 0)}<p class="dim-text">Box {bi + 1}</p>{/if}
-      <!-- Tracks never shrink below their content (everything stays
-           readable); the .results rule centers any overhang so a wide grid
-           grows past the section symmetrically instead of spilling right. -->
-      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, minmax(max-content, 1fr))`}>
+      <!-- Text wraps down inside the cards; tracks bottom out at the longest
+           word (nothing clips), and the .results rule centers the rare
+           overhang so a too-wide grid grows past the section symmetrically. -->
+      <div class="results" style={`grid-template-columns: repeat(${calib.cols}, minmax(min-content, 1fr))`}>
         {#each box as r (r.box_index + "," + r.row + "," + r.col)}
           {@const slotKey = r.box_index + "," + r.row + "," + r.col}
           <div
@@ -1359,9 +1359,6 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-  }
-  .slot-info span {
-    white-space: nowrap;
   }
 
   .passives {
