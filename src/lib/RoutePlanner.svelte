@@ -275,7 +275,7 @@
   </div>
 
   {#if history.length > 0}
-    <details class="history" open>
+    <details class="history">
       <summary>Recent calculations ({history.length})</summary>
       <p class="history-hint">
         Session history — click one to restore its inputs and results. Bookmark
