@@ -38,6 +38,55 @@
   let planning = $state(false);
   let error = $state<string | null>(null);
 
+  // Session-only history of completed calculations, so a result isn't lost
+  // when the user runs another one before bookmarking. Kept in memory (this
+  // component stays mounted across tab switches); bookmarks are for permanence.
+  interface CalcSnapshot {
+    id: string;
+    label: string;
+    // inputs
+    target: string;
+    desired: string[];
+    assumeWild: boolean;
+    maxSteps: number;
+    reversers: number;
+    // outputs
+    routes: Route[];
+    stats: PlanStats | null;
+  }
+  let history = $state<CalcSnapshot[]>([]);
+  let currentId = $state<string | null>(null);
+  const HISTORY_CAP = 10;
+
+  // Same inputs? (desired compared order-insensitively.) Used to avoid a
+  // duplicate entry when the same calculation is re-run.
+  function sameInputs(s: CalcSnapshot): boolean {
+    return (
+      s.target === target &&
+      s.assumeWild === assumeWild &&
+      s.maxSteps === maxSteps &&
+      s.reversers === reversers &&
+      s.desired.length === desired.length &&
+      [...s.desired].sort().join() === [...desired].sort().join()
+    );
+  }
+
+  function restore(s: CalcSnapshot) {
+    // Reassign the bound input state (PalSelect/PassivePicker/inputs follow);
+    // owned pals are intentionally NOT restored — they live in the shared
+    // ownedStore, so the result reflects the owned set at compute time and a
+    // re-plan uses the current one.
+    target = s.target;
+    desired = [...s.desired];
+    assumeWild = s.assumeWild;
+    maxSteps = s.maxSteps;
+    reversers = s.reversers;
+    routes = s.routes;
+    stats = s.stats;
+    error = null;
+    currentId = s.id;
+  }
+
   onMount(async () => {
     const all = await invoke<PalEntry[]>("list_pals");
     pals = all.filter((p) => p.icon !== null);
@@ -72,13 +121,18 @@
 
   async function planRoutes() {
     if (!target) return;
+    // Capture inputs up front: after the await, TS no longer narrows the
+    // component-level `target` away from null, and this is the exact input set
+    // the result belongs to.
+    const tgt = target;
+    const desiredSnap = [...desired];
     planning = true;
     error = null;
     try {
       const out = await invoke<PlanOutcome>("plan", {
         req: {
-          target,
-          desired_passives: desired,
+          target: tgt,
+          desired_passives: desiredSnap,
           owned: ownedStore.list,
           assume_wild: assumeWild,
           max_steps: Number.isFinite(maxSteps) ? maxSteps : 500,
@@ -87,6 +141,23 @@
       });
       routes = out.routes;
       stats = out.stats;
+      // Record this completed calculation so it can be recalled later. Replace
+      // the top entry instead of duplicating when the inputs are unchanged.
+      const passiveLabel = desiredSnap.length ? desiredSnap.map(passiveName).join(", ") : "none";
+      const snap: CalcSnapshot = {
+        id: crypto.randomUUID(),
+        label: `${palName(tgt)} · ${passiveLabel} · ${out.routes.length} route${out.routes.length === 1 ? "" : "s"}`,
+        target: tgt,
+        desired: desiredSnap,
+        assumeWild,
+        maxSteps,
+        reversers,
+        routes: out.routes,
+        stats: out.stats,
+      };
+      const rest = history[0] && sameInputs(history[0]) ? history.slice(1) : history;
+      history = [snap, ...rest].slice(0, HISTORY_CAP);
+      currentId = snap.id;
     } catch (e) {
       error = String(e);
       routes = null;
@@ -202,6 +273,33 @@
       {planning ? "Planning…" : "Plan routes"}
     </button>
   </div>
+
+  {#if history.length > 0}
+    <details class="history" open>
+      <summary>Recent calculations ({history.length})</summary>
+      <p class="history-hint">
+        Session history — click one to restore its inputs and results. Bookmark
+        a route to keep it permanently.
+      </p>
+      <ul>
+        {#each history as h (h.id)}
+          <li>
+            <button
+              class="restore"
+              class:active={h.id === currentId}
+              title="Restore this calculation"
+              onclick={() => restore(h)}
+            >
+              {h.label}
+            </button>
+          </li>
+        {/each}
+      </ul>
+      <button class="history-clear" onclick={() => { history = []; currentId = null; }}>
+        Clear history
+      </button>
+    </details>
+  {/if}
 
   {#if error}
     <p class="error">{error}</p>
@@ -558,5 +656,66 @@
   .hint {
     margin-top: 1.5rem;
     color: var(--text-dim);
+  }
+
+  .history {
+    margin-top: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .history summary {
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .history-hint {
+    margin: 0.4rem 0;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+  .history ul {
+    list-style: none;
+    margin: 0.25rem 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .history .restore {
+    width: 100%;
+    text-align: left;
+    padding: 0.3rem 0.5rem;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.8rem;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .history .restore:hover {
+    border-color: var(--border);
+    color: var(--accent);
+  }
+  .history .restore.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .history-clear {
+    margin-top: 0.4rem;
+    padding: 0.2rem 0.5rem;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    cursor: pointer;
+  }
+  .history-clear:hover {
+    color: #d0652a;
+    border-color: #d0652a;
   }
 </style>
