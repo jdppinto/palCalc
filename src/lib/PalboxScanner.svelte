@@ -2,7 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
   import { onMount } from "svelte";
-  import { addManyOwned, clearAllOwned, ownedStore, replaceAllOwned } from "./owned.svelte";
+  import { addManyOwned, clearAllOwned, ownedStore } from "./owned.svelte";
   import type { Gender, PalEntry, PassiveEntry } from "./types";
 
   type Rect = [number, number, number, number];
@@ -658,16 +658,12 @@
       scanning = false;
     }
   }
-  // A full sweep REPLACES the owned list (the confirm below promises as
-  // much); a single-box scan appends to it.
-  let replaceOnAdd = false;
-  const scan = () => {
-    replaceOnAdd = false;
-    runScan("scan_current_box");
-  };
+  // Scanning only ADDS pals — a base-assigned pal isn't in the palbox and
+  // can't be told apart from a sold one, so a scan must never delete. Both
+  // full and single-box scans append; removal is only via the ✕ / "Remove
+  // all pals" controls.
+  const scan = () => runScan("scan_current_box");
   function scanAll() {
-    if (ownedStore.list.length > 0 && !confirm(`You have ${ownedStore.list.length} owned pals. Scanning will replace them. Continue?`)) return;
-    replaceOnAdd = true;
     runScan("scan_all_boxes");
   }
 
@@ -710,7 +706,7 @@
   }
 
   function addAll() {
-    (replaceOnAdd ? replaceAllOwned : addManyOwned)(
+    addManyOwned(
       found.map((r) => ({
         species: r.species!,
         label: `${pal(r.species)?.name ?? r.species} (scan)`,
@@ -1033,7 +1029,9 @@
     {/if}
     <span class="hint-inline">
       "Scan all" presses E to page through every box — open the palbox on box 1
-      and keep Palworld focused. Results accumulate in Owned Pals.
+      and keep Palworld focused. Scanning only <strong>adds</strong> to Owned
+      Pals; it never deletes (so base-assigned pals are safe). For a clean
+      re-import use "Remove all pals", then "Scan all".
     </span>
   </div>
 
