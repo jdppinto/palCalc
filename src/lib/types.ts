@@ -65,6 +65,9 @@ export interface Route {
 /// recomputing. `route` is the exact Route that was displayed.
 export interface Bookmark {
   id: string;
+  /// Stable structural identity of the route (see routeKey in bookmarks store),
+  /// used for dedup instead of the human-readable label.
+  key: string;
   label: string;
   saved_at: number;
   route: Route;
