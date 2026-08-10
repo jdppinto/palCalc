@@ -1,0 +1,11 @@
+# Build context is the PARENT of palCalc + palm-save. Send only the two crates
+# we build, minus heavy/irrelevant dirs, so the daemon context stays small.
+*
+!palm-save
+!palCalc
+palCalc/*
+!palCalc/palcalc-server
+**/target
+**/node_modules
+**/.git
+**/dist

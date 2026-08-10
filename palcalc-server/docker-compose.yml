@@ -1,0 +1,43 @@
+# Hardened deployment for palcalc-server.
+#
+#   1. cp palcalc-server.docker.example.toml palcalc-server.docker.toml   # set a token
+#   2. PALCALC_SAVE_DIR=/path/to/your/world docker compose up -d --build
+#
+# Confinement: the container can touch ONLY /save (read-only), the tls volume,
+# and /tmp. It runs as a non-root user with every capability dropped, a
+# read-only root filesystem, and no privilege escalation — so a worst-case
+# compromise of the process cannot reach the rest of the host.
+
+services:
+  palcalc-server:
+    build:
+      # Parent of palCalc + palm-save, so the path dependency resolves.
+      context: ../..
+      dockerfile: palCalc/palcalc-server/Dockerfile
+    image: palcalc-server:local
+    container_name: palcalc-server
+    restart: unless-stopped
+    ports:
+      # host TCP 8123 -> container. Use "127.0.0.1:8123:8123" to test locally
+      # first; forward TCP 8123 on your router (NOT your UDP game port) to go live.
+      - "8123:8123"
+    volumes:
+      # Your dedicated-server world folder (contains Level.sav + Players/), READ-ONLY.
+      - "${PALCALC_SAVE_DIR:?set PALCALC_SAVE_DIR to your world save folder}:/save:ro"
+      # Your config (git-ignored). Paths inside it are CONTAINER paths.
+      - "./palcalc-server.docker.toml:/config/palcalc-server.toml:ro"
+      # Persist the TLS cert/key so the pinned fingerprint stays stable.
+      - "palcalc-tls:/data"
+    # ---- hardening ----
+    read_only: true                 # root filesystem is read-only
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL                         # no Linux capabilities
+    security_opt:
+      - no-new-privileges:true      # cannot gain privileges via setuid, etc.
+    mem_limit: 256m
+    pids_limit: 256
+
+volumes:
+  palcalc-tls:

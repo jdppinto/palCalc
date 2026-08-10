@@ -33,6 +33,29 @@ Endpoints:
 - `GET /health` — open liveness check (`{"status":"ok"}`).
 - `GET /roster` — bearer-authenticated; returns the whole roster as JSON.
 
+## Docker (recommended for internet exposure)
+
+Running it in the provided container confines it: a worst-case compromise of
+the process can reach **only** the read-only save mount, the TLS volume, and
+`/tmp` — not the rest of your host.
+
+```bash
+cd palcalc-server
+cp palcalc-server.docker.example.toml palcalc-server.docker.toml   # set a token
+PALCALC_SAVE_DIR=/path/to/your/world docker compose up -d --build
+docker compose logs | grep fingerprint     # copy the SHA-256 to give clients
+```
+
+- Both crates build **inside** the image (Debian bookworm), so the binary
+  isn't tied to your host's glibc. The build context is the parent of `palCalc`
+  so the `palm-save` sibling resolves — keep the two repos side by side.
+- The save folder is mounted **read-only**; the cert/key persist in a named
+  volume so the fingerprint stays stable across restarts.
+- Confinement: non-root user, `cap_drop: ALL`, read-only root FS,
+  `no-new-privileges`, memory/PID limits. See `docker-compose.yml`.
+- `palcalc-server.docker.toml` holds your token — it's git-ignored; never
+  commit it. Config paths inside are **container** paths (`/save`, `/data`).
+
 ## Security posture
 
 - **TLS only** (rustls / ring). Self-signed cert auto-generated; fingerprint

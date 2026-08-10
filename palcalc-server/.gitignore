@@ -3,4 +3,5 @@
 # auditable builds of this internet-facing binary.)
 /target
 palcalc-server.toml
+palcalc-server.docker.toml
 *.pem

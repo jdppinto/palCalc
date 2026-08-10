@@ -1,0 +1,16 @@
+# Docker config. Copy to `palcalc-server.docker.toml` (git-ignored) and set a
+# token. All paths here are CONTAINER paths (see docker-compose.yml volumes) —
+# NOT host paths. The host save folder is chosen via PALCALC_SAVE_DIR.
+
+save_dir = "/save"           # the read-only mount of your world folder
+bind = "0.0.0.0:8123"        # inside the container; compose maps host 8123
+
+# One long random shared secret. Generate: openssl rand -base64 32
+tokens = [
+  # "REPLACE_WITH_A_LONG_RANDOM_SECRET",
+]
+
+# Relative to the working dir (/data), which is the persisted `palcalc-tls`
+# volume — so the self-signed cert (and its fingerprint) survive restarts.
+tls_cert = "cert.pem"
+tls_key = "key.pem"
