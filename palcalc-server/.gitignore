@@ -1,0 +1,6 @@
+# Never commit secrets or generated TLS material.
+# (Cargo.lock IS committed — it pins dependency versions for reproducible,
+# auditable builds of this internet-facing binary.)
+/target
+palcalc-server.toml
+*.pem

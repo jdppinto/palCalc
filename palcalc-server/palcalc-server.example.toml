@@ -1,0 +1,33 @@
+# Copy to `palcalc-server.toml` and fill in. NEVER commit the real file — it
+# holds your access tokens. (`.gitignore` already excludes it.)
+
+# The world save folder: the directory that contains Level.sav and Players/.
+# Windows example:
+#   save_dir = 'C:\Users\you\AppData\Local\Pal\Saved\SaveGames\0\<WORLDID>'
+save_dir = "/path/to/<WORLDID>"
+
+# Address to bind. Loopback by default. To expose to friends (and port-forward
+# 8122 to this host), bind all interfaces:
+bind = "0.0.0.0:8122"
+
+# Access tokens. Each is a long random secret you hand to one friend. Generate
+# one with, e.g.:
+#   openssl rand -base64 32
+#   # or PowerShell:
+#   [Convert]::ToBase64String((1..32 | % {Get-Random -Max 256}))
+# Minimum length is enforced at 24 chars. Revoke by deleting a line + restart.
+tokens = [
+  # "REPLACE_WITH_A_LONG_RANDOM_SECRET",
+]
+
+# TLS cert + key (PEM). If either file is missing, a self-signed pair is
+# generated here on first run and its SHA-256 fingerprint is printed so clients
+# can pin it. Provide your own (e.g. from a real CA) to avoid pinning.
+tls_cert = "cert.pem"
+tls_key = "key.pem"
+
+# --- Optional hardening knobs (sane defaults shown) ---
+# request_timeout_secs = 30   # per-request timeout
+# max_inflight = 64           # global cap on concurrent /roster builds
+# rate_per_second = 5         # per-IP sustained request rate
+# rate_burst = 30             # per-IP burst allowance

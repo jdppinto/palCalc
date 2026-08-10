@@ -1,0 +1,52 @@
+[package]
+name = "palcalc-server"
+version = "0.1.0"
+edition = "2021"
+description = "Read-only HTTPS server exposing a Palworld dedicated-server roster to palCalc clients over an authenticated, TLS-encrypted port."
+license = "MIT"
+publish = false
+
+[lib]
+name = "palcalc_server"
+
+[features]
+# The pinning client + `palcalc-fetch` bin. Off by default so the server
+# binary doesn't link an HTTP client it never uses.
+client = ["dep:reqwest"]
+
+[[bin]]
+name = "palcalc-fetch"
+path = "src/bin/palcalc-fetch.rs"
+required-features = ["client"]
+
+[dependencies]
+palm-save = { path = "../../palm-save" }
+
+# Pinning HTTPS client (feature "client"). rustls-tls only, no bundled roots
+# (we use a custom fingerprint-pinning verifier), no native-tls.
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-manual-roots"], optional = true }
+
+# Async runtime — only the features we use.
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal", "time", "sync"] }
+
+# HTTP + TLS. rustls with the `ring` provider (portable on Windows, the server
+# host, without needing NASM/cmake that aws-lc-rs wants).
+axum = "0.7"
+axum-server = { version = "0.7", features = ["tls-rustls"] }
+tower-http = { version = "0.6", features = ["limit", "timeout", "trace", "set-header"] }
+bytes = "1"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+rustls-pemfile = "2"
+rcgen = "0.13"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+# Constant-time token comparison + hashing.
+subtle = "2"
+sha2 = "0.10"
+
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
