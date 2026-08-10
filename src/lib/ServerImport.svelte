@@ -24,6 +24,8 @@
   let selectedOwner = $state<string>(""); // "" = everyone
   let replace = $state(true);
   let importResult = $state("");
+  // Last-selected player, restored after a reconnect if that player still exists.
+  let savedOwner = "";
 
   // Valid palCalc keys, for mapping the save's internal names.
   let validSpecies = $state<Set<string>>(new Set());
@@ -36,11 +38,24 @@
       url = s.url || "";
       fingerprint = s.fingerprint || "";
       token = s.token || "";
+      savedOwner = s.owner || "";
     } catch {
       /* ignore malformed saved state */
     }
     void loadKeys();
   })();
+
+  function persist() {
+    localStorage.setItem(
+      LS_KEY,
+      JSON.stringify({
+        url: url.trim(),
+        fingerprint: fingerprint.trim(),
+        token: token.trim(),
+        owner: selectedOwner,
+      }),
+    );
+  }
 
   async function loadKeys() {
     try {
@@ -63,7 +78,6 @@
     error = "";
     roster = null;
     importResult = "";
-    selectedOwner = ""; // don't carry a stale player selection across reconnects
     const u = url.trim();
     const fp = fingerprint.trim();
     const tok = token.trim();
@@ -81,7 +95,11 @@
       }
       roster = parsed;
       status = "connected";
-      localStorage.setItem(LS_KEY, JSON.stringify({ url: u, fingerprint: fp, token: tok }));
+      // Restore the last-selected player if they're still in this roster.
+      selectedOwner = parsed.players.some((p) => p.uid === savedOwner)
+        ? savedOwner
+        : "";
+      persist();
     } catch (e) {
       status = "error";
       error = String(e);
@@ -200,7 +218,7 @@
             {roster.players.length} players · {roster.pals.length} pals · updated {generatedAgo()}
           </div>
           <label>Import pals of
-            <select bind:value={selectedOwner}>
+            <select bind:value={selectedOwner} onchange={() => { savedOwner = selectedOwner; persist(); }}>
               <option value="">Everyone ({roster.pals.length})</option>
               {#each roster.players as pl (pl.uid)}
                 <option value={pl.uid}>{ownerLabel(pl.uid, pl.name)}</option>
@@ -294,12 +312,18 @@
   input[type="text"],
   input[type="password"],
   select {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 28rem;
     padding: 0.4rem 0.55rem;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
     font: inherit;
+  }
+  select {
+    cursor: pointer;
   }
   .row {
     display: flex;
