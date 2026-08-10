@@ -51,7 +51,7 @@ Reference implementation: `src/pin.rs` (the `pin::fetch` function and the
 ```
 # token is read from the environment, never an argument (process-list hygiene)
 PALCALC_TOKEN=<your-token> \
-  palcalc-fetch https://your-host:8122/roster 40:B8:05:...:A3
+  palcalc-fetch https://your-host:8123/roster 40:B8:05:...:A3
 ```
 
 - Correct fingerprint + correct token → roster JSON on stdout.

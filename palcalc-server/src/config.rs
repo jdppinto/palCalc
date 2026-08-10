@@ -8,8 +8,10 @@ use serde::Deserialize;
 
 fn default_bind() -> SocketAddr {
     // Safe default: loopback only. The operator must explicitly set a
-    // non-loopback bind to expose the server.
-    "127.0.0.1:8122".parse().unwrap()
+    // non-loopback bind to expose the server. Port 8123 (not 8122) to steer
+    // clear of a common Palworld game port — use a port distinct from the
+    // game's.
+    "127.0.0.1:8123".parse().unwrap()
 }
 
 fn default_request_timeout() -> u64 {
@@ -31,7 +33,8 @@ pub struct Config {
     /// The save world directory: the folder holding `Level.sav` and `Players/`.
     pub save_dir: PathBuf,
 
-    /// Address to bind. Defaults to loopback; set to `0.0.0.0:8122` to expose.
+    /// Address to bind. Defaults to loopback; set to `0.0.0.0:8123` to expose
+    /// (use a port distinct from your Palworld game port, forwarded as TCP).
     #[serde(default = "default_bind")]
     pub bind: SocketAddr,
 

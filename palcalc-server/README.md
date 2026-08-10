@@ -22,6 +22,12 @@ commit it. On first run a self-signed TLS cert/key are generated and the
 certificate's **SHA-256 fingerprint** is printed; share that (and each token)
 with clients out-of-band so they can pin it.
 
+> **Port:** use one **distinct from your Palworld game port**. The game is UDP
+> and this server is TCP, so they can share a number at the OS level, but your
+> router's game-port forward is UDP-only — forward **TCP** for this port
+> separately. The default is `8123`; connect clients to
+> `https://<host>:8123/roster`.
+
 Endpoints:
 
 - `GET /health` — open liveness check (`{"status":"ok"}`).
@@ -49,7 +55,7 @@ The `client` feature builds the pinning HTTPS client and the `palcalc-fetch`
 reference CLI:
 
 ```
-cargo run --features client --bin palcalc-fetch -- https://host:8122/roster <fingerprint>
+cargo run --features client --bin palcalc-fetch -- https://host:8123/roster <fingerprint>
 # token from the PALCALC_TOKEN env var
 ```
 

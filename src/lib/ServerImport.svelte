@@ -178,7 +178,7 @@
       </p>
 
       <label>Server URL
-        <input type="text" bind:value={url} placeholder="https://host:8122/roster" />
+        <input type="text" bind:value={url} placeholder="https://host:8123/roster" />
       </label>
       <label>Certificate fingerprint (SHA-256)
         <input type="text" bind:value={fingerprint} placeholder="AA:BB:CC:…" />

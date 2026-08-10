@@ -6,9 +6,14 @@
 #   save_dir = 'C:\Users\you\AppData\Local\Pal\Saved\SaveGames\0\<WORLDID>'
 save_dir = "/path/to/<WORLDID>"
 
-# Address to bind. Loopback by default. To expose to friends (and port-forward
-# 8122 to this host), bind all interfaces:
-bind = "0.0.0.0:8122"
+# Address to bind. Loopback by default. To expose to friends, bind all
+# interfaces and port-forward this port (TCP) to this host.
+#
+# IMPORTANT: use a port SEPARATE from your Palworld game port. The game server
+# is UDP; this is TCP, so they can share a number at the OS level, but the
+# router forward for your game port is UDP-only — forward TCP for this port
+# separately. Picking a distinct port (e.g. 8123) avoids all confusion.
+bind = "0.0.0.0:8123"
 
 # Access tokens. Each is a long random secret you hand to one friend. Generate
 # one with, e.g.:

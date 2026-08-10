@@ -8,7 +8,7 @@
 //! palCalc app's "server mode" will port into its Tauri backend.
 //!
 //! Example:
-//!   PALCALC_TOKEN=... palcalc-fetch https://your-host:8122/roster AA:BB:...:FF
+//!   PALCALC_TOKEN=... palcalc-fetch https://your-host:8123/roster AA:BB:...:FF
 
 use std::io::Write;
 
