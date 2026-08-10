@@ -47,6 +47,9 @@
       /* ignore malformed saved state */
     }
     void loadKeys();
+    // Auto-connect when we already have saved connection details, so opening
+    // "From server" reconnects immediately instead of needing a Connect click.
+    if (url.trim() && fingerprint.trim() && token.trim()) void connect();
   })();
 
   function persist() {
