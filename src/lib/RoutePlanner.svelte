@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { addOwnedPal, ownedStore, removeOwnedAt } from "./owned.svelte";
+  import { ownedStore } from "./owned.svelte";
   import { isBookmarked, toggleBookmark } from "./bookmarks.svelte";
   import PalSelect from "./PalSelect.svelte";
   import PassivePicker from "./PassivePicker.svelte";
@@ -16,6 +16,8 @@
     Route,
   } from "./types";
 
+  let { onManageRoster }: { onManageRoster?: () => void } = $props();
+
   let pals = $state<PalEntry[]>([]);
   let passives = $state<PassiveEntry[]>([]);
 
@@ -25,11 +27,6 @@
   const WARN_STEP_THRESHOLD = 500;
   let maxSteps = $state(WARN_STEP_THRESHOLD);
   let reversers = $state(0);
-
-  let newSpecies = $state<string | null>(null);
-  let newPassives = $state<string[]>([]);
-  let newGender = $state<Gender | null>(null);
-  let detailsOpen = $state(ownedStore.list.length > 0);
 
   let routes = $state<Route[] | null>(null);
   let stats = $state<PlanStats | null>(null);
@@ -113,24 +110,6 @@
     return passives.find((p) => p.key === key)?.name ?? key;
   }
 
-  function addOwned() {
-    if (!newSpecies) return;
-    addOwnedPal({
-      species: newSpecies,
-      label: `${palName(newSpecies)} #${ownedStore.list.length + 1}`,
-      passives: newPassives,
-      gender: newGender,
-    });
-    detailsOpen = true;
-    newSpecies = null;
-    newPassives = [];
-    newGender = null;
-  }
-
-  function genderSymbol(g: Gender | null): string {
-    return g === "Male" ? " ♂" : g === "Female" ? " ♀" : "";
-  }
-
   async function planRoutes() {
     if (!target) return;
     // Capture inputs up front: after the await, TS no longer narrows the
@@ -209,50 +188,13 @@
 
     <PassivePicker {passives} bind:selected={desired} label="Desired passives (up to 8)" />
 
-    <details bind:open={detailsOpen}>
-      <summary>Owned pals ({ownedStore.list.length})</summary>
-      <div class="owned-add">
-        <PalSelect {pals} bind:value={newSpecies} label="Species" />
-        <div class="owned-passives">
-        <PassivePicker
-          {passives}
-          bind:selected={newPassives}
-          max={4}
-          label="Its passives (up to 4)"
-        />
-        </div>
-        <div class="owned-gender">
-          <label>
-            <input type="radio" name="newGender" checked={newGender === null} onchange={() => newGender = null} />
-            any
-          </label>
-          <label>
-            <input type="radio" name="newGender" checked={newGender === "Male"} onchange={() => newGender = "Male"} />
-            ♂
-          </label>
-          <label>
-            <input type="radio" name="newGender" checked={newGender === "Female"} onchange={() => newGender = "Female"} />
-            ♀
-          </label>
-        </div>
-        <button class="add" onclick={addOwned} disabled={!newSpecies}>Add</button>
-      </div>
-      {#if ownedStore.list.length > 0}
-        <ul class="owned-list">
-          {#each ownedStore.list as o, i (i)}
-            <li>
-              <span>{o.label}{genderSymbol(o.gender)}</span>
-              <span class="dim">
-                {o.passives.length
-                  ? o.passives.map(passiveName).join(", ")
-                  : "no passives"}
-              </span>
-              <button onclick={() => removeOwnedAt(i)} title="Remove">✕</button>
-            </li>
-          {/each}
-        </ul>
-      {/if}
-    </details>
+    <div class="roster-summary">
+      <span class="dim">
+        Planning from your roster: <strong>{ownedStore.list.length}</strong>
+        pal{ownedStore.list.length === 1 ? "" : "s"}
+      </span>
+      <button class="manage" onclick={() => onManageRoster?.()}>Manage in Roster →</button>
+    </div>
 
     <button class="plan" onclick={planRoutes} disabled={!target || planning}>
       {planning ? "Planning…" : "Plan routes"}
@@ -415,59 +357,31 @@
     color: var(--text-dim);
   }
 
-  .owned-add {
+  .roster-summary {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    justify-content: space-between;
     gap: 0.75rem;
-    margin-top: 0.75rem;
+    margin-top: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
   }
 
-  .owned-passives {
-    flex: 1.4;
-  }
-
-  .owned-gender {
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-    padding-bottom: 0.15rem;
-  }
-
-  .owned-gender label {
-    display: flex;
-    align-items: center;
-    gap: 0.15rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-
-  .add {
-    padding: 0.55rem 1rem;
+  .manage {
+    flex-shrink: 0;
+    padding: 0.35rem 0.8rem;
     background: var(--bg-hover);
     border: 1px solid var(--border);
     border-radius: 8px;
+    color: var(--text);
     cursor: pointer;
+    font: inherit;
   }
-
-  .owned-list {
-    list-style: none;
-    margin: 0.75rem 0 0;
-    padding: 0;
-  }
-
-  .owned-list li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.3rem 0;
-  }
-
-  .owned-list button {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    cursor: pointer;
+  .manage:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .dim {

@@ -55,7 +55,7 @@
   </header>
 
   <!-- Views stay mounted (hidden, not removed) so tab switches never lose state -->
-  <div hidden={tab !== "plan"}><RoutePlanner /></div>
+  <div hidden={tab !== "plan"}><RoutePlanner onManageRoster={() => (tab = "roster")} /></div>
   <div hidden={tab !== "roster"}><Roster /></div>
   <div hidden={tab !== "calculator"}><Calculator /></div>
   <div hidden={tab !== "saved"}><Bookmarks /></div>
