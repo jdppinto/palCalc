@@ -1,0 +1,10 @@
+# Canonicalize author/committer identities across this repo's history.
+#
+# Some commits were made through AI assistants running with git misconfigured
+# under unrelated identities (`jd`, `gehh`) — those are not separate people and
+# must not show up as contributors. Map them, and the project owner's own name
+# variants, all to one canonical identity. (This corrects what git and GitHub
+# *display*; it does not rewrite the stored commits.)
+João Pinto <51242859+jdppinto@users.noreply.github.com> <jd@users.noreply.github.com>
+João Pinto <51242859+jdppinto@users.noreply.github.com> <gehh@winfast>
+João Pinto <51242859+jdppinto@users.noreply.github.com> <joaoduartepereirapinto@gmail.com>
