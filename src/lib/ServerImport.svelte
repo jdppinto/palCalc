@@ -9,6 +9,10 @@
   } from "./types";
   import { addManyOwned, clearAllOwned } from "./owned.svelte";
 
+  // When embedded (e.g. in the Roster's "Add pals" panel) the outer collapse
+  // header is dropped and the body is always shown.
+  let { alwaysOpen = false }: { alwaysOpen?: boolean } = $props();
+
   // Persisted connection (this is the user's own machine; the token is a local
   // secret stored alongside the app's other local state).
   const LS_KEY = "palcalc.server";
@@ -181,13 +185,15 @@
 </script>
 
 <section class="server">
-  <button class="head" onclick={() => (collapsed = !collapsed)}>
-    <span class="chev" class:open={!collapsed}>▶</span>
-    Load from server
-    {#if status === "connected"}<span class="ok">connected</span>{/if}
-  </button>
+  {#if !alwaysOpen}
+    <button class="head" onclick={() => (collapsed = !collapsed)}>
+      <span class="chev" class:open={!collapsed}>▶</span>
+      Load from server
+      {#if status === "connected"}<span class="ok">connected</span>{/if}
+    </button>
+  {/if}
 
-  {#if !collapsed}
+  {#if alwaysOpen || !collapsed}
     <div class="body">
       <p class="hint">
         Pull your roster from a palcalc-server (no scanning). Paste the server

@@ -4,22 +4,25 @@
   import BreedingTree from "./lib/BreedingTree.svelte";
   import Bookmarks from "./lib/BookmarksTab.svelte";
   import Calculator from "./lib/Calculator.svelte";
-  import { flushSave, initOwnedStore } from "./lib/owned.svelte";
+  import { flushSave, initOwnedStore, ownedStore } from "./lib/owned.svelte";
   import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
-  import PalboxScanner from "./lib/PalboxScanner.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
-  import ServerImport from "./lib/ServerImport.svelte";
+  import Roster from "./lib/Roster.svelte";
   import type { Route } from "./lib/types";
 
-  type Tab = "calculator" | "planner" | "scanner" | "tree" | "bookmarks";
-  let tab = $state<Tab>("calculator");
+  type Tab = "plan" | "roster" | "calculator" | "saved" | "tree";
+  let tab = $state<Tab>("plan");
   let treeRoute = $state<Route | null>(null);
 
   interface AppVersion { version: string; tag: string | null; prerelease: boolean; dev: boolean }
   let ver = $state<AppVersion | null>(null);
 
   onMount(() => {
-    initOwnedStore();
+    // Empty-aware landing: brand-new users (no owned pals) land on Roster to
+    // add some; returning users stay on Plan. Only flips if untouched.
+    initOwnedStore().then(() => {
+      if (tab === "plan" && ownedStore.list.length === 0) tab = "roster";
+    });
     initBookmarksStore();
     invoke<AppVersion>("app_version").then((v) => (ver = v)).catch(() => {});
     const flush = () => { flushSave(); flushBookmarks(); };
@@ -33,11 +36,11 @@
   }
 
   const tabs: Array<[Tab, string]> = [
+    ["plan", "Plan"],
+    ["roster", "Roster"],
     ["calculator", "Calculator"],
-    ["planner", "Route Planner"],
-    ["scanner", "Scanner"],
+    ["saved", "Saved"],
     ["tree", "Tree"],
-    ["bookmarks", "Bookmarks"],
   ];
 </script>
 
@@ -61,14 +64,11 @@
   </header>
 
   <!-- Views stay mounted (hidden, not removed) so tab switches never lose state -->
+  <div hidden={tab !== "plan"}><RoutePlanner onShowTree={showTree} /></div>
+  <div hidden={tab !== "roster"}><Roster /></div>
   <div hidden={tab !== "calculator"}><Calculator /></div>
-  <div hidden={tab !== "planner"}><RoutePlanner onShowTree={showTree} /></div>
-  <div hidden={tab !== "scanner"}>
-    <div class="server-wrap"><ServerImport /></div>
-    <PalboxScanner />
-  </div>
+  <div hidden={tab !== "saved"}><Bookmarks onOpen={showTree} /></div>
   <div hidden={tab !== "tree"}><BreedingTree route={treeRoute} /></div>
-  <div hidden={tab !== "bookmarks"}><Bookmarks onOpen={showTree} /></div>
 </main>
 
 <style>
@@ -76,11 +76,6 @@
     min-height: 100vh;
   }
 
-  /* Wraps the server-import panel so it lines up with the scanner content
-     below it without changing the scanner's own layout. */
-  .server-wrap {
-    padding: 1rem 1.5rem 0;
-  }
 
   header {
     display: flex;
