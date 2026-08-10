@@ -11,9 +11,13 @@
 services:
   palcalc-server:
     build:
-      # Parent of palCalc + palm-save, so the path dependency resolves.
-      context: ../..
-      dockerfile: palCalc/palcalc-server/Dockerfile
+      # Main context is just this crate (small). palm-save comes in as a named
+      # context so we don't ship a giant parent directory to the daemon.
+      # (Needs Docker Compose v2.17+ / BuildKit for additional_contexts.)
+      context: .
+      dockerfile: Dockerfile
+      additional_contexts:
+        palmsave: ../../palm-save
     image: palcalc-server:local
     container_name: palcalc-server
     restart: unless-stopped

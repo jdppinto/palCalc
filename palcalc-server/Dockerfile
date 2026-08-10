@@ -1,19 +1,21 @@
 # syntax=docker/dockerfile:1
 #
-# Build via the compose file, which sets the build context to the PARENT of
-# palCalc so the `palm-save` path dependency (a sibling of palCalc) resolves:
+# Built by docker-compose.yml, which supplies palm-save as a NAMED build
+# context (`palmsave`) so the small palcalc-server directory stays the main
+# context — no giant parent directory is sent to the daemon.
 #
 #     cd palcalc-server && PALCALC_SAVE_DIR=/path/to/world docker compose up -d --build
 #
-# Both crates compile INSIDE this image on Debian bookworm, so the binary
-# matches the bookworm-slim runtime's glibc — it is not coupled to the host's
-# glibc (important on rolling distros like Arch).
+# Both crates compile INSIDE this image (Debian bookworm), so the binary
+# matches the bookworm-slim runtime glibc — independent of the host's glibc.
 
 FROM rust:1-bookworm AS build
 WORKDIR /src
-# Context root is the parent of palCalc and palm-save (see docker-compose.yml).
-COPY palm-save/ palm-save/
-COPY palCalc/palcalc-server/ palCalc/palcalc-server/
+# palm-save comes from the `palmsave` named context; palcalc-server is the main
+# context. Lay them out two levels deep so the crate's `../../palm-save` path
+# dependency resolves (palCalc/palcalc-server -> ../../palm-save).
+COPY --from=palmsave . palm-save/
+COPY . palCalc/palcalc-server/
 WORKDIR /src/palCalc/palcalc-server
 # --locked: build exactly the committed Cargo.lock (reproducible, auditable).
 RUN cargo build --release --locked --bin palcalc-server

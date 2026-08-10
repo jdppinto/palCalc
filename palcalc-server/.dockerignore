@@ -1,0 +1,6 @@
+# Main build context = this crate. Keep it small and never ship secrets/certs
+# into the image (the whole dir is COPYed in the build stage).
+/target
+*.pem
+palcalc-server.toml
+palcalc-server.docker.toml

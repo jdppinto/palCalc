@@ -47,8 +47,9 @@ docker compose logs | grep fingerprint     # copy the SHA-256 to give clients
 ```
 
 - Both crates build **inside** the image (Debian bookworm), so the binary
-  isn't tied to your host's glibc. The build context is the parent of `palCalc`
-  so the `palm-save` sibling resolves — keep the two repos side by side.
+  isn't tied to your host's glibc. `palm-save` is pulled in as a named build
+  context (`additional_contexts`), so only the two small crate dirs are sent to
+  the daemon — keep the two repos side by side. Needs Compose v2.17+ / BuildKit.
 - The save folder is mounted **read-only**; the cert/key persist in a named
   volume so the fingerprint stays stable across restarts.
 - Confinement: non-root user, `cap_drop: ALL`, read-only root FS,
