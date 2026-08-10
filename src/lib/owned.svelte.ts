@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { OwnedPal } from "./types";
+import { toast } from "./toast.svelte";
 
 let _initialized = false;
 let _saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -38,9 +39,10 @@ function save() {
   if (!_initialized) return;
   if (_saveTimer) clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => {
-    invoke("save_owned_pals", { pals: ownedStore.list }).catch((e) =>
-      console.error("Failed to save owned pals:", e),
-    );
+    invoke("save_owned_pals", { pals: ownedStore.list }).catch((e) => {
+      console.error("Failed to save owned pals:", e);
+      toast.error("Couldn't save your pals to disk.");
+    });
   }, 100);
 }
 
@@ -50,9 +52,10 @@ export function flushSave() {
     _saveTimer = null;
   }
   if (_initialized) {
-    invoke("save_owned_pals", { pals: ownedStore.list }).catch((e) =>
-      console.error("Failed to save owned pals:", e),
-    );
+    invoke("save_owned_pals", { pals: ownedStore.list }).catch((e) => {
+      console.error("Failed to save owned pals:", e);
+      toast.error("Couldn't save your pals to disk.");
+    });
   }
 }
 

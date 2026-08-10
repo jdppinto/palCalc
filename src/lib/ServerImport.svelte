@@ -8,6 +8,7 @@
     ServerPal,
   } from "./types";
   import { addManyOwned, clearAllOwned } from "./owned.svelte";
+  import { toast } from "./toast.svelte";
 
   // When embedded (e.g. in the Roster's "Add pals" panel) the outer collapse
   // header is dropped and the body is always shown.
@@ -184,6 +185,9 @@
       `Imported ${mapped.length} pals` +
       (skipped ? ` (skipped ${skipped} unrecognized)` : "") +
       (replace ? ", replacing the previous list." : ", added to the list.");
+    toast.success(
+      `Imported ${mapped.length} pals into your roster${skipped ? ` (${skipped} skipped)` : ""}.`,
+    );
   }
 </script>
 

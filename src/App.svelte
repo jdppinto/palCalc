@@ -8,6 +8,7 @@
   import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import Roster from "./lib/Roster.svelte";
+  import Toasts from "./lib/Toasts.svelte";
   import type { Route } from "./lib/types";
 
   type Tab = "plan" | "roster" | "calculator" | "saved" | "tree";
@@ -69,6 +70,8 @@
   <div hidden={tab !== "calculator"}><Calculator /></div>
   <div hidden={tab !== "saved"}><Bookmarks onOpen={showTree} /></div>
   <div hidden={tab !== "tree"}><BreedingTree route={treeRoute} /></div>
+
+  <Toasts />
 </main>
 
 <style>

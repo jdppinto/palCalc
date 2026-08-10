@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { Bookmark, Route } from "./types";
+import { toast } from "./toast.svelte";
 
 /// Build a Bookmark from a route — the single source of the label format, so
 /// the Route Planner and the Tree view produce identical labels for the same
@@ -47,9 +48,10 @@ function save() {
   if (!_initialized) return;
   if (_saveTimer) clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => {
-    invoke("save_bookmarks", { bookmarks: bookmarksStore.list }).catch((e) =>
-      console.error("Failed to save bookmarks:", e),
-    );
+    invoke("save_bookmarks", { bookmarks: bookmarksStore.list }).catch((e) => {
+      console.error("Failed to save bookmarks:", e);
+      toast.error("Couldn't save bookmarks to disk.");
+    });
   }, 100);
 }
 
@@ -59,9 +61,10 @@ export function flushBookmarks() {
     _saveTimer = null;
   }
   if (_initialized) {
-    invoke("save_bookmarks", { bookmarks: bookmarksStore.list }).catch((e) =>
-      console.error("Failed to save bookmarks:", e),
-    );
+    invoke("save_bookmarks", { bookmarks: bookmarksStore.list }).catch((e) => {
+      console.error("Failed to save bookmarks:", e);
+      toast.error("Couldn't save bookmarks to disk.");
+    });
   }
 }
 
