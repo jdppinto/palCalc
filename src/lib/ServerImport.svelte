@@ -196,13 +196,13 @@
       </p>
 
       <label>Server URL
-        <input type="text" bind:value={url} placeholder="https://host:8123/roster" />
+        <input class="field wide" type="text" bind:value={url} placeholder="https://host:8123/roster" />
       </label>
       <label>Certificate fingerprint (SHA-256)
-        <input type="text" bind:value={fingerprint} placeholder="AA:BB:CC:…" />
+        <input class="field wide" type="text" bind:value={fingerprint} placeholder="AA:BB:CC:…" />
       </label>
       <label>Access token
-        <input type="password" bind:value={token} placeholder="shared token" />
+        <input class="field wide" type="password" bind:value={token} placeholder="shared token" />
       </label>
 
       <div class="row">
@@ -218,7 +218,7 @@
             {roster.players.length} players · {roster.pals.length} pals · updated {generatedAgo()}
           </div>
           <label>Import pals of
-            <select bind:value={selectedOwner} onchange={() => { savedOwner = selectedOwner; persist(); }}>
+            <select class="field" bind:value={selectedOwner} onchange={() => { savedOwner = selectedOwner; persist(); }}>
               <option value="">Everyone ({roster.pals.length})</option>
               {#each roster.players as pl (pl.uid)}
                 <option value={pl.uid}>{ownerLabel(pl.uid, pl.name)}</option>
@@ -309,9 +309,10 @@
     gap: 0.4rem;
     color: var(--text);
   }
-  input[type="text"],
-  input[type="password"],
-  select {
+  /* Class-based (not [type=…]) selectors: Svelte's scoper collapses attribute
+     selectors like input[type="text"] to a bare scope class that then matches
+     every scoped element — including the <select>. */
+  .field {
     box-sizing: border-box;
     padding: 0.4rem 0.55rem;
     background: var(--bg);
@@ -320,15 +321,12 @@
     color: var(--text);
     font: inherit;
   }
-  input[type="text"],
-  input[type="password"] {
+  /* Text fields fill the column (capped); the dropdown sizes to its content. */
+  .field.wide {
     width: 100%;
     max-width: 28rem;
   }
-  /* The player dropdown sizes to its content and left-aligns, rather than
-     stretching to the full panel width (flex align-items: stretch) like the
-     text fields do. */
-  select {
+  select.field {
     align-self: flex-start;
     max-width: 100%;
     cursor: pointer;
