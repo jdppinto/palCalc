@@ -313,8 +313,6 @@
   input[type="password"],
   select {
     box-sizing: border-box;
-    width: 100%;
-    max-width: 28rem;
     padding: 0.4rem 0.55rem;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -322,7 +320,17 @@
     color: var(--text);
     font: inherit;
   }
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    max-width: 28rem;
+  }
+  /* The player dropdown sizes to its content and left-aligns, rather than
+     stretching to the full panel width (flex align-items: stretch) like the
+     text fields do. */
   select {
+    align-self: flex-start;
+    max-width: 100%;
     cursor: pointer;
   }
   .row {
