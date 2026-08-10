@@ -4,7 +4,11 @@
   import type { Bookmark, Gender, Route, RouteNode } from "./types";
   import { bookmarksStore, isBookmarked, removeBookmark, toggleBookmark } from "./bookmarks.svelte";
 
-  let { route }: { route: Route | null } = $props();
+  let {
+    route,
+    height = "calc(100vh - 64px)",
+    showBookmarks = false,
+  }: { route: Route | null; height?: string; showBookmarks?: boolean } = $props();
 
   // A recalled bookmark overrides the incoming prop; a freshly planned route
   // (prop change) takes over and clears the pick. `current` is what's drawn.
@@ -164,7 +168,7 @@
 </script>
 
 <div class="tree-view">
-  {#if bookmarksStore.list.length > 0}
+  {#if showBookmarks && bookmarksStore.list.length > 0}
     <div class="bookmarks-bar">
       <span class="bm-title">Saved trees</span>
       {#each bookmarksStore.list as b (b.id)}
@@ -181,12 +185,17 @@
       Plan a route first (Route Planner tab), then open it here with “Show tree”.{#if bookmarksStore.list.length > 0} Or click a saved tree above.{/if}
     </p>
   {:else}
-    <div class="wrap">
+    <div class="wrap" style="height: {height}">
       <div class="legend">
         <span class="key target">target</span>
         <span class="key bred">bred (intermediate)</span>
         <span class="key owned">owned</span>
         <span class="key wild">wild catch</span>
+        {#if current}
+          <span class="stats">
+            {current.steps} step{current.steps === 1 ? "" : "s"}{#if current.reversers_used} · ♻{current.reversers_used}{/if}{#if current.covered.length} · ✓ {current.covered.join(", ")}{/if}{#if current.missing.length} · <span class="miss">✗ {current.missing.join(", ")}</span>{/if}
+          </span>
+        {/if}
         <span class="tip">scroll to zoom · drag to pan · click a node to collapse/expand</span>
         <button
           class="bookmark-btn"
@@ -411,7 +420,13 @@
   .wrap {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 64px);
+    min-height: 0;
+  }
+  .stats {
+    color: var(--text-dim);
+  }
+  .stats .miss {
+    color: #d0652a;
   }
 
   .legend {

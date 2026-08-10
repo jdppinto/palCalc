@@ -1,8 +1,15 @@
 <script lang="ts">
   import { bookmarksStore, removeBookmark } from "./bookmarks.svelte";
-  import type { Route } from "./types";
+  import BreedingTree from "./BreedingTree.svelte";
 
-  let { onOpen }: { onOpen: (route: Route) => void } = $props();
+  // Which saved routes have their tree expanded (by bookmark id).
+  let expanded = $state<Set<string>>(new Set());
+  function toggle(id: string) {
+    const s = new Set(expanded);
+    if (s.has(id)) s.delete(id);
+    else s.add(id);
+    expanded = s;
+  }
 
   // saved_at is a Date.now() epoch ms; render it in the local locale.
   function when(ms: number): string {
@@ -18,21 +25,28 @@
   <h2>Bookmarked breedings</h2>
   {#if bookmarksStore.list.length === 0}
     <p class="empty">
-      No bookmarks yet. Save a breeding from the Route Planner (☆ Bookmark) or
-      the Tree view (★ Bookmark this tree), and it'll appear here.
+      No bookmarks yet. Save a breeding from the Route Planner (☆ Bookmark) or a
+      breeding tree (★ Bookmark this tree), and it'll appear here.
     </p>
   {:else}
     <ul>
       {#each bookmarksStore.list as b (b.id)}
         <li>
-          <div class="info">
-            <span class="label">{b.label}</span>
-            <span class="meta">saved {when(b.saved_at)}</span>
+          <div class="line">
+            <div class="info">
+              <span class="label">{b.label}</span>
+              <span class="meta">saved {when(b.saved_at)}</span>
+            </div>
+            <button class="open" onclick={() => toggle(b.id)}>
+              {expanded.has(b.id) ? "▾ hide tree" : "▸ tree"}
+            </button>
+            <button class="remove" title="Remove bookmark" onclick={() => removeBookmark(b.id)}>
+              Remove
+            </button>
           </div>
-          <button class="open" onclick={() => onOpen(b.route)}>Open tree →</button>
-          <button class="remove" title="Remove bookmark" onclick={() => removeBookmark(b.id)}>
-            Remove
-          </button>
+          {#if expanded.has(b.id)}
+            <BreedingTree route={b.route} height="60vh" />
+          {/if}
         </li>
       {/each}
     </ul>
@@ -63,12 +77,17 @@
   }
   li {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 0.6rem;
     padding: 0.6rem 0.75rem;
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: 8px;
+  }
+  .line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
   .info {
     display: flex;
