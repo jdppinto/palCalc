@@ -27,5 +27,11 @@ ocrs = "0.12.2"
 rten = "0.24.0"
 strsim = "0.11.1"
 
+# Server mode: pinned HTTPS client to talk to palcalc-server. rustls-tls only
+# (custom fingerprint-pinning verifier), no native-tls, no bundled CA roots.
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls-manual-roots"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+sha2 = "0.10"
+
 [target.'cfg(target_os = "linux")'.dependencies]
 libwayshot = "0.8.0"

@@ -1,4 +1,5 @@
 pub mod scanner;
+pub mod server_client;
 
 use palcalc_core::{plan_routes, GameData, Gender, OwnedPal, PlanOutcome, PlanRequest};
 use serde::Serialize;
@@ -701,6 +702,17 @@ fn app_version() -> AppVersion {
     app_version_info()
 }
 
+/// Server mode: fetch a roster JSON from a palcalc-server, pinning its
+/// self-signed certificate by SHA-256 fingerprint. Returns the raw JSON body.
+#[tauri::command]
+async fn fetch_server_roster(
+    url: String,
+    token: String,
+    fingerprint: String,
+) -> Result<String, String> {
+    server_client::fetch_roster(&url, &token, &fingerprint).await
+}
+
 pub fn run() {
     #[cfg(windows)]
     extract_webview2_loader();
@@ -748,7 +760,8 @@ pub fn run() {
             load_owned_pals,
             save_owned_pals,
             load_bookmarks,
-            save_bookmarks
+            save_bookmarks,
+            fetch_server_roster
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

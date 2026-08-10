@@ -80,6 +80,11 @@ impl ServerCertVerifier for PinnedVerifier {
 /// case) into 32 bytes.
 pub fn parse_fingerprint(s: &str) -> Result<[u8; 32], String> {
     let hex: String = s.chars().filter(|c| !c.is_whitespace() && *c != ':').collect();
+    // Guard non-ASCII before byte-slicing below (a stray multi-byte char would
+    // otherwise panic on a char boundary rather than erroring).
+    if !hex.is_ascii() {
+        return Err("fingerprint contains non-hex characters".to_string());
+    }
     if hex.len() != 64 {
         return Err(format!(
             "fingerprint must be 32 bytes (64 hex chars), got {} hex chars",
@@ -140,5 +145,7 @@ mod tests {
         assert_eq!(parse_fingerprint(colon).unwrap(), parse_fingerprint(plain).unwrap());
         assert!(parse_fingerprint("tooshort").is_err());
         assert!(parse_fingerprint(&"zz".repeat(32)).is_err());
+        // Non-ASCII must error, not panic on a char boundary.
+        assert!(parse_fingerprint(&"é".repeat(32)).is_err());
     }
 }

@@ -8,6 +8,7 @@
   import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
   import PalboxScanner from "./lib/PalboxScanner.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
+  import ServerImport from "./lib/ServerImport.svelte";
   import type { Route } from "./lib/types";
 
   type Tab = "calculator" | "planner" | "scanner" | "tree" | "bookmarks";
@@ -62,7 +63,10 @@
   <!-- Views stay mounted (hidden, not removed) so tab switches never lose state -->
   <div hidden={tab !== "calculator"}><Calculator /></div>
   <div hidden={tab !== "planner"}><RoutePlanner onShowTree={showTree} /></div>
-  <div hidden={tab !== "scanner"}><PalboxScanner /></div>
+  <div hidden={tab !== "scanner"}>
+    <div class="server-wrap"><ServerImport /></div>
+    <PalboxScanner />
+  </div>
   <div hidden={tab !== "tree"}><BreedingTree route={treeRoute} /></div>
   <div hidden={tab !== "bookmarks"}><Bookmarks onOpen={showTree} /></div>
 </main>
@@ -70,6 +74,12 @@
 <style>
   main {
     min-height: 100vh;
+  }
+
+  /* Wraps the server-import panel so it lines up with the scanner content
+     below it without changing the scanner's own layout. */
+  .server-wrap {
+    padding: 1rem 1.5rem 0;
   }
 
   header {

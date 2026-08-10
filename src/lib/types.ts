@@ -82,3 +82,28 @@ export interface PlanOutcome {
   routes: Route[];
   stats: PlanStats;
 }
+
+// --- Server mode (palcalc-server) ---
+
+export interface ServerPlayer {
+  uid: string;
+  name: string;
+}
+
+export type PalLocation = "palbox" | "party" | "base" | "unknown";
+
+export interface ServerPal {
+  species: string;
+  gender: string; // "Male" | "Female" | "" (raw from the save)
+  level: number;
+  passives: string[];
+  owner: string | null;
+  location: PalLocation;
+  container: string | null;
+}
+
+export interface ServerRoster {
+  generated_at_unix: number;
+  players: ServerPlayer[];
+  pals: ServerPal[];
+}
