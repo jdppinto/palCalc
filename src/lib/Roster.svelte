@@ -68,6 +68,37 @@
     {/if}
   </header>
 
+  <!-- Add controls live at the top so they're reachable without scrolling
+       past a large roster. -->
+  <div class="add">
+    <div class="addhead">
+      <h3>Add pals</h3>
+      <div class="sources">
+        <button class="src" class:active={source === "server"} onclick={() => toggle("server")}>From server</button>
+        <button class="src" class:active={source === "scan"} onclick={() => toggle("scan")}>Scan game screen</button>
+        <button class="src" class:active={source === "manual"} onclick={() => toggle("manual")}>Add manually</button>
+      </div>
+    </div>
+
+    {#if source === "server"}
+      <ServerImport alwaysOpen />
+    {:else if source === "scan"}
+      <PalboxScanner />
+    {:else if source === "manual"}
+      <div class="manual">
+        <PalSelect {pals} bind:value={newSpecies} label="Species" />
+        <PassivePicker {passives} bind:selected={newPassives} max={4} label="Its passives (up to 4)" />
+        <div class="genders">
+          <span class="glabel">Gender</span>
+          <label><input type="radio" name="rostergender" checked={newGender === null} onchange={() => (newGender = null)} /> any</label>
+          <label><input type="radio" name="rostergender" checked={newGender === "Male"} onchange={() => (newGender = "Male")} /> ♂</label>
+          <label><input type="radio" name="rostergender" checked={newGender === "Female"} onchange={() => (newGender = "Female")} /> ♀</label>
+        </div>
+        <button class="primary" onclick={addManual} disabled={!newSpecies}>Add pal</button>
+      </div>
+    {/if}
+  </div>
+
   {#if ownedStore.list.length}
     <div class="grid">
       {#each ownedStore.list as p, i (i)}
@@ -89,37 +120,10 @@
     </div>
   {:else}
     <p class="empty">
-      No pals in your roster yet. Add some below — import from your palcalc-server,
-      scan the game screen, or add them by hand.
+      No pals in your roster yet. Add some above — import from your
+      palcalc-server, scan the game screen, or add them by hand.
     </p>
   {/if}
-
-  <div class="add">
-    <h3>Add pals</h3>
-    <div class="sources">
-      <button class="src" class:active={source === "server"} onclick={() => toggle("server")}>From server</button>
-      <button class="src" class:active={source === "scan"} onclick={() => toggle("scan")}>Scan game screen</button>
-      <button class="src" class:active={source === "manual"} onclick={() => toggle("manual")}>Add manually</button>
-    </div>
-
-    {#if source === "server"}
-      <ServerImport alwaysOpen />
-    {:else if source === "scan"}
-      <PalboxScanner />
-    {:else if source === "manual"}
-      <div class="manual">
-        <PalSelect {pals} bind:value={newSpecies} label="Species" />
-        <PassivePicker {passives} bind:selected={newPassives} max={4} label="Its passives (up to 4)" />
-        <div class="genders">
-          <span class="glabel">Gender</span>
-          <label><input type="radio" name="rostergender" checked={newGender === null} onchange={() => (newGender = null)} /> any</label>
-          <label><input type="radio" name="rostergender" checked={newGender === "Male"} onchange={() => (newGender = "Male")} /> ♂</label>
-          <label><input type="radio" name="rostergender" checked={newGender === "Female"} onchange={() => (newGender = "Female")} /> ♀</label>
-        </div>
-        <button class="primary" onclick={addManual} disabled={!newSpecies}>Add pal</button>
-      </div>
-    {/if}
-  </div>
 </section>
 
 <style>
@@ -142,84 +146,20 @@
     color: var(--text-dim);
     font-weight: 400;
   }
-  .empty {
-    color: var(--text-dim);
-    margin: 1rem 0 0;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.6rem;
-    margin-top: 0.9rem;
-  }
-  .card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.6rem 0.5rem;
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    text-align: center;
-  }
-  .rm {
-    position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    line-height: 1;
-    padding: 0;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--text-dim);
-    cursor: pointer;
-  }
-  .rm:hover {
-    background: var(--bg-hover);
-    color: #f85149;
-  }
-  .icon {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-  }
-  .name {
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-  .g {
-    color: var(--text-dim);
-    font-weight: 400;
-  }
-  .passives {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.2rem;
-  }
-  .pv {
-    font-size: 0.68rem;
-    padding: 0.05rem 0.3rem;
-    border-radius: 4px;
-    background: var(--bg-hover);
-    color: var(--text-dim);
-  }
-  .pv.none {
-    background: none;
-    font-style: italic;
-  }
 
   .add {
-    margin-top: 1.75rem;
-    border-top: 1px solid var(--border);
-    padding-top: 1rem;
+    margin-top: 0.9rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .addhead {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
   h3 {
-    margin: 0 0 0.6rem;
+    margin: 0;
     font-size: 0.95rem;
   }
   .sources {
@@ -295,6 +235,77 @@
   button.danger:hover {
     border-color: #f85149;
     color: #f85149;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.6rem 0.5rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+  }
+  .rm {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    line-height: 1;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .rm:hover {
+    background: var(--bg-hover);
+    color: #f85149;
+  }
+  .icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+  .name {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .g {
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  .passives {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.2rem;
+  }
+  .pv {
+    font-size: 0.68rem;
+    padding: 0.05rem 0.3rem;
+    border-radius: 4px;
+    background: var(--bg-hover);
+    color: var(--text-dim);
+  }
+  .pv.none {
+    background: none;
+    font-style: italic;
+  }
+  .empty {
+    color: var(--text-dim);
+    margin: 1.1rem 0 0;
   }
   .add :global(.server) {
     margin-top: 0.9rem;
