@@ -88,6 +88,7 @@ export interface PlanOutcome {
 export interface ServerPlayer {
   uid: string;
   name: string;
+  guild: string | null;
 }
 
 export type PalLocation = "palbox" | "party" | "base" | "unknown";
@@ -100,6 +101,7 @@ export interface ServerPal {
   owner: string | null;
   location: PalLocation;
   container: string | null;
+  guild: string | null;
 }
 
 export interface ServerRoster {

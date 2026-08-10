@@ -113,11 +113,24 @@
     };
   }
 
-  const selectedPals = $derived(
-    roster
-      ? roster.pals.filter((p) => selectedOwner === "" || p.owner === selectedOwner)
-      : [],
+  const selectedGuild = $derived(
+    roster && selectedOwner
+      ? (roster.players.find((p) => p.uid === selectedOwner)?.guild ?? null)
+      : null,
   );
+
+  // A player's own palbox/party pals, plus their whole guild's base pals
+  // (guild attribution is authoritative — includes guildmates' base workers).
+  const selectedPals = $derived.by(() => {
+    if (!roster) return [];
+    if (selectedOwner === "") return roster.pals;
+    const g = selectedGuild;
+    return roster.pals.filter(
+      (p) =>
+        (p.owner === selectedOwner && (p.location === "palbox" || p.location === "party")) ||
+        (p.location === "base" && g != null && p.guild === g),
+    );
+  });
 
   function ownerLabel(uid: string, name: string): string {
     const n = roster ? roster.pals.filter((p) => p.owner === uid).length : 0;
@@ -205,8 +218,9 @@
             {#if importResult}<span class="ok">{importResult}</span>{/if}
           </div>
           <p class="note">
-            Selecting a player imports the pals it currently owns (palbox, party,
-            and bases). Guild-shared base pals owned by others aren't included yet.
+            Selecting a player imports their palbox and party plus their whole
+            guild's base pals (including guildmates' base workers). "Everyone"
+            imports the entire server roster.
           </p>
         </div>
       {/if}

@@ -107,6 +107,8 @@ fn hx(u: &[u8; 16]) -> String {
 struct PlayerOut {
     uid: String,
     name: String,
+    /// The guild (group id) this player belongs to.
+    guild: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -118,6 +120,9 @@ struct PalOut {
     owner: Option<String>,
     location: &'static str,
     container: Option<String>,
+    /// The guild (group id) that owns this pal's container/base — authoritative
+    /// for the "my guild's bases" view (not inferred from the pal's owner).
+    guild: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -159,6 +164,7 @@ fn build_body(dir: &Path) -> anyhow::Result<Vec<u8>> {
         .map(|(uid, name)| PlayerOut {
             uid: hx(uid),
             name: name.clone(),
+            guild: roster.player_guild.get(uid).map(hx),
         })
         .collect();
 
@@ -178,6 +184,7 @@ fn build_body(dir: &Path) -> anyhow::Result<Vec<u8>> {
                 Location::Unknown => "unknown",
             },
             container: p.container.map(|c| hx(&c)),
+            guild: p.guild.map(|g| hx(&g)),
         })
         .collect();
 
