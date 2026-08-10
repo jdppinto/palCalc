@@ -136,6 +136,10 @@
       label: displayName.get(species) || species,
       passives: p.passives.filter((k) => validPassives.has(k)),
       gender: p.gender === "Male" ? "Male" : p.gender === "Female" ? "Female" : null,
+      level: p.level,
+      location: p.location,
+      guild: p.guild,
+      source: "server",
     };
   }
 

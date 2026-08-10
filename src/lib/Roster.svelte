@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
-  import type { PalEntry, PassiveEntry, Gender } from "./types";
+  import type { PalEntry, PassiveEntry, Gender, PalLocation } from "./types";
   import {
     ownedStore,
     addOwnedPal,
@@ -37,6 +37,16 @@
   const nameOf = (species: string) => palByKey.get(species)?.name ?? species;
   const sym = (g: Gender | null) => (g === "Male" ? "♂" : g === "Female" ? "♀" : "");
 
+  // Location filter (only meaningful for server-imported pals, which carry a
+  // location). Filter against the full list; map back by reference to remove.
+  let locFilter = $state<"" | PalLocation>("");
+  const hasLocations = $derived(ownedStore.list.some((p) => p.location));
+  const shown = $derived(
+    locFilter
+      ? ownedStore.list.filter((p) => p.location === locFilter)
+      : ownedStore.list,
+  );
+
   function toggle(s: typeof source) {
     source = source === s ? "" : s;
   }
@@ -49,6 +59,7 @@
       label: `${nameOf(newSpecies)} #${n}`,
       passives: newPassives,
       gender: newGender,
+      source: "manual",
     });
     newSpecies = null;
     newPassives = [];
@@ -62,10 +73,28 @@
 
 <section class="roster">
   <header class="rhead">
-    <h2>Roster <span class="count">· {ownedStore.list.length} pals</span></h2>
-    {#if ownedStore.list.length}
-      <button class="danger" onclick={removeAll}>Remove all</button>
-    {/if}
+    <h2>
+      Roster
+      <span class="count">
+        · {shown.length}{#if locFilter} of {ownedStore.list.length}{/if} pals
+      </span>
+    </h2>
+    <div class="rhead-actions">
+      {#if hasLocations}
+        <label class="filter">
+          Location
+          <select bind:value={locFilter}>
+            <option value="">All</option>
+            <option value="palbox">Palbox</option>
+            <option value="party">Party</option>
+            <option value="base">Base</option>
+          </select>
+        </label>
+      {/if}
+      {#if ownedStore.list.length}
+        <button class="danger" onclick={removeAll}>Remove all</button>
+      {/if}
+    </div>
   </header>
 
   <!-- Add controls live at the top so they're reachable without scrolling
@@ -99,15 +128,30 @@
     {/if}
   </div>
 
-  {#if ownedStore.list.length}
+  {#if !ownedStore.list.length}
+    <p class="empty">
+      No pals in your roster yet. Add some above — import from your
+      palcalc-server, scan the game screen, or add them by hand.
+    </p>
+  {:else if !shown.length}
+    <p class="empty">No pals match this filter.</p>
+  {:else}
     <div class="grid">
-      {#each ownedStore.list as p, i (i)}
+      {#each shown as p (p)}
         <div class="card">
-          <button class="rm" title="Remove" onclick={() => removeOwnedAt(i)}>✕</button>
+          <button class="rm" title="Remove" onclick={() => removeOwnedAt(ownedStore.list.indexOf(p))}>✕</button>
           {#if iconOf(p.species)}
             <img class="icon" src={"/icons/" + iconOf(p.species)} alt={nameOf(p.species)} />
           {/if}
           <div class="name">{nameOf(p.species)} <span class="g">{sym(p.gender)}</span></div>
+          {#if p.level || (p.location && p.location !== "unknown")}
+            <div class="meta">
+              {#if p.level}<span class="lv">Lv {p.level}</span>{/if}
+              {#if p.location && p.location !== "unknown"}
+                <span class="loc {p.location}">{p.location}</span>
+              {/if}
+            </div>
+          {/if}
           <div class="passives">
             {#if p.passives.length}
               {#each p.passives as k}<span class="pv">{passiveName(k)}</span>{/each}
@@ -118,11 +162,6 @@
         </div>
       {/each}
     </div>
-  {:else}
-    <p class="empty">
-      No pals in your roster yet. Add some above — import from your
-      palcalc-server, scan the game screen, or add them by hand.
-    </p>
   {/if}
 </section>
 
@@ -145,6 +184,27 @@
   .count {
     color: var(--text-dim);
     font-weight: 400;
+  }
+  .rhead-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+  .filter select {
+    padding: 0.3rem 0.5rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
   }
 
   .add {
@@ -285,6 +345,35 @@
   .g {
     color: var(--text-dim);
     font-weight: 400;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.66rem;
+  }
+  .lv {
+    color: var(--text-dim);
+  }
+  .loc {
+    padding: 0.02rem 0.3rem;
+    border-radius: 999px;
+    text-transform: capitalize;
+    background: var(--bg-hover);
+    color: var(--text-dim);
+  }
+  .loc.palbox {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+  }
+  .loc.party {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .loc.base {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
   }
   .passives {
     display: flex;

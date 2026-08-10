@@ -32,6 +32,17 @@ pub struct OwnedPal {
     pub passives: Vec<String>,
     #[serde(default)]
     pub gender: Option<Gender>,
+    // Optional provenance/metadata carried through from the source (server
+    // import, screen scan, manual). The planner ignores these; they exist so
+    // the roster UI can display/filter them and they survive persistence.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub guild: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

@@ -9,6 +9,11 @@ fn owned(species: &str, passives: &[&str]) -> OwnedPal {
         species: species.into(),
         label: String::new(),
         passives: passives.iter().map(|s| s.to_string()).collect(),
+        gender: None,
+        level: None,
+        location: None,
+        guild: None,
+        source: None,
     }
 }
 
@@ -20,6 +25,7 @@ fn req(target: &str) -> PlanRequest {
         assume_wild: false,
         max_steps: None,
         max_routes: None,
+        reversers: 0,
     }
 }
 

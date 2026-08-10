@@ -712,6 +712,7 @@
         label: `${pal(r.species)?.name ?? r.species} (scan)`,
         passives: r.passives,
         gender: r.gender,
+        source: "scan" as const,
       })),
     );
     results = null;

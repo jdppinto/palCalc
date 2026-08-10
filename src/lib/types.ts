@@ -22,11 +22,18 @@ export interface PassiveEntry {
   rank: number;
 }
 
+export type PalSource = "server" | "scan" | "manual";
+
 export interface OwnedPal {
   species: string;
   label: string;
   passives: string[];
   gender: Gender | null;
+  // Optional provenance/metadata (present mainly on server-imported pals).
+  level?: number;
+  location?: PalLocation;
+  guild?: string | null;
+  source?: PalSource;
 }
 
 export interface PlanRequest {
