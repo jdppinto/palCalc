@@ -1,15 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
+  import BreedingTree from "./lib/BreedingTree.svelte";
   import Bookmarks from "./lib/BookmarksTab.svelte";
   import Calculator from "./lib/Calculator.svelte";
   import { flushSave, initOwnedStore, ownedStore } from "./lib/owned.svelte";
   import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import Roster from "./lib/Roster.svelte";
+  import type { Route } from "./lib/types";
 
-  type Tab = "plan" | "roster" | "calculator" | "saved";
+  type Tab = "plan" | "roster" | "calculator" | "saved" | "tree";
   let tab = $state<Tab>("plan");
+  let treeRoute = $state<Route | null>(null);
 
   interface AppVersion { version: string; tag: string | null; prerelease: boolean; dev: boolean }
   let ver = $state<AppVersion | null>(null);
@@ -27,11 +30,17 @@
     return () => window.removeEventListener("beforeunload", flush);
   });
 
+  function showTree(route: Route) {
+    treeRoute = route;
+    tab = "tree";
+  }
+
   const tabs: Array<[Tab, string]> = [
     ["plan", "Plan"],
     ["roster", "Roster"],
     ["calculator", "Calculator"],
     ["saved", "Saved"],
+    ["tree", "Tree"],
   ];
 </script>
 
@@ -55,10 +64,11 @@
   </header>
 
   <!-- Views stay mounted (hidden, not removed) so tab switches never lose state -->
-  <div hidden={tab !== "plan"}><RoutePlanner onManageRoster={() => (tab = "roster")} /></div>
+  <div hidden={tab !== "plan"}><RoutePlanner onShowTree={showTree} onManageRoster={() => (tab = "roster")} /></div>
   <div hidden={tab !== "roster"}><Roster /></div>
   <div hidden={tab !== "calculator"}><Calculator /></div>
-  <div hidden={tab !== "saved"}><Bookmarks /></div>
+  <div hidden={tab !== "saved"}><Bookmarks onOpen={showTree} /></div>
+  <div hidden={tab !== "tree"}><BreedingTree route={treeRoute} /></div>
 </main>
 
 <style>

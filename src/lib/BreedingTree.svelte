@@ -7,7 +7,7 @@
   let {
     route,
     height = "calc(100vh - 64px)",
-    showBookmarks = false,
+    showBookmarks = true,
   }: { route: Route | null; height?: string; showBookmarks?: boolean } = $props();
 
   // A recalled bookmark overrides the incoming prop; a freshly planned route

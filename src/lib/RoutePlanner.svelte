@@ -5,7 +5,6 @@
   import { isBookmarked, toggleBookmark } from "./bookmarks.svelte";
   import PalSelect from "./PalSelect.svelte";
   import PassivePicker from "./PassivePicker.svelte";
-  import BreedingTree from "./BreedingTree.svelte";
   import type {
     Gender,
     OwnedPal,
@@ -14,9 +13,13 @@
     PlanOutcome,
     PlanStats,
     Route,
+    RouteNode,
   } from "./types";
 
-  let { onManageRoster }: { onManageRoster?: () => void } = $props();
+  let {
+    onShowTree,
+    onManageRoster,
+  }: { onShowTree: (route: Route) => void; onManageRoster?: () => void } = $props();
 
   let pals = $state<PalEntry[]>([]);
   let passives = $state<PassiveEntry[]>([]);
@@ -32,20 +35,6 @@
   let stats = $state<PlanStats | null>(null);
   let planning = $state(false);
   let error = $state<string | null>(null);
-
-  // Which route cards have their breeding tree expanded (by index).
-  let expanded = $state<Set<number>>(new Set());
-  function toggleTree(i: number) {
-    const s = new Set(expanded);
-    if (s.has(i)) s.delete(i);
-    else s.add(i);
-    expanded = s;
-  }
-  // Collapse all trees whenever a new result set arrives.
-  $effect(() => {
-    void routes;
-    expanded = new Set();
-  });
 
   // Session-only history of completed calculations, so a result isn't lost
   // when the user runs another one before bookmarking. Kept in memory (this
@@ -110,6 +99,10 @@
     return passives.find((p) => p.key === key)?.name ?? key;
   }
 
+  function genderSymbol(g: Gender | null): string {
+    return g === "Male" ? " ♂" : g === "Female" ? " ♀" : "";
+  }
+
   async function planRoutes() {
     if (!target) return;
     // Capture inputs up front: after the await, TS no longer narrows the
@@ -159,6 +152,33 @@
   }
 
 </script>
+
+{#snippet tree(node: RouteNode, gender: Gender | null)}
+  <li>
+    <div class="node">
+      {#if node.icon}
+        <img src={"/icons/" + node.icon} alt="" />
+      {/if}
+      <span class="name">{node.name}{genderSymbol(gender)}</span>
+      {#if node.owned === "wild"}
+        <span class="tag wild">wild catch</span>
+      {:else if node.owned !== null}
+        <span class="tag owned">{node.owned}</span>
+      {:else}
+        <span class="tag bred">bred</span>
+      {/if}
+      {#each node.passives as p (p)}
+        <span class="tag passive">{p}</span>
+      {/each}
+    </div>
+    {#if node.parents.length === 2}
+      <ul>
+        {@render tree(node.parents[0], node.gender_a)}
+        {@render tree(node.parents[1], node.gender_b)}
+      </ul>
+    {/if}
+  </li>
+{/snippet}
 
 <section>
   <div class="config">
@@ -276,13 +296,13 @@
               >
                 {isBookmarked(r) ? "★ Saved" : "☆ Bookmark"}
               </button>
-              <button class="show-tree" onclick={() => toggleTree(i)}>
-                {expanded.has(i) ? "▾ hide tree" : "▸ tree"}
+              <button class="show-tree" onclick={() => onShowTree(r)}>
+                Show tree →
               </button>
             </header>
-            {#if expanded.has(i)}
-              <BreedingTree route={r} height="60vh" />
-            {/if}
+            <ul class="tree-root">
+              {@render tree(r.root, null)}
+            </ul>
           </div>
         {/each}
       </div>
@@ -469,10 +489,55 @@
     color: var(--accent);
   }
 
+  ul.tree-root,
+  .route ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 1.4rem;
+    border-left: 1px solid var(--border);
+  }
+
+  ul.tree-root {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .node {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    flex-wrap: wrap;
+  }
+
+  .node img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .name {
+    font-weight: 500;
+  }
+
   .tag {
     font-size: 0.75rem;
     padding: 0.1rem 0.5rem;
     border-radius: 999px;
+  }
+
+  .tag.owned {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+  }
+
+  .tag.wild {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+  }
+
+  .tag.bred {
+    background: var(--bg-hover);
+    color: var(--text-dim);
   }
 
   .tag.passive {
