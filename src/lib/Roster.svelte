@@ -294,8 +294,8 @@
     font: inherit;
   }
   button.danger:hover {
-    border-color: #f85149;
-    color: #f85149;
+    border-color: var(--danger);
+    color: var(--danger);
   }
 
   .grid {
@@ -332,7 +332,7 @@
   }
   .rm:hover {
     background: var(--bg-hover);
-    color: #f85149;
+    color: var(--danger);
   }
   .icon {
     width: 48px;
@@ -365,20 +365,20 @@
     color: var(--text-dim);
   }
   .loc.palbox {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
+    background: var(--info-soft);
+    color: var(--info);
   }
   .loc.party {
     background: var(--accent-soft);
     color: var(--accent);
   }
   .loc.base {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
+    background: var(--success-soft);
+    color: var(--success);
   }
   .loc.dps {
-    background: rgba(167, 139, 250, 0.18);
-    color: #a78bfa;
+    background: var(--purple-soft);
+    color: var(--purple);
   }
   .passives {
     display: flex;

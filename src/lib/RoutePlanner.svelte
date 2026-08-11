@@ -413,7 +413,7 @@
     align-self: flex-start;
     padding: 0.6rem 1.4rem;
     background: var(--accent);
-    color: #1a1408;
+    color: var(--on-accent);
     font-weight: 600;
     border: none;
     border-radius: 8px;
@@ -472,8 +472,8 @@
   }
   /* When saved, hovering hints removal rather than re-adding. */
   .bookmark.saved:hover {
-    color: #d0652a;
-    border-color: #d0652a;
+    color: var(--warning);
+    border-color: var(--warning);
   }
   .show-tree {
     padding: 0.3rem 0.8rem;
@@ -526,13 +526,13 @@
   }
 
   .tag.owned {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
+    background: var(--success-soft);
+    color: var(--success);
   }
 
   .tag.wild {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
+    background: var(--info-soft);
+    color: var(--info);
   }
 
   .tag.bred {
@@ -546,13 +546,13 @@
   }
 
   .tag.missing {
-    background: rgba(239, 68, 68, 0.15);
-    color: #f87171;
+    background: var(--danger-soft);
+    color: var(--danger);
   }
 
   .tag.rev {
-    background: rgba(168, 85, 247, 0.15);
-    color: #c084fc;
+    background: var(--purple-soft);
+    color: var(--purple);
   }
 
   .warn {
@@ -569,7 +569,7 @@
 
   .error {
     margin-top: 1.5rem;
-    color: #ef4444;
+    color: var(--danger);
   }
 
   .hint {
@@ -634,7 +634,7 @@
     cursor: pointer;
   }
   .history-clear:hover {
-    color: #d0652a;
-    border-color: #d0652a;
+    color: var(--warning);
+    border-color: var(--warning);
   }
 </style>

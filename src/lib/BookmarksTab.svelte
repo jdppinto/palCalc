@@ -100,7 +100,7 @@
     border-color: var(--accent);
   }
   .remove:hover {
-    color: #d0652a;
-    border-color: #d0652a;
+    color: var(--warning);
+    border-color: var(--warning);
   }
 </style>

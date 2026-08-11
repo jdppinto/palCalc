@@ -152,7 +152,7 @@
 
   .error {
     margin-top: 1.5rem;
-    color: #ef4444;
+    color: var(--danger);
   }
 
   .hint {

@@ -294,12 +294,12 @@
     transform: rotate(90deg);
   }
   .ok {
-    color: #3fb950;
+    color: var(--success);
     font-weight: 500;
     font-size: 0.85rem;
   }
   .err {
-    color: #f85149;
+    color: var(--danger);
     font-size: 0.85rem;
   }
   .body {

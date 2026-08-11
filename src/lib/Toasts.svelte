@@ -38,10 +38,10 @@
     color: var(--text);
   }
   .toast.success {
-    border-left-color: #3fb950;
+    border-left-color: var(--success);
   }
   .toast.error {
-    border-left-color: #f85149;
+    border-left-color: var(--danger);
   }
   .toast.info {
     border-left-color: var(--accent);

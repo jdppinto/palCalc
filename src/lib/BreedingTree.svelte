@@ -392,7 +392,7 @@
     cursor: pointer;
   }
   .bm-rm:hover {
-    color: #d0652a;
+    color: var(--warning);
   }
   .bookmark-btn {
     margin-left: auto;
@@ -413,8 +413,8 @@
   }
   /* When saved, hovering hints removal rather than re-adding. */
   .bookmark-btn.saved:hover {
-    color: #d0652a;
-    border-color: #d0652a;
+    color: var(--warning);
+    border-color: var(--warning);
   }
 
   .wrap {
@@ -426,7 +426,7 @@
     color: var(--text-dim);
   }
   .stats .miss {
-    color: #d0652a;
+    color: var(--warning);
   }
 
   .legend {
@@ -453,15 +453,15 @@
 
   .key.bred::before {
     background: transparent;
-    border: 2px solid #3b82f6;
+    border: 2px solid var(--info);
   }
 
   .key.owned::before {
-    background: #22c55e;
+    background: var(--success);
   }
 
   .key.wild::before {
-    background: #3b82f6;
+    background: var(--info);
   }
 
   .tip {
@@ -472,7 +472,7 @@
     flex: 1;
     width: 100%;
     background:
-      radial-gradient(circle, #22262e 1px, transparent 1px) 0 0 / 26px 26px,
+      radial-gradient(circle, var(--border) 1px, transparent 1px) 0 0 / 26px 26px,
       var(--bg);
     cursor: grab;
   }
@@ -503,21 +503,21 @@
   }
 
   .node.bred rect {
-    stroke: #3b82f6;
+    stroke: var(--info);
   }
 
   .node.owned rect {
-    fill: rgba(34, 197, 94, 0.18);
-    stroke: #22c55e;
+    fill: var(--success-soft);
+    stroke: var(--success);
   }
 
   .node.wild rect {
-    fill: rgba(59, 130, 246, 0.15);
-    stroke: #3b82f6;
+    fill: var(--info-soft);
+    stroke: var(--info);
   }
 
   .node.target rect {
-    fill: rgba(245, 158, 11, 0.2);
+    fill: var(--accent-soft);
     stroke: var(--accent);
     stroke-width: 2;
   }
@@ -538,25 +538,25 @@
   }
 
   .passive-chip {
-    fill: rgba(156, 163, 175, 0.12);
-    stroke: #9ca3af;
+    fill: var(--bg-hover);
+    stroke: var(--border);
     stroke-width: 0.5;
   }
 
   .passive-chip.desired {
-    fill: rgba(34, 197, 94, 0.18);
-    stroke: #22c55e;
+    fill: var(--success-soft);
+    stroke: var(--success);
     stroke-width: 1.2;
   }
 
   .passive-chip.covered {
-    fill: rgba(34, 197, 94, 0.15);
-    stroke: #22c55e;
+    fill: var(--success-soft);
+    stroke: var(--success);
     stroke-width: 0.8;
   }
 
   .passive-label {
-    fill: #9ca3af;
+    fill: var(--text-dim);
     font-size: 8px;
     text-anchor: middle;
     dominant-baseline: middle;
@@ -564,12 +564,12 @@
   }
 
   .passive-label.desired {
-    fill: #22c55e;
+    fill: var(--success);
     font-weight: 600;
   }
 
   .passive-label.covered {
-    fill: #22c55e;
+    fill: var(--success);
     font-weight: 600;
   }
 </style>
