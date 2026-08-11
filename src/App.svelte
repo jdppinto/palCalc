@@ -9,6 +9,9 @@
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import Roster from "./lib/Roster.svelte";
   import Toasts from "./lib/Toasts.svelte";
+  import { check } from "@tauri-apps/plugin-updater";
+  import { relaunch } from "@tauri-apps/plugin-process";
+  import { toast } from "./lib/toast.svelte";
   import type { Route } from "./lib/types";
 
   type Tab = "plan" | "roster" | "calculator" | "saved" | "tree";
@@ -26,10 +29,35 @@
     });
     initBookmarksStore();
     invoke<AppVersion>("app_version").then((v) => (ver = v)).catch(() => {});
+    void checkForUpdate();
     const flush = () => { flushSave(); flushBookmarks(); };
     window.addEventListener("beforeunload", flush);
     return () => window.removeEventListener("beforeunload", flush);
   });
+
+  // Self-update: on launch, ask GitHub for a newer signed release. If one
+  // exists, offer a one-click "Update & restart". Errors are swallowed —
+  // offline, no release yet, or running unpackaged in dev all land here.
+  async function checkForUpdate() {
+    try {
+      const update = await check();
+      if (!update) return;
+      toast.action(`PalCalc ${update.version} is available.`, {
+        label: "Update & restart",
+        run: async () => {
+          try {
+            toast.info("Downloading update…");
+            await update.downloadAndInstall();
+            await relaunch();
+          } catch (e) {
+            toast.error(`Update failed: ${e}`);
+          }
+        },
+      });
+    } catch {
+      /* offline, no release yet, or unpackaged — ignore */
+    }
+  }
 
   function showTree(route: Route) {
     treeRoute = route;

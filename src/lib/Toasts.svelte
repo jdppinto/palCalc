@@ -6,6 +6,11 @@
   {#each toastStore.list as t (t.id)}
     <div class="toast {t.kind}" role="status">
       <span class="msg">{t.message}</span>
+      {#if t.action}
+        <button class="act" onclick={() => { t.action?.run(); dismiss(t.id); }}>
+          {t.action.label}
+        </button>
+      {/if}
       <button class="x" aria-label="Dismiss" onclick={() => dismiss(t.id)}>✕</button>
     </div>
   {/each}
@@ -49,6 +54,20 @@
   .msg {
     flex: 1;
     min-width: 0;
+  }
+  .act {
+    flex-shrink: 0;
+    padding: 0.25rem 0.6rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .act:hover {
+    filter: brightness(1.08);
   }
   .x {
     flex-shrink: 0;

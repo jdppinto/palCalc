@@ -718,6 +718,8 @@ pub fn run() {
     extract_webview2_loader();
     let data = GameData::load().expect("failed to parse embedded game data");
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(data)
         .setup(|app| {
             // Stamp the window title so a prerelease/dev build is unmistakable

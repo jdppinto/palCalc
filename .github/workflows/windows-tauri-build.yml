@@ -39,12 +39,13 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app
-        run: npm run tauri build
+        # --no-bundle: this is a CI/cache-warming build, not a release. Skipping
+        # the bundle avoids producing updater artifacts, which would otherwise
+        # require the signing key (only the release workflow has it).
+        run: npm run tauri build -- --no-bundle
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: palcalc-windows
-          path: |
-            src-tauri/target/release/*.exe
-            src-tauri/target/release/bundle/**
+          path: src-tauri/target/release/*.exe

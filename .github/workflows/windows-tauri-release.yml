@@ -32,37 +32,29 @@ jobs:
           workspaces: src-tauri -> target
           shared-key: windows-release
 
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: npm-${{ hashFiles('package-lock.json') }}
-
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Read app version
-        id: version
-        shell: bash
-        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
-
-      - name: Build Tauri app
-        # PALCALC_RELEASE_TAG is read at compile time (option_env!) so the exe
-        # knows the tag it was built from and shows PRE-RELEASE for a
-        # hyphenated tag. The build step is the only place the tag is baked in.
-        env:
-          PALCALC_RELEASE_TAG: ${{ github.ref_name }}
-        run: npm run tauri build
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          # Semver pre-identifiers (v0.5.1-rc.7) are hyphenated: mark those
-          # as prereleases so they never claim the "Latest" badge.
-          prerelease: ${{ contains(github.ref_name, '-') }}
-          files: |
-            src-tauri/target/release/palcalc.exe
+      # tauri-action builds the frontend + Rust, bundles the NSIS installer,
+      # signs it and the updater artifacts with the repo's signing secret, then
+      # creates the GitHub release for this tag and uploads the installer, its
+      # .sig, and latest.json. The app's updater endpoint reads that latest.json
+      # from releases/latest/download/, so only non-prerelease tags are served.
+      - name: Build, sign, and publish release
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Baked in at compile time (option_env!) so the exe knows the tag it
+          # was built from and shows PRE-RELEASE for a hyphenated tag.
+          PALCALC_RELEASE_TAG: ${{ github.ref_name }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: ${{ github.ref_name }}
+          releaseBody: "Download and run the Windows installer below. Once installed, PalCalc keeps itself up to date automatically."
+          # Semver pre-identifiers (v0.5.1-rc.7) are hyphenated: mark those as
+          # prereleases so they never claim the "Latest" badge or get served
+          # to the auto-updater.
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          releaseDraft: false
