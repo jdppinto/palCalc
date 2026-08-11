@@ -2500,7 +2500,7 @@ dependencies = [
 
 [[package]]
 name = "palcalc"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "ab_glyph",
  "base64 0.22.1",
