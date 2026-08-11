@@ -8,8 +8,7 @@
     removeOwnedAt,
     clearAllOwned,
   } from "./owned.svelte";
-  import PalSelect from "./PalSelect.svelte";
-  import PassivePicker from "./PassivePicker.svelte";
+  import Combobox from "./Combobox.svelte";
   import ServerImport from "./ServerImport.svelte";
   import PalboxScanner from "./PalboxScanner.svelte";
 
@@ -116,8 +115,8 @@
       <PalboxScanner />
     {:else if source === "manual"}
       <div class="manual">
-        <PalSelect {pals} bind:value={newSpecies} label="Species" />
-        <PassivePicker {passives} bind:selected={newPassives} max={4} label="Its passives (up to 4)" />
+        <Combobox options={pals} bind:value={newSpecies} label="Species" />
+        <Combobox options={passives} bind:selected={newPassives} multiple max={4} showRank label="Its passives (up to 4)" />
         <div class="genders">
           <span class="glabel">Gender</span>
           <label><input type="radio" name="rostergender" checked={newGender === null} onchange={() => (newGender = null)} /> any</label>

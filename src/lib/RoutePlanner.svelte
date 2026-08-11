@@ -3,8 +3,7 @@
   import { onMount } from "svelte";
   import { ownedStore } from "./owned.svelte";
   import { isBookmarked, toggleBookmark } from "./bookmarks.svelte";
-  import PalSelect from "./PalSelect.svelte";
-  import PassivePicker from "./PassivePicker.svelte";
+  import Combobox from "./Combobox.svelte";
   import type {
     Gender,
     OwnedPal,
@@ -70,7 +69,7 @@
   }
 
   function restore(s: CalcSnapshot) {
-    // Reassign the bound input state (PalSelect/PassivePicker/inputs follow);
+    // Reassign the bound input state (the Combobox pickers and inputs follow);
     // owned pals are intentionally NOT restored — they live in the shared
     // ownedStore, so the result reflects the owned set at compute time and a
     // re-plan uses the current one.
@@ -183,7 +182,7 @@
 <section>
   <div class="config">
     <div class="row">
-      <PalSelect {pals} bind:value={target} label="Target pal" />
+      <Combobox options={pals} bind:value={target} label="Target pal" />
       <label class="wild">
         <input type="checkbox" bind:checked={assumeWild} />
         assume wild catches
@@ -206,7 +205,7 @@
       </p>
     {/if}
 
-    <PassivePicker {passives} bind:selected={desired} label="Desired passives (up to 8)" />
+    <Combobox options={passives} bind:selected={desired} multiple max={8} showRank label="Desired passives (up to 8)" />
 
     <div class="roster-summary">
       <span class="dim">

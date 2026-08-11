@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import PalSelect from "./PalSelect.svelte";
+  import Combobox from "./Combobox.svelte";
   import type { BreedResult, Gender, PalEntry } from "./types";
 
   let pals = $state<PalEntry[]>([]);
@@ -52,9 +52,9 @@
 
 <section>
   <div class="parents">
-    <PalSelect {pals} bind:value={a} label="Parent A" />
+    <Combobox options={pals} bind:value={a} label="Parent A" />
     <button class="swap" onclick={swap} title="Swap parents">⇄</button>
-    <PalSelect {pals} bind:value={b} label="Parent B" />
+    <Combobox options={pals} bind:value={b} label="Parent B" />
   </div>
 
   {#if error}
