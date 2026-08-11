@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 use bytes::Bytes;
-use palm_save::{classify, parse_player, parse_roster, Location, PlayerLoc};
+use palm_save::{classify, parse_dps, parse_player, parse_roster, Location, PlayerLoc};
 use serde::Serialize;
 use tokio::sync::Mutex;
 
@@ -103,6 +103,18 @@ fn hx(u: &[u8; 16]) -> String {
     u.iter().map(|b| format!("{b:02x}")).collect()
 }
 
+/// Player save / DPS filenames use the canonical UUID hex (first 4 bytes shown
+/// big-endian); the roster's owner ids are the raw little-endian bytes. Reverse
+/// the first 4 bytes (2 hex chars each), lowercased, so a DPS file's owner
+/// matches the roster's player ids.
+fn owner_hex_from_filename_uid(uid: &str) -> Option<String> {
+    if uid.len() != 32 || !uid.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return None;
+    }
+    let u = uid.to_lowercase();
+    Some(format!("{}{}{}{}{}", &u[6..8], &u[4..6], &u[2..4], &u[0..2], &u[8..]))
+}
+
 #[derive(Serialize)]
 struct PlayerOut {
     uid: String,
@@ -137,6 +149,9 @@ struct RosterOut {
 fn build_body(dir: &Path) -> anyhow::Result<Vec<u8>> {
     let level = read_gvas(&dir.join("Level.sav"))?;
     let roster = parse_roster(&level).map_err(|e| anyhow::anyhow!("parse_roster: {e}"))?;
+    // Free the ~72MB Level.sav buffer before the DPS files (each ~73MB) are
+    // read one at a time below, keeping peak memory to a single save.
+    drop(level);
 
     // Load each real player save for palbox/party labeling.
     let mut players_loc: Vec<PlayerLoc> = Vec::new();
@@ -168,7 +183,7 @@ fn build_body(dir: &Path) -> anyhow::Result<Vec<u8>> {
         })
         .collect();
 
-    let pals = roster
+    let mut pals: Vec<PalOut> = roster
         .pals
         .iter()
         .map(|p| PalOut {
@@ -187,6 +202,50 @@ fn build_body(dir: &Path) -> anyhow::Result<Vec<u8>> {
             guild: p.guild.map(|g| hx(&g)),
         })
         .collect();
+
+    // Append each player's Dimensional Pal Storage pals (from <uid>_dps.sav),
+    // which live outside Level.sav. Read one file at a time (each ~73MB
+    // decompressed); owner comes from the filename, guild from that player.
+    let guild_by_owner: std::collections::HashMap<String, String> = roster
+        .player_guild
+        .iter()
+        .map(|(u, g)| (hx(u), hx(g)))
+        .collect();
+    if let Ok(entries) = std::fs::read_dir(dir.join("Players")) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .unwrap_or("")
+                .to_string();
+            if !name.ends_with("_dps.sav") {
+                continue;
+            }
+            let canon = &name[..name.len() - "_dps.sav".len()];
+            let owner = owner_hex_from_filename_uid(canon);
+            let guild = owner.as_ref().and_then(|o| guild_by_owner.get(o).cloned());
+            match read_gvas(&path)
+                .and_then(|g| parse_dps(&g).map_err(|e| anyhow::anyhow!("parse_dps {name}: {e}")))
+            {
+                Ok(dps) => {
+                    for p in &dps {
+                        pals.push(PalOut {
+                            species: p.species.clone(),
+                            gender: p.gender.clone(),
+                            level: p.level,
+                            passives: p.passives.clone(),
+                            owner: owner.clone(),
+                            location: "dps",
+                            container: None,
+                            guild: guild.clone(),
+                        });
+                    }
+                }
+                Err(e) => tracing::warn!("skipping DPS {name}: {e}"),
+            }
+        }
+    }
 
     let out = RosterOut {
         generated_at_unix: SystemTime::now()

@@ -157,7 +157,8 @@
     const g = selectedGuild;
     return roster.pals.filter(
       (p) =>
-        (p.owner === selectedOwner && (p.location === "palbox" || p.location === "party")) ||
+        (p.owner === selectedOwner &&
+          (p.location === "palbox" || p.location === "party" || p.location === "dps")) ||
         (p.location === "base" && g != null && p.guild === g),
     );
   });

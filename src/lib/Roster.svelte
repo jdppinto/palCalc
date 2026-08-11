@@ -88,6 +88,7 @@
             <option value="palbox">Palbox</option>
             <option value="party">Party</option>
             <option value="base">Base</option>
+            <option value="dps">Dimensional</option>
           </select>
         </label>
       {/if}
@@ -374,6 +375,10 @@
   .loc.base {
     background: rgba(34, 197, 94, 0.15);
     color: #4ade80;
+  }
+  .loc.dps {
+    background: rgba(167, 139, 250, 0.18);
+    color: #a78bfa;
   }
   .passives {
     display: flex;

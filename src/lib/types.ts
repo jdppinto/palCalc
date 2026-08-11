@@ -101,7 +101,7 @@ export interface ServerPlayer {
   guild: string | null;
 }
 
-export type PalLocation = "palbox" | "party" | "base" | "unknown";
+export type PalLocation = "palbox" | "party" | "base" | "dps" | "unknown";
 
 export interface ServerPal {
   species: string;
