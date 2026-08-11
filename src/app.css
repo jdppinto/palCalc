@@ -15,7 +15,7 @@
   --on-accent: #1a1408;
 
   /* Semantic colors. Each has a translucent -soft companion for tinted
-     backgrounds/badges. Tuned for the dark palette; overridden for light. */
+     backgrounds/badges. */
   --danger: #f85149;
   --danger-soft: rgba(248, 81, 73, 0.15);
   --success: #3fb950;
@@ -28,35 +28,6 @@
   --purple-soft: rgba(167, 139, 250, 0.18);
 
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-/* Light theme: opt-in via data-theme on the root (set before mount in
-   main.ts, toggled from the header). Same token names, light-tuned values —
-   semantic colors are darkened so they stay readable on a white surface. */
-:root[data-theme="light"] {
-  color-scheme: light;
-
-  --bg: #f5f6f8;
-  --bg-raised: #ffffff;
-  --bg-hover: #e9ecf1;
-  --border: #d3d8e0;
-  --text: #1b1e26;
-  --text-dim: #5c6472;
-
-  --accent: #b45309;
-  --accent-soft: rgba(180, 83, 9, 0.12);
-  --on-accent: #fff8ef;
-
-  --danger: #d1242f;
-  --danger-soft: rgba(209, 36, 47, 0.1);
-  --success: #1a7f37;
-  --success-soft: rgba(26, 127, 55, 0.1);
-  --warning: #bc4c00;
-  --warning-soft: rgba(188, 76, 0, 0.1);
-  --info: #0969da;
-  --info-soft: rgba(9, 105, 218, 0.1);
-  --purple: #8250df;
-  --purple-soft: rgba(130, 80, 223, 0.1);
 }
 
 * {

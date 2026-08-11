@@ -9,7 +9,6 @@
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import Roster from "./lib/Roster.svelte";
   import Toasts from "./lib/Toasts.svelte";
-  import { themeStore, toggleTheme } from "./lib/theme.svelte";
   import type { Route } from "./lib/types";
 
   type Tab = "plan" | "roster" | "calculator" | "saved" | "tree";
@@ -56,16 +55,8 @@
         </button>
       {/each}
     </nav>
-    <!-- Pushed to the far right; everything after it trails along the edge. -->
-    <button
-      class="theme-toggle"
-      onclick={toggleTheme}
-      title={themeStore.theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-      aria-label="Toggle color theme"
-    >
-      {themeStore.theme === "dark" ? "☾" : "☀"}
-    </button>
-    <!-- Only shown for prerelease/dev builds. A clean release shows nothing. -->
+    <!-- Only shown for prerelease/dev builds, floated to the far right so it
+         never displaces the nav. A clean release shows nothing. -->
     {#if ver && (ver.prerelease || ver.dev)}
       <span class="version prerelease" title={ver.version}>
         {ver.prerelease ? "PRE-RELEASE" : "DEV"} {ver.version}
@@ -110,28 +101,8 @@
     color: var(--accent);
   }
 
-  .theme-toggle {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-dim);
-    cursor: pointer;
-    font-size: 1rem;
-    line-height: 1;
-  }
-  .theme-toggle:hover {
-    background: var(--bg-hover);
-    color: var(--text);
-  }
-
   .version {
+    margin-left: auto;
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.03em;
