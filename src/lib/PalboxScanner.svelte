@@ -639,6 +639,11 @@
 
   let scanReportPath = $state<string | null>(null);
 
+  // Maintainer-only tooling (debug bundles, dump/replay, repo-coupled report
+  // commands) is shown only in dev builds; release builds friends install get
+  // a clean scan → review → add flow.
+  const DEV = import.meta.env.DEV;
+
   async function runScan(command: "scan_current_box" | "scan_all_boxes") {
     scanning = true;
     error = null;
@@ -1036,7 +1041,7 @@
     </span>
   </div>
 
-  {#if scanReportPath}
+  {#if DEV && scanReportPath}
     <p class="dim-text">
       Scan debug bundle written to <code>{scanReportPath}</code> — pass it on
       with:<br />
@@ -1051,6 +1056,7 @@
     <p class="banner error">{error}</p>
   {/if}
 
+  {#if DEV}
   <details>
     <summary>Debug tools</summary>
     <div class="row">
@@ -1166,6 +1172,7 @@
       </details>
     {/if}
   </details>
+  {/if}
 
   {#if unknownRows.length > 0}
     <div class="label-panel">
