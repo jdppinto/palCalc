@@ -4,5 +4,5 @@ pub mod planner;
 pub mod types;
 
 pub use data::GameData;
-pub use planner::{plan_routes, OwnedPal, PlanOutcome, PlanRequest, Route, RouteNode};
+pub use planner::{plan_routes, Ivs, OwnedPal, PlanOutcome, PlanRequest, Route, RouteNode};
 pub use types::*;

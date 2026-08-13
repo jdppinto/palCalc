@@ -24,12 +24,23 @@ export interface PassiveEntry {
 
 export type PalSource = "server" | "scan" | "manual";
 
+/// Innate per-individual stat talents (the game's "IVs"), each 0..=100.
+export interface Ivs {
+  hp: number;
+  attack: number;
+  defense: number;
+}
+
+/// Overall IV quality used for ranking/sorting (HP + Attack + Defense).
+export const ivTotal = (iv: Ivs): number => iv.hp + iv.attack + iv.defense;
+
 export interface OwnedPal {
   species: string;
   label: string;
   passives: string[];
   gender: Gender | null;
   // Optional provenance/metadata (present mainly on server-imported pals).
+  ivs?: Ivs;
   level?: number;
   location?: PalLocation;
   guild?: string | null;
@@ -44,6 +55,7 @@ export interface PlanRequest {
   max_steps?: number;
   max_routes?: number;
   reversers: number;
+  prioritize_ivs?: boolean;
 }
 
 export interface RouteNode {
@@ -53,6 +65,7 @@ export interface RouteNode {
   owned: string | null;
   passives: string[];
   all_passives: string[];
+  ivs: Ivs | null;
   covered_passives: string[];
   gender: Gender | null;
   gender_a: Gender | null;
@@ -108,6 +121,7 @@ export interface ServerPal {
   gender: string; // "Male" | "Female" | "" (raw from the save)
   level: number;
   passives: string[];
+  ivs?: Ivs; // absent when the save carried no Talent_* fields
   owner: string | null;
   location: PalLocation;
   container: string | null;

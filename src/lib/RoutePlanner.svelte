@@ -30,6 +30,10 @@
   const WARN_STEP_THRESHOLD = 500;
   let maxSteps = $state(WARN_STEP_THRESHOLD);
   let reversers = $state(0);
+  // When on, the planner prefers your highest-total-IV pal among interchangeable
+  // owned individuals. IVs are shown either way; this only steers which one is
+  // chosen — breeding re-rolls IVs, so it's a preference, not a guarantee.
+  let prioritizeIvs = $state(false);
 
   let routes = $state<Route[] | null>(null);
   let stats = $state<PlanStats | null>(null);
@@ -48,6 +52,7 @@
     assumeWild: boolean;
     maxSteps: number;
     reversers: number;
+    prioritizeIvs: boolean;
     // outputs
     routes: Route[];
     stats: PlanStats | null;
@@ -64,6 +69,7 @@
       s.assumeWild === assumeWild &&
       s.maxSteps === maxSteps &&
       s.reversers === reversers &&
+      s.prioritizeIvs === prioritizeIvs &&
       s.desired.length === desired.length &&
       [...s.desired].sort().join() === [...desired].sort().join()
     );
@@ -79,6 +85,7 @@
     assumeWild = s.assumeWild;
     maxSteps = s.maxSteps;
     reversers = s.reversers;
+    prioritizeIvs = s.prioritizeIvs;
     routes = s.routes;
     stats = s.stats;
     error = null;
@@ -121,6 +128,7 @@
           assume_wild: assumeWild,
           max_steps: Number.isFinite(maxSteps) ? maxSteps : 500,
           reversers,
+          prioritize_ivs: prioritizeIvs,
         },
       });
       routes = out.routes;
@@ -136,6 +144,7 @@
         assumeWild,
         maxSteps,
         reversers,
+        prioritizeIvs,
         routes: out.routes,
         stats: out.stats,
       };
@@ -187,6 +196,13 @@
       <label class="wild">
         <input type="checkbox" bind:checked={assumeWild} />
         assume wild catches
+      </label>
+      <label
+        class="wild"
+        title="Among interchangeable owned pals, use your highest-total-IV (HP+ATK+DEF) individual. IVs come from server/save imports; breeding re-rolls a child's IVs, so this steers parent choice — it doesn't guarantee max IVs."
+      >
+        <input type="checkbox" bind:checked={prioritizeIvs} />
+        prioritize IVs
       </label>
       <label class="rev">
         reversers

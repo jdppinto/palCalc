@@ -10,6 +10,7 @@ fn owned(species: &str, passives: &[&str]) -> OwnedPal {
         label: String::new(),
         passives: passives.iter().map(|s| s.to_string()).collect(),
         gender: None,
+        ivs: None,
         level: None,
         location: None,
         guild: None,
@@ -26,6 +27,7 @@ fn req(target: &str) -> PlanRequest {
         max_steps: None,
         max_routes: None,
         reversers: 0,
+        prioritize_ivs: false,
     }
 }
 
@@ -116,6 +118,33 @@ fn passive_coverage_prefers_route_carrying_desired_passives() {
     // Both leaves must be the owned carriers
     let leaves: Vec<_> = best.root.parents.iter().filter(|n| n.owned.is_some()).collect();
     assert_eq!(leaves.len(), 2);
+}
+
+#[test]
+fn prioritize_ivs_picks_the_best_individual_among_twins() {
+    let d = data();
+    let mut r = req("SheepBall");
+    r.prioritize_ivs = true;
+    // Two interchangeable Lamballs (same species/passives/gender), different IVs:
+    // the planner should seed only the higher-total-IV one.
+    let weak = OwnedPal {
+        gender: Some(Gender::Male),
+        ivs: Some(palcalc_core::Ivs { hp: 10, attack: 10, defense: 10 }),
+        label: "weak".into(),
+        ..owned("SheepBall", &[])
+    };
+    let strong = OwnedPal {
+        gender: Some(Gender::Male),
+        ivs: Some(palcalc_core::Ivs { hp: 90, attack: 90, defense: 90 }),
+        label: "strong".into(),
+        ..owned("SheepBall", &[])
+    };
+    r.owned = vec![weak, strong];
+    let routes = plan_routes(&d, &r).unwrap().routes;
+    assert_eq!(routes[0].steps, 0);
+    assert_eq!(routes[0].root.owned.as_deref(), Some("strong"));
+    let ivs = routes[0].root.ivs.expect("owned leaf carries IVs");
+    assert_eq!((ivs.hp, ivs.attack, ivs.defense), (90, 90, 90));
 }
 
 #[test]

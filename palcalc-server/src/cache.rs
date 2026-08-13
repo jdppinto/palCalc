@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
 use bytes::Bytes;
-use palm_save::{classify, parse_dps, parse_player, parse_roster, Location, PlayerLoc};
+use palm_save::{classify, parse_dps, parse_player, parse_roster, Ivs, Location, PlayerLoc};
 use serde::Serialize;
 use tokio::sync::Mutex;
 
@@ -123,12 +123,28 @@ struct PlayerOut {
     guild: Option<String>,
 }
 
+/// Innate stat talents (IVs), each 0..=100. Serialized only when present.
+#[derive(Serialize, Clone, Copy)]
+struct IvsOut {
+    hp: i64,
+    attack: i64,
+    defense: i64,
+}
+
+impl From<Ivs> for IvsOut {
+    fn from(v: Ivs) -> Self {
+        IvsOut { hp: v.hp, attack: v.attack, defense: v.defense }
+    }
+}
+
 #[derive(Serialize)]
 struct PalOut {
     species: String,
     gender: String,
     level: i64,
     passives: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ivs: Option<IvsOut>,
     owner: Option<String>,
     location: &'static str,
     container: Option<String>,
@@ -191,6 +207,7 @@ fn build_body(dir: &Path) -> anyhow::Result<Vec<u8>> {
             gender: p.gender.clone(),
             level: p.level,
             passives: p.passives.clone(),
+            ivs: p.ivs.map(Into::into),
             owner: p.owner.map(|o| hx(&o)),
             location: match classify(p.container, &players_loc) {
                 Location::Palbox => "palbox",
@@ -235,6 +252,7 @@ fn build_body(dir: &Path) -> anyhow::Result<Vec<u8>> {
                             gender: p.gender.clone(),
                             level: p.level,
                             passives: p.passives.clone(),
+                            ivs: p.ivs.map(Into::into),
                             owner: owner.clone(),
                             location: "dps",
                             container: None,

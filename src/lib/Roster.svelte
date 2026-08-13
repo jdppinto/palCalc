@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import type { PalEntry, PassiveEntry, Gender, PalLocation } from "./types";
+  import { ivTotal } from "./types";
   import {
     ownedStore,
     addOwnedPal,
@@ -40,12 +41,21 @@
   // Location filter (only meaningful for server-imported pals, which carry a
   // location). Filter against the full list; map back by reference to remove.
   let locFilter = $state<"" | PalLocation>("");
+  let sortByIv = $state(false);
   const hasLocations = $derived(ownedStore.list.some((p) => p.location));
-  const shown = $derived(
-    locFilter
+  const hasIvs = $derived(ownedStore.list.some((p) => p.ivs));
+  // Filter by location, then optionally sort by total IV (pals without IV data
+  // sink to the bottom). Sorting a copy keeps object identity, so the per-card
+  // remove-by-reference (indexOf on the store list) still works.
+  const shown = $derived.by(() => {
+    const filtered = locFilter
       ? ownedStore.list.filter((p) => p.location === locFilter)
-      : ownedStore.list,
-  );
+      : ownedStore.list;
+    if (!sortByIv) return filtered;
+    return [...filtered].sort(
+      (a, b) => (b.ivs ? ivTotal(b.ivs) : -1) - (a.ivs ? ivTotal(a.ivs) : -1),
+    );
+  });
 
   function toggle(s: typeof source) {
     source = source === s ? "" : s;
@@ -90,6 +100,12 @@
             <option value="base">Base</option>
             <option value="dps">Dimensional</option>
           </select>
+        </label>
+      {/if}
+      {#if hasIvs}
+        <label class="filter">
+          <input type="checkbox" bind:checked={sortByIv} />
+          Sort by IV
         </label>
       {/if}
       {#if ownedStore.list.length}
@@ -151,6 +167,12 @@
               {#if p.location && p.location !== "unknown"}
                 <span class="loc {p.location}">{p.location}</span>
               {/if}
+            </div>
+          {/if}
+          {#if p.ivs}
+            <div class="iv" title="Innate IVs — HP {p.ivs.hp} · ATK {p.ivs.attack} · DEF {p.ivs.defense} (total {ivTotal(p.ivs)})">
+              <span class="ivk">IV</span>
+              <span class="ivv">{p.ivs.hp}</span>/<span class="ivv">{p.ivs.attack}</span>/<span class="ivv">{p.ivs.defense}</span>
             </div>
           {/if}
           <div class="passives">
@@ -379,6 +401,23 @@
   .loc.dps {
     background: var(--purple-soft);
     color: var(--purple);
+  }
+  .iv {
+    display: flex;
+    align-items: center;
+    gap: 0.12rem;
+    font-size: 0.64rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .ivk {
+    font-weight: 700;
+    color: var(--accent);
+    margin-right: 0.15rem;
+    letter-spacing: 0.02em;
+  }
+  .ivv {
+    color: var(--text);
   }
   .passives {
     display: flex;

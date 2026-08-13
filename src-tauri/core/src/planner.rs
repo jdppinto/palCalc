@@ -22,6 +22,21 @@ const DEFAULT_MAX_ROUTES: usize = 10;
 const MAX_DESIRED: usize = 12;
 const PARETO_CAP: usize = 24;
 
+/// Innate per-individual stat talents (the game's "IVs"), each 0..=100.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct Ivs {
+    pub hp: i64,
+    pub attack: i64,
+    pub defense: i64,
+}
+
+impl Ivs {
+    /// Overall IV quality used for ranking parents (HP + Attack + Defense).
+    fn total(&self) -> i64 {
+        self.hp + self.attack + self.defense
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OwnedPal {
     pub species: TribeKey,
@@ -32,6 +47,11 @@ pub struct OwnedPal {
     pub passives: Vec<String>,
     #[serde(default)]
     pub gender: Option<Gender>,
+    /// Innate stat talents (IVs). Present for save/server-imported pals; absent
+    /// for scanned/manual pals. Surfaced for display and, when the request asks
+    /// to prioritize IVs, used to prefer the best individual among equivalents.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ivs: Option<Ivs>,
     // Optional provenance/metadata carried through from the source (server
     // import, screen scan, manual). The planner ignores these; they exist so
     // the roster UI can display/filter them and they survive persistence.
@@ -62,6 +82,12 @@ pub struct PlanRequest {
     /// Number of pal reversers available to flip genders during breeding.
     #[serde(default)]
     pub reversers: u32,
+    /// When set, among owned pals that are interchangeable for the search
+    /// (same species, desired-passive coverage, passive count and gender) the
+    /// planner keeps only the highest total-IV individual, so routes lean on
+    /// your best-IV stock. IV display is unaffected by this flag.
+    #[serde(default)]
+    pub prioritize_ivs: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -75,6 +101,9 @@ pub struct RouteNode {
     pub passives: Vec<String>,
     /// All passives on this pal (owned leaves only, empty for bred/wild).
     pub all_passives: Vec<String>,
+    /// The pal's innate IVs (owned leaves only; None for bred/wild or when the
+    /// source carried no IV data).
+    pub ivs: Option<Ivs>,
     /// Desired passives covered by this subtree (all nodes).
     pub covered_passives: Vec<String>,
     /// The pal's own gender (owned leaves only).
@@ -248,9 +277,10 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
     // flipped_seed[owned_idx] = state ID of the flipped-gender copy.
     let mut flipped_seed: Vec<Option<u32>> = vec![None; req.owned.len()];
 
-    // Seed owned pals first so they dominate equivalent wild seeds.
-    let mut frontier: Vec<u32> = Vec::new();
-    for (oi, o) in req.owned.iter().enumerate() {
+    // Precompute (species idx, desired-passive mask, total passives) per owned
+    // pal — this also validates every owned species up front.
+    let mut owned_meta: Vec<(u16, u16, u16)> = Vec::with_capacity(req.owned.len());
+    for o in &req.owned {
         let Some(&sp) = idx.get(o.species.as_str()) else {
             return Err(format!("unknown owned species: {}", o.species));
         };
@@ -259,6 +289,43 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
             .iter()
             .filter_map(|p| passive_bit.get(p.as_str()))
             .fold(0u16, |acc, b| acc | b);
+        owned_meta.push((sp, mask, o.passives.len() as u16));
+    }
+
+    // Which owned individuals to seed. Normally all of them. When prioritizing
+    // IVs, drop individuals that are interchangeable for the search — same
+    // species, desired-passive mask, total passive count and gender — keeping
+    // only the highest total-IV one, since a lower-IV twin could never make a
+    // better parent. (Different genders stay: they aren't interchangeable.)
+    let seed_order: Vec<usize> = if req.prioritize_ivs {
+        let mut best: HashMap<(u16, u16, u16, u8), (i64, usize)> = HashMap::new();
+        for (oi, o) in req.owned.iter().enumerate() {
+            let (sp, mask, tp) = owned_meta[oi];
+            let gkey = match o.gender {
+                Some(Gender::Male) => 1u8,
+                Some(Gender::Female) => 2u8,
+                None => 0u8,
+            };
+            let iv = o.ivs.map(|v| v.total()).unwrap_or(0);
+            match best.get(&(sp, mask, tp, gkey)) {
+                Some(&(best_iv, _)) if best_iv >= iv => {}
+                _ => {
+                    best.insert((sp, mask, tp, gkey), (iv, oi));
+                }
+            }
+        }
+        let mut v: Vec<usize> = best.into_values().map(|(_, oi)| oi).collect();
+        v.sort_unstable(); // stable seeding order (and owned-before-wild intent)
+        v
+    } else {
+        (0..req.owned.len()).collect()
+    };
+
+    // Seed owned pals first so they dominate equivalent wild seeds.
+    let mut frontier: Vec<u32> = Vec::new();
+    for &oi in &seed_order {
+        let o = &req.owned[oi];
+        let (sp, mask, tp) = owned_meta[oi];
         if let Some(id) = insert(
             &mut states,
             &mut per_species,
@@ -266,7 +333,7 @@ pub fn plan_routes(gd: &GameData, req: &PlanRequest) -> Result<PlanOutcome, Stri
                 species: sp,
                 mask,
                 steps: 0,
-                total_passives: o.passives.len() as u16,
+                total_passives: tp,
                 reversed_mask: 0,
                 prov: Prov::Owned(oi as u32, o.gender),
             },
@@ -586,6 +653,7 @@ fn build_node(
         owned: None,
         passives: Vec::new(),
         all_passives: Vec::new(),
+        ivs: None,
         covered_passives,
         gender: None,
         gender_a: None,
@@ -597,6 +665,7 @@ fn build_node(
         Prov::Owned(oi, _) => {
             let o = &owned[oi as usize];
             node.gender = o.gender;
+            node.ivs = o.ivs;
             node.owned = Some(if o.label.is_empty() {
                 info.name.clone()
             } else {

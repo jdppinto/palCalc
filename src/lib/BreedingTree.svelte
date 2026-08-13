@@ -260,7 +260,7 @@
               {:else if l.node.owned === "wild"}
                 <text x="48" y="38" class="sub">wild catch</text>
               {:else if l.node.owned !== null}
-                <text x="48" y="38" class="sub">{l.node.owned}</text>
+                <text x="48" y="38" class="sub">{#if l.node.ivs}<title>Innate IVs — HP {l.node.ivs.hp} · ATK {l.node.ivs.attack} · DEF {l.node.ivs.defense}</title>{/if}{l.node.owned}{#if l.node.ivs}<tspan class="ivtag"> · IV {l.node.ivs.hp + l.node.ivs.attack + l.node.ivs.defense}</tspan>{/if}</text>
               {/if}
               {#if l.node.all_passives.length > 0}
                 {@const desiredSet = new Set(l.node.passives)}
@@ -535,6 +535,11 @@
   .sub {
     fill: var(--text-dim);
     font-size: 11px;
+  }
+
+  .ivtag {
+    fill: var(--accent);
+    font-weight: 600;
   }
 
   .passive-chip {
