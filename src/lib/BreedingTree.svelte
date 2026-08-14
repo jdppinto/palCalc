@@ -1,26 +1,62 @@
 <script lang="ts">
   import { select } from "d3-selection";
   import { zoom, type D3ZoomEvent } from "d3-zoom";
-  import type { Bookmark, Gender, Route, RouteNode } from "./types";
-  import { bookmarksStore, isBookmarked, removeBookmark, toggleBookmark } from "./bookmarks.svelte";
+  import type { Bookmark, BookmarkGoal, Gender, Route, RouteNode } from "./types";
+  import {
+    bookmarksStore,
+    isBookmarked,
+    removeBookmark,
+    toggleBookmark,
+    resolveBookmark,
+  } from "./bookmarks.svelte";
+  import { toast } from "./toast.svelte";
 
   let {
     route,
+    goal = null,
+    label = "",
     height = "calc(100vh - 64px)",
     showBookmarks = true,
-  }: { route: Route | null; height?: string; showBookmarks?: boolean } = $props();
+  }: {
+    route: Route | null;
+    goal?: BookmarkGoal | null;
+    label?: string;
+    height?: string;
+    showBookmarks?: boolean;
+  } = $props();
 
   // A recalled bookmark overrides the incoming prop; a freshly planned route
   // (prop change) takes over and clears the pick. `current` is what's drawn.
   let picked = $state<Route | null>(null);
+  let pickedBookmark = $state<Bookmark | null>(null);
   $effect(() => {
     void route;
     picked = null;
+    pickedBookmark = null;
   });
   const current = $derived(picked ?? route);
+  // The goal/label backing what's drawn: a recalled bookmark, else the props.
+  const currentGoal = $derived<BookmarkGoal | null>(pickedBookmark ?? goal);
+  const currentLabel = $derived(pickedBookmark ? pickedBookmark.label : label);
 
   function bookmarkCurrent() {
-    if (current) toggleBookmark(current);
+    if (currentGoal) toggleBookmark(currentGoal, currentLabel);
+  }
+
+  // Recall a saved bookmark inside the tree view: re-plan it against the live
+  // roster and draw the fresh result (or report it's unreachable right now).
+  async function openSaved(b: Bookmark) {
+    try {
+      const r = await resolveBookmark(b);
+      if (r) {
+        picked = r;
+        pickedBookmark = b;
+      } else {
+        toast.error(`No route to ${b.label} with your current roster yet.`);
+      }
+    } catch (e) {
+      toast.error(`Couldn't plan ${b.label}: ${e}`);
+    }
   }
 
   const NODE_W = 172;
@@ -173,7 +209,7 @@
       <span class="bm-title">Saved trees</span>
       {#each bookmarksStore.list as b (b.id)}
         <span class="bm-chip">
-          <button class="bm-load" title={b.label} onclick={() => (picked = b.route)}>{b.label}</button>
+          <button class="bm-load" title={b.label} onclick={() => openSaved(b)}>{b.label}</button>
           <button class="bm-rm" title="Remove bookmark" onclick={() => removeBookmark(b.id)}>×</button>
         </span>
       {/each}
@@ -199,11 +235,12 @@
         <span class="tip">scroll to zoom · drag to pan · click a node to collapse/expand</span>
         <button
           class="bookmark-btn"
-          class:saved={current && isBookmarked(current)}
-          title={current && isBookmarked(current) ? "Remove bookmark" : "Bookmark this tree"}
+          class:saved={!!currentGoal && isBookmarked(currentGoal)}
+          disabled={!currentGoal}
+          title={currentGoal && isBookmarked(currentGoal) ? "Remove bookmark" : "Bookmark this pal + passives"}
           onclick={bookmarkCurrent}
         >
-          {current && isBookmarked(current) ? "★ Bookmarked" : "☆ Bookmark this tree"}
+          {currentGoal && isBookmarked(currentGoal) ? "★ Bookmarked" : "☆ Bookmark this pal"}
         </button>
       </div>
     <svg bind:this={svgEl} role="img" aria-label="Breeding tree">

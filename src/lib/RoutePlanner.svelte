@@ -2,10 +2,11 @@
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
   import { ownedStore } from "./owned.svelte";
-  import { isBookmarked, toggleBookmark } from "./bookmarks.svelte";
+  import { isBookmarked, toggleBookmark, goalLabel } from "./bookmarks.svelte";
   import PalSelect from "./PalSelect.svelte";
   import PassivePicker from "./PassivePicker.svelte";
   import type {
+    BookmarkGoal,
     Gender,
     OwnedPal,
     PalEntry,
@@ -19,7 +20,10 @@
   let {
     onShowTree,
     onManageRoster,
-  }: { onShowTree: (route: Route) => void; onManageRoster?: () => void } = $props();
+  }: {
+    onShowTree: (route: Route, goal: BookmarkGoal | null, label: string) => void;
+    onManageRoster?: () => void;
+  } = $props();
 
   let pals = $state<PalEntry[]>([]);
   let passives = $state<PassiveEntry[]>([]);
@@ -35,6 +39,14 @@
   let stats = $state<PlanStats | null>(null);
   let planning = $state(false);
   let error = $state<string | null>(null);
+  // The goal that produced the currently-shown routes. Bookmarking is
+  // goal-level (all routes of one plan share it), so this drives the button.
+  let currentGoal = $state<BookmarkGoal | null>(null);
+  const currentGoalLabel = $derived(
+    currentGoal
+      ? goalLabel(palName(currentGoal.target), currentGoal.desired_passives.map(passiveName))
+      : "",
+  );
 
   // Session-only history of completed calculations, so a result isn't lost
   // when the user runs another one before bookmarking. Kept in memory (this
@@ -81,6 +93,13 @@
     reversers = s.reversers;
     routes = s.routes;
     stats = s.stats;
+    currentGoal = {
+      target: s.target,
+      desired_passives: [...s.desired],
+      assume_wild: s.assumeWild,
+      reversers: s.reversers,
+      max_steps: s.maxSteps,
+    };
     error = null;
     currentId = s.id;
   }
@@ -110,21 +129,24 @@
     // the result belongs to.
     const tgt = target;
     const desiredSnap = [...desired];
+    // Snapshot the whole goal up front so a bookmark reflects exactly what
+    // produced these routes, even if the inputs are edited afterward.
+    const goal: BookmarkGoal = {
+      target: tgt,
+      desired_passives: desiredSnap,
+      assume_wild: assumeWild,
+      reversers,
+      max_steps: Number.isFinite(maxSteps) ? maxSteps : 500,
+    };
     planning = true;
     error = null;
     try {
       const out = await invoke<PlanOutcome>("plan", {
-        req: {
-          target: tgt,
-          desired_passives: desiredSnap,
-          owned: ownedStore.list,
-          assume_wild: assumeWild,
-          max_steps: Number.isFinite(maxSteps) ? maxSteps : 500,
-          reversers,
-        },
+        req: { ...goal, owned: ownedStore.list },
       });
       routes = out.routes;
       stats = out.stats;
+      currentGoal = goal;
       // Record this completed calculation so it can be recalled later. Replace
       // the top entry instead of duplicating when the inputs are unchanged.
       const passiveLabel = desiredSnap.length ? desiredSnap.map(passiveName).join(", ") : "none";
@@ -146,6 +168,7 @@
       error = String(e);
       routes = null;
       stats = null;
+      currentGoal = null;
     } finally {
       planning = false;
     }
@@ -268,6 +291,20 @@
         {/if}
       </p>
     {/if}
+    {#if currentGoal}
+      <div class="goal-actions">
+        <button
+          class="bookmark"
+          class:saved={isBookmarked(currentGoal)}
+          title={isBookmarked(currentGoal)
+            ? "Remove bookmark"
+            : "Bookmark this target + passives. Opening it later re-plans against your current roster, so it stays up to date as you get new pals."}
+          onclick={() => currentGoal && toggleBookmark(currentGoal, currentGoalLabel)}
+        >
+          {isBookmarked(currentGoal) ? "★ Bookmarked" : "☆ Bookmark this pal"}
+        </button>
+      </div>
+    {/if}
     {#if routes.length === 0}
       <p class="hint">
         No route found — add owned pals, enable wild catches, or raise max steps.
@@ -288,15 +325,7 @@
               {#each r.missing as p (p)}
                 <span class="tag missing">✗ {p}</span>
               {/each}
-              <button
-                class="bookmark"
-                class:saved={isBookmarked(r)}
-                title={isBookmarked(r) ? "Remove bookmark" : "Bookmark this route"}
-                onclick={() => toggleBookmark(r)}
-              >
-                {isBookmarked(r) ? "★ Saved" : "☆ Bookmark"}
-              </button>
-              <button class="show-tree" onclick={() => onShowTree(r)}>
+              <button class="show-tree" onclick={() => onShowTree(r, currentGoal, currentGoalLabel)}>
                 Show tree →
               </button>
             </header>
@@ -453,9 +482,11 @@
 
   /* Bookmark sits just left of Show tree; it carries the margin-left:auto so
      the pair floats to the right edge together. */
+  .goal-actions {
+    margin: 0.75rem 0 0.25rem;
+  }
   .bookmark {
-    margin-left: auto;
-    padding: 0.3rem 0.8rem;
+    padding: 0.35rem 0.85rem;
     background: var(--bg-hover);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -476,6 +507,7 @@
     border-color: var(--warning);
   }
   .show-tree {
+    margin-left: auto;
     padding: 0.3rem 0.8rem;
     background: var(--bg-hover);
     border: 1px solid var(--border);

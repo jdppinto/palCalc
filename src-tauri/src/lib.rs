@@ -205,9 +205,9 @@ fn save_owned_pals(pals: Vec<OwnedPal>) -> Result<(), String> {
     std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
 }
 
-/// Saved breeding-tree bookmarks. Stored as opaque JSON — the frontend owns
-/// the Bookmark shape (id, label, saved_at, route), so the backend just
-/// persists the blob rather than duplicating the Route type in Rust.
+/// Saved breeding bookmarks. Stored as opaque JSON — the frontend owns the
+/// Bookmark shape (id, label, saved_at, and the breeding goal: target +
+/// desired passives + settings), so the backend just persists the blob.
 #[tauri::command]
 fn load_bookmarks() -> Result<serde_json::Value, String> {
     let path = scanner::config::palcalc_dir().join("breeding_bookmarks.json");

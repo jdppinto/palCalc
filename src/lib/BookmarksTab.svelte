@@ -1,8 +1,8 @@
 <script lang="ts">
   import { bookmarksStore, removeBookmark } from "./bookmarks.svelte";
-  import type { Route } from "./types";
+  import type { Bookmark } from "./types";
 
-  let { onOpen }: { onOpen: (route: Route) => void } = $props();
+  let { onOpen }: { onOpen: (b: Bookmark) => void } = $props();
 
   // saved_at is a Date.now() epoch ms; render it in the local locale.
   function when(ms: number): string {
@@ -22,6 +22,10 @@
       the Tree view (★ Bookmark this tree), and it'll appear here.
     </p>
   {:else}
+    <p class="hint">
+      Each bookmark is a target and its passives — opening one re-plans it
+      against your current roster, so a new pal can shorten the tree.
+    </p>
     <ul>
       {#each bookmarksStore.list as b (b.id)}
         <li>
@@ -29,7 +33,7 @@
             <span class="label">{b.label}</span>
             <span class="meta">saved {when(b.saved_at)}</span>
           </div>
-          <button class="open" onclick={() => onOpen(b.route)}>Open tree →</button>
+          <button class="open" onclick={() => onOpen(b)}>Open tree →</button>
           <button class="remove" title="Remove bookmark" onclick={() => removeBookmark(b.id)}>
             Remove
           </button>
@@ -52,6 +56,11 @@
   .empty {
     color: var(--text-dim);
     padding: 2rem 0;
+  }
+  .hint {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin: 0 0 1rem;
   }
   ul {
     list-style: none;

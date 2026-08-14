@@ -68,16 +68,26 @@ export interface Route {
   reversers_used: number;
 }
 
-/// A saved breeding-tree result, persisted so a route can be recalled without
-/// recomputing. `route` is the exact Route that was displayed.
-export interface Bookmark {
+/// The saved *goal* of a bookmark — the pal you want and its desired passives,
+/// independent of your current roster. Opening a bookmark re-plans this goal
+/// against the live roster, so it reflects newly-acquired pals instead of a
+/// frozen tree. Mirrors PlanRequest minus the (live) `owned` list.
+export interface BookmarkGoal {
+  target: string;
+  desired_passives: string[];
+  assume_wild: boolean;
+  reversers: number;
+  max_steps: number;
+}
+
+/// A persisted bookmark: a goal plus display/identity metadata.
+export interface Bookmark extends BookmarkGoal {
   id: string;
-  /// Stable structural identity of the route (see routeKey in bookmarks store),
-  /// used for dedup instead of the human-readable label.
+  /// Stable identity: target + sorted desired passives + assume_wild. Used for
+  /// dedup/isBookmarked instead of the human-readable label.
   key: string;
   label: string;
   saved_at: number;
-  route: Route;
 }
 
 export interface PlanStats {

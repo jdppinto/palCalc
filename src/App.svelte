@@ -5,18 +5,22 @@
   import Bookmarks from "./lib/BookmarksTab.svelte";
   import Calculator from "./lib/Calculator.svelte";
   import { flushSave, initOwnedStore, ownedStore } from "./lib/owned.svelte";
-  import { flushBookmarks, initBookmarksStore } from "./lib/bookmarks.svelte";
+  import { flushBookmarks, initBookmarksStore, resolveBookmark } from "./lib/bookmarks.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import Roster from "./lib/Roster.svelte";
   import Toasts from "./lib/Toasts.svelte";
   import { check } from "@tauri-apps/plugin-updater";
   import { relaunch } from "@tauri-apps/plugin-process";
   import { toast } from "./lib/toast.svelte";
-  import type { Route } from "./lib/types";
+  import type { Bookmark, BookmarkGoal, Route } from "./lib/types";
 
   type Tab = "plan" | "roster" | "calculator" | "saved" | "tree";
   let tab = $state<Tab>("plan");
+  // What the Tree tab draws: a computed route plus the goal/label it came from
+  // (so the tree view can re-bookmark or recompute it).
   let treeRoute = $state<Route | null>(null);
+  let treeGoal = $state<BookmarkGoal | null>(null);
+  let treeLabel = $state("");
 
   interface AppVersion { version: string; tag: string | null; prerelease: boolean; dev: boolean }
   let ver = $state<AppVersion | null>(null);
@@ -59,9 +63,27 @@
     }
   }
 
-  function showTree(route: Route) {
+  function showTree(route: Route, goal: BookmarkGoal | null = null, label = "") {
     treeRoute = route;
+    treeGoal = goal;
+    treeLabel = label;
     tab = "tree";
+  }
+
+  // Opening a bookmark re-plans its goal against the CURRENT roster, so the tree
+  // reflects newly-acquired pals. If nothing's reachable now, say so plainly
+  // instead of showing a stale tree.
+  async function openBookmark(b: Bookmark) {
+    try {
+      const route = await resolveBookmark(b);
+      if (route) {
+        showTree(route, b, b.label);
+      } else {
+        toast.error(`No route to ${b.label} with your current roster yet.`);
+      }
+    } catch (e) {
+      toast.error(`Couldn't plan ${b.label}: ${e}`);
+    }
   }
 
   const tabs: Array<[Tab, string]> = [
@@ -96,8 +118,8 @@
   <div hidden={tab !== "plan"}><RoutePlanner onShowTree={showTree} onManageRoster={() => (tab = "roster")} /></div>
   <div hidden={tab !== "roster"}><Roster /></div>
   <div hidden={tab !== "calculator"}><Calculator /></div>
-  <div hidden={tab !== "saved"}><Bookmarks onOpen={showTree} /></div>
-  <div hidden={tab !== "tree"}><BreedingTree route={treeRoute} /></div>
+  <div hidden={tab !== "saved"}><Bookmarks onOpen={openBookmark} /></div>
+  <div hidden={tab !== "tree"}><BreedingTree route={treeRoute} goal={treeGoal} label={treeLabel} /></div>
 
   <Toasts />
 </main>
