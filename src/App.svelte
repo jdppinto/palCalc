@@ -6,6 +6,7 @@
   import Calculator from "./lib/Calculator.svelte";
   import { flushSave, initOwnedStore, ownedStore } from "./lib/owned.svelte";
   import { flushBookmarks, initBookmarksStore, resolveBookmark } from "./lib/bookmarks.svelte";
+  import { initServerSync } from "./lib/serverSync.svelte";
   import RoutePlanner from "./lib/RoutePlanner.svelte";
   import Roster from "./lib/Roster.svelte";
   import Toasts from "./lib/Toasts.svelte";
@@ -30,6 +31,9 @@
     // add some; returning users stay on Plan. Only flips if untouched.
     initOwnedStore().then(() => {
       if (tab === "plan" && ownedStore.list.length === 0) tab = "roster";
+      // Start background server auto-sync once owned pals are loaded, so the
+      // first sync doesn't race the persisted list.
+      initServerSync();
     });
     initBookmarksStore();
     invoke<AppVersion>("app_version").then((v) => (ver = v)).catch(() => {});

@@ -78,3 +78,12 @@ export function clearAllOwned() {
   ownedStore.list = [];
   save();
 }
+
+/// Replace all server-imported pals with a fresh set, leaving manually-added
+/// and scanned pals untouched. Used by server auto-sync so background polling
+/// refreshes your palbox without clobbering pals you added by hand or scanned.
+export function replaceServerOwned(serverPals: OwnedPal[]) {
+  const kept = ownedStore.list.filter((p) => p.source !== "server");
+  ownedStore.list = [...kept, ...serverPals];
+  save();
+}

@@ -1,14 +1,15 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import type {
-    OwnedPal,
-    PalEntry,
-    PassiveEntry,
-    ServerRoster,
-    ServerPal,
-  } from "./types";
+  import type { OwnedPal, ServerRoster } from "./types";
   import { addManyOwned, clearAllOwned } from "./owned.svelte";
   import { toast } from "./toast.svelte";
+  import {
+    ensureCatalogs,
+    filterForOwner,
+    pollNow,
+    serverPalToOwned,
+    syncStatus,
+  } from "./serverSync.svelte";
 
   // When embedded (e.g. in the Roster's "Add pals" panel) the outer collapse
   // header is dropped and the body is always shown.
@@ -29,13 +30,10 @@
   let selectedOwner = $state<string>(""); // "" = everyone
   let replace = $state(true);
   let importResult = $state("");
+  // Re-fetch the roster every 20s and refresh server pals (see serverSync).
+  let autoSync = $state(false);
   // Last-selected player, restored after a reconnect if that player still exists.
   let savedOwner = "";
-
-  // Valid palCalc keys, for mapping the save's internal names.
-  let validSpecies = $state<Set<string>>(new Set());
-  let validPassives = $state<Set<string>>(new Set());
-  let displayName = $state<Map<string, string>>(new Map());
 
   (function init() {
     try {
@@ -44,10 +42,11 @@
       fingerprint = s.fingerprint || "";
       token = s.token || "";
       savedOwner = s.owner || "";
+      autoSync = !!s.autoSync;
     } catch {
       /* ignore malformed saved state */
     }
-    void loadKeys();
+    void ensureCatalogs();
     // Auto-connect when we already have saved connection details, so opening
     // "From server" reconnects immediately instead of needing a Connect click.
     if (url.trim() && fingerprint.trim() && token.trim()) void connect();
@@ -61,20 +60,16 @@
         fingerprint: fingerprint.trim(),
         token: token.trim(),
         owner: selectedOwner,
+        autoSync,
       }),
     );
   }
 
-  async function loadKeys() {
-    try {
-      const pals = await invoke<PalEntry[]>("list_pals");
-      validSpecies = new Set(pals.map((p) => p.key));
-      displayName = new Map(pals.map((p) => [p.key, p.name]));
-      const pass = await invoke<PassiveEntry[]>("list_passives");
-      validPassives = new Set(pass.map((p) => p.key));
-    } catch (e) {
-      console.error("failed to load pal/passive keys", e);
-    }
+  // Toggle background auto-sync: persist the choice and, when turning it on,
+  // kick a sync immediately instead of waiting for the first 20s tick.
+  function onAutoSyncChange() {
+    persist();
+    if (autoSync) pollNow();
   }
 
   const canConnect = $derived(
@@ -114,54 +109,9 @@
     }
   }
 
-  // Species/passive names in the save are Palworld internal keys, which are the
-  // same keys palCalc uses. Strip alpha/raid prefixes as a fallback.
-  const PREFIXES = ["BOSS_", "GYM_", "RAID_", "PREDATOR_"];
-  function normSpecies(s: string): string | null {
-    if (validSpecies.has(s)) return s;
-    for (const p of PREFIXES) {
-      if (s.startsWith(p)) {
-        const t = s.slice(p.length);
-        if (validSpecies.has(t)) return t;
-      }
-    }
-    return null;
-  }
-
-  function toOwned(p: ServerPal): OwnedPal | null {
-    const species = normSpecies(p.species);
-    if (!species) return null;
-    return {
-      species,
-      label: displayName.get(species) || species,
-      passives: p.passives.filter((k) => validPassives.has(k)),
-      gender: p.gender === "Male" ? "Male" : p.gender === "Female" ? "Female" : null,
-      level: p.level,
-      location: p.location,
-      guild: p.guild,
-      source: "server",
-    };
-  }
-
-  const selectedGuild = $derived(
-    roster && selectedOwner
-      ? (roster.players.find((p) => p.uid === selectedOwner)?.guild ?? null)
-      : null,
-  );
-
-  // A player's own palbox/party pals, plus their whole guild's base pals
-  // (guild attribution is authoritative — includes guildmates' base workers).
-  const selectedPals = $derived.by(() => {
-    if (!roster) return [];
-    if (selectedOwner === "") return roster.pals;
-    const g = selectedGuild;
-    return roster.pals.filter(
-      (p) =>
-        (p.owner === selectedOwner &&
-          (p.location === "palbox" || p.location === "party" || p.location === "dps")) ||
-        (p.location === "base" && g != null && p.guild === g),
-    );
-  });
+  // Mapping (save keys → palCalc keys) and owner filtering are shared with the
+  // background poller so manual import and auto-sync agree exactly.
+  const selectedPals = $derived(roster ? filterForOwner(roster, selectedOwner) : []);
 
   function ownerLabel(uid: string, name: string): string {
     const n = roster ? roster.pals.filter((p) => p.owner === uid).length : 0;
@@ -176,11 +126,12 @@
     return `${Math.floor(secs / 3600)}h ago`;
   }
 
-  function importPals() {
+  async function importPals() {
+    await ensureCatalogs();
     const mapped: OwnedPal[] = [];
     let skipped = 0;
     for (const p of selectedPals) {
-      const o = toOwned(p);
+      const o = serverPalToOwned(p);
       if (o) mapped.push(o);
       else skipped++;
     }
@@ -247,6 +198,18 @@
             <input type="checkbox" bind:checked={replace} />
             Replace current owned pals
           </label>
+          <label class="check">
+            <input type="checkbox" bind:checked={autoSync} onchange={onAutoSyncChange} />
+            Auto-sync every 20s
+          </label>
+          {#if autoSync}
+            <p class="note">
+              Re-checks the server every 20s and refreshes your palbox pals
+              automatically (hand-added and scanned pals are kept). Keeps running
+              while the app is open, and resumes next time you open it.
+              {#if syncStatus.lastError}<br /><span class="err">last sync failed: {syncStatus.lastError}</span>{/if}
+            </p>
+          {/if}
           <div class="row">
             <button class="primary" onclick={importPals} disabled={selectedPals.length === 0}>
               Import {selectedPals.length} pals
